@@ -1,4 +1,30 @@
 {{-- Tab 6: Development Gap --}}
+@php
+    $manajerialGaps = $employee->competencyGaps->filter(function($g) {
+        return empty($g->competency_type) || strtolower($g->competency_type) === 'manajerial';
+    })->values();
+
+    $technicalGaps = $employee->competencyGaps->filter(function($g) {
+        return strtolower($g->competency_type) === 'technical';
+    })->values();
+
+    $totalGaps = $employee->competencyGaps->count();
+    $rendahGaps = $employee->competencyGaps->filter(fn($g) => strtolower($g->gap_severity) === 'rendah');
+    $sedangGaps = $employee->competencyGaps->filter(fn($g) => strtolower($g->gap_severity) === 'sedang');
+    $tinggiGaps = $employee->competencyGaps->filter(fn($g) => strtolower($g->gap_severity) === 'tinggi');
+
+    $rendahCount = $rendahGaps->count();
+    $sedangCount = $sedangGaps->count();
+    $tinggiCount = $tinggiGaps->count();
+
+    $pctRendah = $totalGaps > 0 ? round(($rendahCount / $totalGaps) * 100, 1) : 0;
+    $pctSedang = $totalGaps > 0 ? round(($sedangCount / $totalGaps) * 100, 1) : 0;
+    $pctTinggi = $totalGaps > 0 ? round(($tinggiCount / $totalGaps) * 100, 1) : 0;
+
+    $tinggiManajerial = $manajerialGaps->filter(fn($g) => strtolower($g->gap_severity) === 'tinggi')->count();
+    $tinggiTechnical = $technicalGaps->filter(fn($g) => strtolower($g->gap_severity) === 'tinggi')->count();
+@endphp
+
 <div class="tab-pane-content">
     {{-- Header Meta Bar & Actions --}}
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:16px;">
@@ -38,8 +64,8 @@
         </div>
     </div>
 
-    {{-- A. RINGKASAN GAP --}}
-    <div class="dashboard-card">
+    {{-- A. RINGKASAN & POSISI TARGET GAP --}}
+    <div class="dashboard-card" style="margin-bottom:20px;">
         <div class="card-header-bar" style="margin-bottom:12px; padding-bottom:8px;">
             <div class="card-title-wrap">
                 <span class="card-title" style="font-size:13px;">A. Ringkasan & Posisi Target Gap</span>
@@ -60,37 +86,54 @@
                 </div>
                 <div style="display:flex; align-items:center; gap:20px;">
                     {{-- SVG Donut Chart --}}
-                    <div style="position:relative; width:130px; height:130px;">
+                    <div style="position:relative; width:130px; height:130px; flex-shrink:0;">
                         <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);">
                             {{-- Background circle --}}
                             <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="5" />
-                            {{-- Segment 1: Rendah (12.5% = 12.5 dash) -> Green #27ae60 --}}
-                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#27ae60" stroke-width="5" stroke-dasharray="12.5, 87.5" stroke-dashoffset="0" />
-                            {{-- Segment 2: Sedang (50% = 50 dash) -> Yellow #f59e0b --}}
-                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f59e0b" stroke-width="5" stroke-dasharray="50, 50" stroke-dashoffset="-12.5" />
-                            {{-- Segment 3: Tinggi (37.5% = 37.5 dash) -> Red #e11d48 --}}
-                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e11d48" stroke-width="5" stroke-dasharray="37.5, 62.5" stroke-dashoffset="-62.5" />
+                            @if($totalGaps > 0)
+                                {{-- Segment 1: Rendah (Hijau) -> #27ae60 --}}
+                                @if($rendahCount > 0)
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                          fill="none" stroke="#27ae60" stroke-width="5"
+                                          stroke-dasharray="{{ $pctRendah }}, {{ 100 - $pctRendah }}"
+                                          stroke-dashoffset="0" />
+                                @endif
+                                {{-- Segment 2: Sedang (Kuning) -> #f59e0b --}}
+                                @if($sedangCount > 0)
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                          fill="none" stroke="#f59e0b" stroke-width="5"
+                                          stroke-dasharray="{{ $pctSedang }}, {{ 100 - $pctSedang }}"
+                                          stroke-dashoffset="-{{ $pctRendah }}" />
+                                @endif
+                                {{-- Segment 3: Tinggi (Merah) -> #e11d48 --}}
+                                @if($tinggiCount > 0)
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                          fill="none" stroke="#e11d48" stroke-width="5"
+                                          stroke-dasharray="{{ $pctTinggi }}, {{ 100 - $pctTinggi }}"
+                                          stroke-dashoffset="-{{ $pctRendah + $pctSedang }}" />
+                                @endif
+                            @endif
                         </svg>
                         <div style="position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
                             <span style="font-size:10px; color:#64748b; font-weight:600;">Total</span>
-                            <span style="font-size:18px; font-weight:800; color:#0f172a; line-height:1;">8</span>
+                            <span style="font-size:18px; font-weight:800; color:#0f172a; line-height:1;">{{ $totalGaps }}</span>
                             <span style="font-size:9.5px; color:#64748b;">Kompetensi</span>
                         </div>
                     </div>
 
-                    {{-- Legend --}}
+                    {{-- Legend (Connected dynamically to Tingkat Gap: Rendah, Sedang, Tinggi) --}}
                     <div style="display:flex; flex-direction:column; gap:8px; font-size:11.5px;">
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="width:10px; height:10px; border-radius:50%; background:#27ae60; display:inline-block;"></span>
-                            <span><strong>1</strong> (12.5%) Gap Rendah (0.00 – 0.99)</span>
+                            <span style="width:10px; height:10px; border-radius:50%; background:#27ae60; display:inline-block; flex-shrink:0;"></span>
+                            <span><strong>{{ $rendahCount }}</strong> ({{ $pctRendah }}%) Gap Rendah (0.00 – 0.99)</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="width:10px; height:10px; border-radius:50%; background:#f59e0b; display:inline-block;"></span>
-                            <span><strong>4</strong> (50%) Gap Sedang (1.00 – 1.99)</span>
+                            <span style="width:10px; height:10px; border-radius:50%; background:#f59e0b; display:inline-block; flex-shrink:0;"></span>
+                            <span><strong>{{ $sedangCount }}</strong> ({{ $pctSedang }}%) Gap Sedang (1.00 – 1.99)</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="width:10px; height:10px; border-radius:50%; background:#e11d48; display:inline-block;"></span>
-                            <span><strong>3</strong> (37.5%) Gap Tinggi (≥ 2.00)</span>
+                            <span style="width:10px; height:10px; border-radius:50%; background:#e11d48; display:inline-block; flex-shrink:0;"></span>
+                            <span><strong>{{ $tinggiCount }}</strong> ({{ $pctTinggi }}%) Gap Tinggi (≥ 2.00)</span>
                         </div>
                     </div>
                 </div>
@@ -102,7 +145,11 @@
                     Interpretasi
                 </div>
                 <div style="font-size:12px; color:#475569; line-height:1.6;">
-                    <strong>{{ $employee->name }}</strong> memiliki <strong>3 kompetensi dengan gap tinggi</strong> yang perlu menjadi fokus prioritas pengembangan untuk dipersiapkan menuju posisi <strong>Engineering Manager</strong>.
+                    <strong>{{ $employee->name }}</strong> memiliki <strong>{{ $tinggiCount }} kompetensi dengan gap tinggi</strong>
+                    @if($tinggiCount > 0)
+                        ({{ $tinggiManajerial }} Manajerial{{ $tinggiTechnical > 0 ? ', ' . $tinggiTechnical . ' Technical' : '' }})
+                    @endif
+                    yang perlu menjadi fokus prioritas pengembangan untuk dipersiapkan menuju posisi <strong>{{ $employee->target_position_gap ?: 'Engineering Manager' }}</strong>.
                 </div>
             </div>
 
@@ -129,22 +176,22 @@
         </div>
     </div>
 
-    {{-- B. DETAIL GAP KOMPETENSI (POSISI SAAT INI VS POSISI TARGET) --}}
-    <div class="dashboard-card">
+    {{-- B. DETAIL GAP KOMPETENSI MANAJERIAL --}}
+    <div class="dashboard-card" style="margin-bottom:20px;">
         <div class="card-header-bar" style="margin-bottom:12px; padding-bottom:8px;">
             <div class="card-title-wrap">
-                <span class="card-title" style="font-size:13px;">B. Detail Gap Kompetensi <span style="font-weight:500; text-transform:none; color:#64748b;">(Posisi Saat Ini vs Posisi Target)</span></span>
+                <span class="card-title" style="font-size:13px;">B. Detail Gap Kompetensi Manajerial <span style="font-weight:500; text-transform:none; color:#64748b;">(Posisi Saat Ini vs Posisi Target)</span></span>
             </div>
             <div class="quick-action-btn-group">
-                <button type="button" class="btn-mini btn-mini-primary" data-modal-target="modal-tambah-gap" data-preselect-section="gap-detail" title="Tambah Baris Gap Kompetensi">
+                <button type="button" class="btn-mini btn-mini-primary" data-modal-target="modal-tambah-gap" data-preselect-section="gap-detail" data-preselect-type="Manajerial" title="Tambah Gap Manajerial">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Tambah Gap
                 </button>
-                <button type="button" class="btn-mini btn-mini-outline" data-modal-target="modal-edit-gap" data-preselect-section="edit-gap-detail" title="Edit Gap Kompetensi">
+                <button type="button" class="btn-mini btn-mini-outline" data-modal-target="modal-edit-gap" data-preselect-section="edit-gap-detail" title="Edit Gap Manajerial">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     Edit
                 </button>
-                <button type="button" class="btn-mini btn-mini-danger" data-modal-target="modal-hapus-gap" data-preselect-section="del-gap-detail" title="Hapus Gap Kompetensi">
+                <button type="button" class="btn-mini btn-mini-danger" data-modal-target="modal-hapus-gap" data-preselect-section="del-gap-detail" title="Hapus Gap Manajerial">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     Hapus
                 </button>
@@ -156,8 +203,8 @@
                     <tr>
                         <th rowspan="2" class="text-center" style="width:4%; vertical-align:middle;">No.</th>
                         <th rowspan="2" style="width:16%; vertical-align:middle;">Kompetensi</th>
-                        <th colspan="2" class="text-center" style="width:26%; background:#f1f5f9;">Level Saat Ini<br><small style="font-weight:400; color:#475569;">(Posisi Saat Ini: Section Head)</small></th>
-                        <th colspan="2" class="text-center" style="width:26%; background:#f1f5f9;">Level Standar<br><small style="font-weight:400; color:#475569;">(Posisi Target: Engineering Manager)</small></th>
+                        <th colspan="2" class="text-center" style="width:26%; background:#f1f5f9;">Level Saat Ini<br><small style="font-weight:400; color:#475569;">(Posisi Saat Ini: {{ $employee->position ?: 'Section Head' }})</small></th>
+                        <th colspan="2" class="text-center" style="width:26%; background:#f1f5f9;">Target Level<br><small style="font-weight:400; color:#475569;">(Posisi Target: {{ $employee->target_position_gap ?: 'Engineering Manager' }})</small></th>
                         <th rowspan="2" class="text-center" style="width:8%; vertical-align:middle;">Gap<br><small style="font-weight:400; color:#64748b;">(Target - Saat Ini)</small></th>
                         <th rowspan="2" class="text-center" style="width:8%; vertical-align:middle;">Tingkat Gap</th>
                         <th rowspan="2" style="width:22%; vertical-align:middle;">Peningkatan yang Diharapkan</th>
@@ -170,9 +217,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($employee->competencyGaps as $gap)
+                    @forelse($manajerialGaps as $gap)
                         <tr>
-                            <td class="text-center">{{ $gap->order_no }}</td>
+                            <td class="text-center">{{ $loop->iteration }}</td>
                             <td style="font-weight:700;">{{ $gap->competency }}</td>
                             <td class="text-center font-bold">{{ $gap->current_level }}</td>
                             <td style="font-size:11px; color:#475569;">{{ $gap->current_desc }}</td>
@@ -180,9 +227,9 @@
                             <td style="font-size:11px; color:#475569;">{{ $gap->standard_desc }}</td>
                             <td class="text-center font-bold" style="font-size:13px;">{{ $gap->gap }}</td>
                             <td class="text-center">
-                                @if($gap->gap_severity === 'Tinggi')
+                                @if(strtolower($gap->gap_severity) === 'tinggi')
                                     <span class="badge-red" style="font-size:10.5px; padding:2px 8px;">Tinggi</span>
-                                @elseif($gap->gap_severity === 'Sedang')
+                                @elseif(strtolower($gap->gap_severity) === 'sedang')
                                     <span class="badge-orange" style="font-size:10.5px; padding:2px 8px;">Sedang</span>
                                 @else
                                     <span class="badge-green" style="font-size:10.5px; padding:2px 8px;">Rendah</span>
@@ -190,7 +237,86 @@
                             </td>
                             <td style="font-size:11.5px;">{{ $gap->expected_improvement }}</td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="9" class="text-center" style="padding:24px; color:#94a3b8; font-style:italic;">
+                                Belum ada data gap kompetensi manajerial. Silakan klik "Tambah Gap" untuk menambahkan data.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- C. DETAIL GAP KOMPETENSI TECHNICAL --}}
+    <div class="dashboard-card" style="margin-bottom:20px;">
+        <div class="card-header-bar" style="margin-bottom:12px; padding-bottom:8px;">
+            <div class="card-title-wrap">
+                <span class="card-title" style="font-size:13px;">C. Detail Gap Kompetensi Technical <span style="font-weight:500; text-transform:none; color:#64748b;">(Posisi Saat Ini vs Posisi Target)</span></span>
+            </div>
+            <div class="quick-action-btn-group">
+                <button type="button" class="btn-mini btn-mini-primary" data-modal-target="modal-tambah-gap" data-preselect-section="gap-detail" data-preselect-type="Technical" title="Tambah Gap Technical">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Tambah Gap
+                </button>
+                <button type="button" class="btn-mini btn-mini-outline" data-modal-target="modal-edit-gap" data-preselect-section="edit-gap-detail" title="Edit Gap Technical">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    Edit
+                </button>
+                <button type="button" class="btn-mini btn-mini-danger" data-modal-target="modal-hapus-gap" data-preselect-section="del-gap-detail" title="Hapus Gap Technical">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Hapus
+                </button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="text-center" style="width:4%; vertical-align:middle;">No.</th>
+                        <th rowspan="2" style="width:16%; vertical-align:middle;">Kompetensi</th>
+                        <th colspan="2" class="text-center" style="width:26%; background:#f1f5f9;">Level Saat Ini<br><small style="font-weight:400; color:#475569;">(Posisi Saat Ini: {{ $employee->position ?: 'Section Head' }})</small></th>
+                        <th colspan="2" class="text-center" style="width:26%; background:#f1f5f9;">Target Level<br><small style="font-weight:400; color:#475569;">(Posisi Target: {{ $employee->target_position_gap ?: 'Engineering Manager' }})</small></th>
+                        <th rowspan="2" class="text-center" style="width:8%; vertical-align:middle;">Gap<br><small style="font-weight:400; color:#64748b;">(Target - Saat Ini)</small></th>
+                        <th rowspan="2" class="text-center" style="width:8%; vertical-align:middle;">Tingkat Gap</th>
+                        <th rowspan="2" style="width:22%; vertical-align:middle;">Peningkatan yang Diharapkan</th>
+                    </tr>
+                    <tr>
+                        <th class="text-center" style="width:6%;">Level</th>
+                        <th>Deskripsi Singkat</th>
+                        <th class="text-center" style="width:6%;">Level</th>
+                        <th>Deskripsi Singkat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($technicalGaps as $gap)
+                        <tr>
+                            <td class="text-center">{{ $loop->iteration }}</td>
+                            <td style="font-weight:700;">{{ $gap->competency }}</td>
+                            <td class="text-center font-bold">{{ $gap->current_level }}</td>
+                            <td style="font-size:11px; color:#475569;">{{ $gap->current_desc }}</td>
+                            <td class="text-center font-bold">{{ $gap->standard_level }}</td>
+                            <td style="font-size:11px; color:#475569;">{{ $gap->standard_desc }}</td>
+                            <td class="text-center font-bold" style="font-size:13px;">{{ $gap->gap }}</td>
+                            <td class="text-center">
+                                @if(strtolower($gap->gap_severity) === 'tinggi')
+                                    <span class="badge-red" style="font-size:10.5px; padding:2px 8px;">Tinggi</span>
+                                @elseif(strtolower($gap->gap_severity) === 'sedang')
+                                    <span class="badge-orange" style="font-size:10.5px; padding:2px 8px;">Sedang</span>
+                                @else
+                                    <span class="badge-green" style="font-size:10.5px; padding:2px 8px;">Rendah</span>
+                                @endif
+                            </td>
+                            <td style="font-size:11.5px;">{{ $gap->expected_improvement }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="9" class="text-center" style="padding:24px; color:#94a3b8; font-style:italic;">
+                                Belum ada data gap kompetensi technical. Silakan klik "Tambah Gap" untuk menambahkan data.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

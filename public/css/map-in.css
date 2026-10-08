@@ -327,22 +327,187 @@ a {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 16px 0;
+    padding: 8px 0 10px 0;
     border-right: 1px solid #061528;
+    position: relative;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 40;
+    box-sizing: border-box;
 }
 
+.sidebar-main-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Sidebar Toggle Arrow Button (Panah ke samping) */
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 20px;
+    right: -13px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: #0b2545;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    outline: none;
+    padding: 0;
+}
+
+.sidebar-toggle-btn:hover {
+    background-color: #0284c7;
+    transform: scale(1.15);
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.4);
+}
+
+.sidebar-toggle-btn svg {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Drag Resizer Handle on right border of sidebar */
+.sidebar-resizer {
+    position: absolute;
+    top: 0;
+    right: -4px;
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 80;
+    transition: background 0.15s ease;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer.is-resizing {
+    background: rgba(59, 130, 246, 0.5);
+}
+
+body.sidebar-resizing {
+    user-select: none !important;
+    cursor: col-resize !important;
+}
+
+/* Collapsed Mini State (.sidebar.collapsed) */
+.sidebar.collapsed {
+    width: 68px !important;
+    min-width: 68px !important;
+}
+
+.sidebar.collapsed .sidebar-toggle-btn svg {
+    transform: rotate(180deg); /* Arrow rotates from pointing left to pointing right! */
+}
+
+.sidebar.collapsed .sidebar-search-box {
+    padding: 0 10px 12px 10px;
+    text-align: center;
+}
+
+.sidebar.collapsed .search-label,
+.sidebar.collapsed .search-input-wrap input,
+.sidebar.collapsed #search-suggestions {
+    display: none !important;
+}
+
+.sidebar.collapsed .search-input-wrap {
+    justify-content: center;
+}
+
+.sidebar.collapsed .search-btn {
+    position: static;
+    width: 44px;
+    height: 36px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar.collapsed .search-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 10px 0;
+    gap: 0;
+    position: relative;
+    border-left-width: 3px;
+}
+
+.sidebar.collapsed .nav-item span:not(.nav-item-icon),
+.sidebar.collapsed .nav-item-badge {
+    display: none !important;
+}
+
+.sidebar.collapsed .nav-item-icon {
+    width: 22px;
+    height: 22px;
+}
+
+/* Floating Tooltip on Hover in Collapsed Mode */
+.sidebar.collapsed .nav-item:hover::after,
+.sidebar.collapsed .btn-back-daftar:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    left: 74px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    z-index: 1000;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.sidebar.collapsed .sidebar-footer {
+    padding: 12px 10px;
+}
+
+.sidebar.collapsed .btn-back-daftar {
+    padding: 8px;
+    justify-content: center;
+    width: 44px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.sidebar.collapsed .btn-back-daftar span {
+    display: none !important;
+}
+
+
 .sidebar-search-box {
-    padding: 0 16px 16px 16px;
+    padding: 8px 14px 10px 14px;
+    margin: 4px 0 6px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     position: relative;
 }
 
 .search-label {
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 700;
     color: #8da4c4;
     letter-spacing: 0.8px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -461,20 +626,20 @@ a {
 
 /* Sidebar Nav */
 .sidebar-nav {
-    flex: 1;
-    padding: 12px 0;
+    flex: 0 0 auto;
+    padding: 2px 0;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 9px 16px;
+    gap: 10px;
+    padding: 7px 14px;
     color: #c4d5e8;
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 500;
     transition: all 0.15s ease-in-out;
     border-left: 3px solid transparent;
@@ -650,13 +815,13 @@ a {
 }
 
 .emp-title {
-    font-size: 13.5px;
+    font-size: 14.7px;
     font-weight: 600;
     color: #334155;
 }
 
 .emp-section {
-    font-size: 12.5px;
+    font-size: 13.7px;
     color: #64748b;
     margin-bottom: 6px;
 }
@@ -675,13 +840,13 @@ a {
 }
 
 .spec-label {
-    font-size: 11px;
+    font-size: 12.2px;
     color: #64748b;
     font-weight: 500;
 }
 
 .spec-val {
-    font-size: 13px;
+    font-size: 14.2px;
     font-weight: 700;
     color: #0f172a;
 }
@@ -692,23 +857,23 @@ a {
     gap: 6px;
     border-left: 1px solid #e2e8f0;
     padding-left: 20px;
-    min-width: 180px;
+    min-width: 190px;
 }
 
 .jobclass-title {
-    font-size: 11px;
+    font-size: 12.2px;
     color: #64748b;
     font-weight: 500;
 }
 
 .jobclass-code {
-    font-size: 14px;
+    font-size: 15.2px;
     font-weight: 800;
     color: #0f172a;
 }
 
 .jobclass-date {
-    font-size: 11.5px;
+    font-size: 12.7px;
     color: #475569;
 }
 
@@ -717,13 +882,13 @@ a {
     background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    padding: 12px 18px;
-    min-width: 320px;
+    padding: 14px 20px;
+    min-width: 385px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .ringkasan-header {
-    font-size: 11px;
+    font-size: 12.2px;
     font-weight: 800;
     letter-spacing: 0.6px;
     color: #1e3a8a;
@@ -736,27 +901,33 @@ a {
 .ringkasan-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 7px;
 }
 
 .ringkasan-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 11.5px;
+    gap: 14px;
+    font-size: 12.7px;
 }
 
 .ringkasan-label {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
     color: #475569;
     font-weight: 500;
+    font-size: 12.7px;
+    white-space: nowrap;
 }
 
 .ringkasan-val {
     font-weight: 700;
     color: #0f172a;
+    font-size: 12.7px;
+    text-align: right;
+    white-space: nowrap;
 }
 
 /* Badges */
@@ -785,6 +956,13 @@ a {
     border-radius: 3px;
     font-size: 11px;
     font-weight: 700;
+}
+
+.emp-ringkasan-box .badge-green,
+.emp-ringkasan-box .badge-orange,
+.emp-ringkasan-box .badge-red {
+    font-size: 12.2px;
+    padding: 2.5px 9px;
 }
 
 .badge-table-green {
@@ -1608,3 +1786,369 @@ textarea.form-control {
     color: #94a3b8;
 }
 
+/* --------------------------------------------------------------------------
+   Talent Snapshot Responsive Grid & Compact Tables
+   -------------------------------------------------------------------------- */
+.talent-snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
+}
+
+@media (max-width: 992px) {
+    .talent-snapshot-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+}
+
+.talent-snapshot-card {
+    margin-bottom: 0 !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+    padding: 14px 16px !important;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.talent-header-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.talent-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 4px;
+}
+
+.talent-table-scroll::-webkit-scrollbar {
+    height: 5px;
+    width: 5px;
+}
+
+.talent-table-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.talent-table-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.talent-table-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.table-compact {
+    font-size: 14px !important;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-compact th {
+    padding: 6px 8px !important;
+    font-size: 13.5px !important;
+    line-height: 1.35 !important;
+    background-color: #f8fafc;
+    color: #334155;
+    font-weight: 700;
+    border: 1px solid #e2e8f0;
+    vertical-align: middle;
+}
+
+.table-compact td {
+    padding: 6px 8px !important;
+    font-size: 13.5px !important;
+    line-height: 1.4 !important;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    vertical-align: middle;
+}
+
+/* --------------------------------------------------------------------------
+   Global Responsiveness (HP, Tablet, Laptop Layar Kecil)
+   -------------------------------------------------------------------------- */
+.form-row {
+    display: flex;
+    gap: 14px;
+}
+.form-row > .form-group {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Layar Laptop Kecil & Tablet Landscape (<= 1100px) */
+@media (max-width: 1100px) {
+    .employee-header-card {
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 16px 20px;
+    }
+    .emp-profile-left {
+        flex: 1 1 100%;
+    }
+    .emp-jobclass-center {
+        border-left: none;
+        padding-left: 0;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 12px;
+        flex: 1 1 auto;
+        min-width: 180px;
+    }
+    .emp-ringkasan-box {
+        border-top: 1px solid #e2e8f0;
+        flex: 1 1 350px;
+        min-width: 320px;
+    }
+}
+
+/* Tablet Portrait & Handphone (<= 768px) */
+@media (max-width: 768px) {
+    .topbar {
+        padding: 0 14px;
+    }
+    .brand-subtitle {
+        display: none; /* Hemat ruang horizontal di header */
+    }
+    .content-area {
+        padding: 14px 16px;
+        min-width: 0;
+    }
+    .sidebar.collapsed {
+        width: 58px !important;
+        min-width: 58px !important;
+    }
+    .sidebar:not(.collapsed) {
+        position: fixed;
+        left: 0;
+        top: 52px;
+        bottom: 0;
+        height: calc(100vh - 52px);
+        z-index: 999;
+        box-shadow: 6px 0 25px rgba(0, 0, 0, 0.4);
+    }
+    .talent-header-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+    .talent-header-actions .btn {
+        flex: 1 1 auto;
+        justify-content: center;
+        text-align: center;
+    }
+    .talent-snapshot-card {
+        padding: 12px 14px !important;
+    }
+    .modal-card {
+        max-width: 95vw;
+        margin: 10px;
+    }
+    .emp-ringkasan-box {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        flex: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+}
+
+/* Handphone Layar Standar & Kecil (<= 640px: iPhone 16 Pro Max, dsb) */
+@media (max-width: 640px) {
+    .content-area {
+        padding: 10px 12px;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    .employee-header-card {
+        padding: 14px 12px;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+        height: auto !important;
+    }
+    .emp-profile-left {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .emp-main-info {
+        align-items: center;
+        width: 100%;
+    }
+    .emp-specs-row {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+        width: 100%;
+    }
+    .emp-jobclass-center {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .emp-ringkasan-box {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        flex: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 10px 12px !important;
+        overflow: hidden !important;
+    }
+    .ringkasan-header {
+        font-size: 11.5px !important;
+        margin-bottom: 8px !important;
+        padding-bottom: 5px !important;
+    }
+    .ringkasan-list {
+        gap: 7px !important;
+        width: 100% !important;
+    }
+    .ringkasan-item {
+        font-size: 11.8px !important;
+        gap: 8px !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    .ringkasan-label {
+        font-size: 11.8px !important;
+        white-space: nowrap !important;
+        line-height: 1.25 !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        gap: 5px !important;
+        flex-shrink: 0 !important;
+    }
+    .ringkasan-label svg {
+        flex-shrink: 0 !important;
+        width: 13px !important;
+        height: 13px !important;
+    }
+    .ringkasan-val {
+        font-size: 11.8px !important;
+        white-space: normal !important;
+        text-align: right !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        line-height: 1.25 !important;
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 55% !important;
+    }
+    .emp-ringkasan-box .badge-green,
+    .emp-ringkasan-box .badge-orange,
+    .emp-ringkasan-box .badge-red {
+        font-size: 11px !important;
+        padding: 2px 7px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    .table-compact th,
+    .table-compact td {
+        padding: 4px 6px !important;
+        font-size: 12.5px !important;
+    }
+    .user-name {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .role-badge-topbar {
+        display: none;
+    }
+}
+
+/* Handphone Layar Sangat Kecil (<= 420px: iPhone SE, dsb) */
+@media (max-width: 420px) {
+    .content-area {
+        padding: 8px 8px;
+    }
+    .employee-header-card {
+        padding: 12px 10px;
+        height: auto !important;
+    }
+    .emp-ringkasan-box {
+        padding: 8px 10px !important;
+        flex: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    .ringkasan-header {
+        margin-bottom: 6px !important;
+        padding-bottom: 4px !important;
+    }
+    .ringkasan-list {
+        gap: 6px !important;
+    }
+    .ringkasan-item {
+        font-size: 11px !important;
+        gap: 6px !important;
+    }
+    .ringkasan-label {
+        font-size: 11px !important;
+        line-height: 1.25 !important;
+        gap: 4px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+    .ringkasan-val {
+        font-size: 11px !important;
+        line-height: 1.25 !important;
+        max-width: 55% !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+    }
+}
+
+/* ==========================================================================
+   Sidebar: Locked Tabs & Selected Employee Badge Styles
+   ========================================================================== */
+.sidebar-employee-badge {
+    transition: all 0.2s ease;
+}
+.sidebar-no-emp-box {
+    transition: all 0.2s ease;
+}
+.sidebar.collapsed .sidebar-employee-badge,
+.sidebar.collapsed .sidebar-no-emp-box,
+.sidebar.collapsed .sidebar-section-header {
+    display: none !important;
+}
+.nav-item-locked {
+    opacity: 0.55;
+    cursor: not-allowed !important;
+    position: relative;
+}
+.nav-item-locked:hover {
+    background-color: rgba(245, 158, 11, 0.12) !important;
+    color: #fef08a !important;
+}
+.sidebar.collapsed .nav-item-locked:hover::after {
+    content: attr(data-title) " (Terkunci: Pilih Karyawan)" !important;
+}

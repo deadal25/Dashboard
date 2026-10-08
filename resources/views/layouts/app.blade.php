@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'MAP-IN: Talent & Career Management' }}</title>
     <link rel="stylesheet" href="/css/map-in.css">
-    <!-- Lucide Icons or SVG icons support -->
+    <!-- Bootstrap Icons support -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
     <div class="app-wrapper">

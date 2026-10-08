@@ -35,8 +35,13 @@
                 {{-- Row 2: Jabatan & Departemen --}}
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Jabatan <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="position" class="form-control" placeholder="Contoh: Engineering Section Head" required>
+                        <label class="form-label">Jabatan / Posisi <span style="color:#ef4444;">*</span></label>
+                        <select name="position" class="form-control" required>
+                            <option value="">-- Pilih Jabatan / Posisi --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getPositionStandards() as $pos)
+                                <option value="{{ $pos }}">{{ $pos }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Departemen <span style="color:#ef4444;">*</span></label>
@@ -72,23 +77,76 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Job Class <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="current_job_class" class="form-control" placeholder="Contoh: JC4" required>
+                        <select name="current_job_class" id="add-emp-jobclass" class="form-control select-jobclass" required>
+                            <option value="">-- Pilih Job Class --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getJobClassList() as $kj)
+                                <option value="{{ $kj }}">{{ $kj }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Grade <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="current_grade" class="form-control" placeholder="Contoh: G4-1" required>
+                        <label class="form-label">Grade Saat Ini <span style="color:#ef4444;">*</span></label>
+                        <select name="current_grade" id="add-emp-grade" class="form-control select-grade" required>
+                            <option value="">-- Pilih Grade --</option>
+                        </select>
                     </div>
                 </div>
 
-                {{-- Row 6: Grade Sejak & Jabatan Sejak --}}
+                {{-- Row 6: Grade Sejak & Jabatan Sejak (Bulan & Tahun Dropdown) --}}
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Grade Sejak</label>
-                        <input type="text" name="grade_since" class="form-control" placeholder="Contoh: April 2026">
+                        <div style="display: flex; gap: 8px;">
+                            <select id="add-emp-grade-month" class="form-control" style="flex: 1.2;">
+                                <option value="">-- Pilih Bulan --</option>
+                                <option value="Januari">Januari</option>
+                                <option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option>
+                                <option value="April">April</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Juni">Juni</option>
+                                <option value="Juli">Juli</option>
+                                <option value="Agustus">Agustus</option>
+                                <option value="September">September</option>
+                                <option value="Oktober">Oktober</option>
+                                <option value="November">November</option>
+                                <option value="Desember">Desember</option>
+                            </select>
+                            <select id="add-emp-grade-year" class="form-control" style="flex: 1;">
+                                <option value="">-- Pilih Tahun --</option>
+                                @for($y = (int)date('Y') + 5; $y >= 1990; $y--)
+                                    <option value="{{ $y }}">{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <input type="hidden" id="add-emp-grade-since" name="grade_since" value="">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Jabatan Sejak</label>
-                        <input type="text" name="position_since" class="form-control" placeholder="Contoh: April 2023">
+                        <div style="display: flex; gap: 8px;">
+                            <select id="add-emp-pos-month" class="form-control" style="flex: 1.2;">
+                                <option value="">-- Pilih Bulan --</option>
+                                <option value="Januari">Januari</option>
+                                <option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option>
+                                <option value="April">April</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Juni">Juni</option>
+                                <option value="Juli">Juli</option>
+                                <option value="Agustus">Agustus</option>
+                                <option value="September">September</option>
+                                <option value="Oktober">Oktober</option>
+                                <option value="November">November</option>
+                                <option value="Desember">Desember</option>
+                            </select>
+                            <select id="add-emp-pos-year" class="form-control" style="flex: 1;">
+                                <option value="">-- Pilih Tahun --</option>
+                                @for($y = (int)date('Y') + 5; $y >= 1990; $y--)
+                                    <option value="{{ $y }}">{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <input type="hidden" id="add-emp-position-since" name="position_since" value="">
                     </div>
                 </div>
 
@@ -130,7 +188,12 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Jabatan / Posisi <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-emp-position" name="position" class="form-control" required>
+                        <select id="edit-emp-position" name="position" class="form-control" required>
+                            <option value="">-- Pilih Jabatan / Posisi --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getPositionStandards() as $pos)
+                                <option value="{{ $pos }}">{{ $pos }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Departemen <span style="color:#ef4444;">*</span></label>
@@ -163,22 +226,76 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Job Class Saat Ini <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-emp-jobclass" name="current_job_class" class="form-control" required>
+                        <select id="edit-emp-jobclass" name="current_job_class" class="form-control select-jobclass" required>
+                            <option value="">-- Pilih Job Class --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getJobClassList() as $kj)
+                                <option value="{{ $kj }}">{{ $kj }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Grade Saat Ini <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-emp-grade" name="current_grade" class="form-control" required>
+                        <select id="edit-emp-grade" name="current_grade" class="form-control select-grade" required>
+                            <option value="">-- Pilih Grade --</option>
+                        </select>
                     </div>
                 </div>
 
+                {{-- Row: Grade Sejak & Menjabat Sejak (Bulan & Tahun Dropdown) --}}
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Grade Sejak</label>
-                        <input type="text" id="edit-emp-grade-since" name="grade_since" class="form-control" placeholder="Contoh: April 2026">
+                        <div style="display: flex; gap: 8px;">
+                            <select id="edit-emp-grade-month" class="form-control" style="flex: 1.2;">
+                                <option value="">-- Pilih Bulan --</option>
+                                <option value="Januari">Januari</option>
+                                <option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option>
+                                <option value="April">April</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Juni">Juni</option>
+                                <option value="Juli">Juli</option>
+                                <option value="Agustus">Agustus</option>
+                                <option value="September">September</option>
+                                <option value="Oktober">Oktober</option>
+                                <option value="November">November</option>
+                                <option value="Desember">Desember</option>
+                            </select>
+                            <select id="edit-emp-grade-year" class="form-control" style="flex: 1;">
+                                <option value="">-- Pilih Tahun --</option>
+                                @for($y = (int)date('Y') + 5; $y >= 1990; $y--)
+                                    <option value="{{ $y }}">{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <input type="hidden" id="edit-emp-grade-since" name="grade_since" value="">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Menjabat Sejak</label>
-                        <input type="text" id="edit-emp-position-since" name="position_since" class="form-control" placeholder="Contoh: April 2023">
+                        <div style="display: flex; gap: 8px;">
+                            <select id="edit-emp-pos-month" class="form-control" style="flex: 1.2;">
+                                <option value="">-- Pilih Bulan --</option>
+                                <option value="Januari">Januari</option>
+                                <option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option>
+                                <option value="April">April</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Juni">Juni</option>
+                                <option value="Juli">Juli</option>
+                                <option value="Agustus">Agustus</option>
+                                <option value="September">September</option>
+                                <option value="Oktober">Oktober</option>
+                                <option value="November">November</option>
+                                <option value="Desember">Desember</option>
+                            </select>
+                            <select id="edit-emp-pos-year" class="form-control" style="flex: 1;">
+                                <option value="">-- Pilih Tahun --</option>
+                                @for($y = (int)date('Y') + 5; $y >= 1990; $y--)
+                                    <option value="{{ $y }}">{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <input type="hidden" id="edit-emp-position-since" name="position_since" value="">
                     </div>
                 </div>
 

@@ -125,14 +125,24 @@
         </div>
     </div>
 
-    {{-- B. RENCANA PENGEMBANGAN (IDP ACTION PLAN) --}}
+    @php
+        $allIdpPlans = $employee->idpActionPlans;
+        $manajerialPlans = $allIdpPlans->filter(function($p) {
+            return strtolower($p->competency_type ?? 'manajerial') !== 'technical';
+        });
+        $technicalPlans = $allIdpPlans->filter(function($p) {
+            return strtolower($p->competency_type ?? '') === 'technical';
+        });
+    @endphp
+
+    {{-- B. RENCANA PENGEMBANGAN MANAJERIAL --}}
     <div class="dashboard-card">
         <div class="card-header-bar" style="margin-bottom:12px; padding-bottom:8px;">
             <div class="card-title-wrap">
-                <span class="card-title" style="font-size:13px;">B. Rencana Pengembangan <span style="font-weight:500; text-transform:none; color:#64748b;">(IDP Action Plan)</span></span>
+                <span class="card-title" style="font-size:13px;">B. Rencana Pengembangan Manajerial <span style="font-weight:500; text-transform:none; color:#64748b;">(IDP Action Plan)</span></span>
             </div>
             <div class="quick-action-btn-group">
-                <button type="button" class="btn-mini btn-mini-primary" data-modal-target="modal-tambah-idp" data-preselect-section="idp-action" title="Tambah Rencana Aksi IDP">
+                <button type="button" class="btn-mini btn-mini-primary" data-modal-target="modal-tambah-idp" data-preselect-section="idp-action" data-preselect-type="Manajerial" title="Tambah Rencana Aksi IDP Manajerial">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Tambah Rencana
                 </button>
@@ -151,7 +161,7 @@
                 <thead>
                     <tr>
                         <th class="text-center" style="width:4%;">No.</th>
-                        <th style="width:14%;">Kompetensi yang Dikembangkan<br><small style="font-weight:400; color:#64748b;">({{ $employee->idpActionPlans->count() }} Rencana)</small></th>
+                        <th style="width:14%;">Kompetensi yang Dikembangkan<br><small style="font-weight:400; color:#64748b;">({{ $manajerialPlans->count() }} Rencana)</small></th>
                         <th style="width:16%;">Tujuan Spesifik (Target)</th>
                         <th style="width:12%;">Metode Pengembangan</th>
                         <th style="width:18%;">Aktivitas / Program</th>
@@ -164,9 +174,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($employee->idpActionPlans as $plan)
+                    @forelse($manajerialPlans as $plan)
                         <tr>
-                            <td class="text-center">{{ $plan->order_no }}</td>
+                            <td class="text-center">{{ $plan->order_no ?? $loop->iteration }}</td>
                             <td style="font-weight:700;">{{ $plan->competency }}</td>
                             <td style="font-size:11px; color:#334155;">{{ $plan->specific_goal }}</td>
                             <td style="font-size:11px;">
@@ -201,17 +211,111 @@
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="11" class="text-center text-muted" style="padding: 24px; color:#64748b; font-size:12px;">
+                                Belum ada rencana pengembangan manajerial yang ditambahkan.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
-    {{-- C. MONITORING & REVIEW --}}
-    <div class="dashboard-card">
+    {{-- C. RENCANA PENGEMBANGAN TECHNICAL --}}
+    <div class="dashboard-card" style="margin-top: 20px;">
         <div class="card-header-bar" style="margin-bottom:12px; padding-bottom:8px;">
             <div class="card-title-wrap">
-                <span class="card-title" style="font-size:13px;">C. Monitoring & Review</span>
+                <span class="card-title" style="font-size:13px;">C. Rencana Pengembangan Technical <span style="font-weight:500; text-transform:none; color:#64748b;">(IDP Action Plan)</span></span>
+            </div>
+            <div class="quick-action-btn-group">
+                <button type="button" class="btn-mini btn-mini-primary" data-modal-target="modal-tambah-idp" data-preselect-section="idp-action" data-preselect-type="Technical" title="Tambah Rencana Aksi IDP Technical">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Tambah Rencana
+                </button>
+                <button type="button" class="btn-mini btn-mini-outline" data-modal-target="modal-edit-idp" data-preselect-section="edit-idp-action" title="Edit Rencana Aksi IDP">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    Edit
+                </button>
+                <button type="button" class="btn-mini btn-mini-danger" data-modal-target="modal-hapus-idp" data-preselect-section="del-idp-action" title="Hapus Rencana Aksi IDP">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Hapus
+                </button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width:4%;">No.</th>
+                        <th style="width:14%;">Kompetensi yang Dikembangkan<br><small style="font-weight:400; color:#64748b;">({{ $technicalPlans->count() }} Rencana)</small></th>
+                        <th style="width:16%;">Tujuan Spesifik (Target)</th>
+                        <th style="width:12%;">Metode Pengembangan</th>
+                        <th style="width:18%;">Aktivitas / Program</th>
+                        <th style="width:10%;">PIC / Pendukung</th>
+                        <th class="text-center" style="width:7%;">Mulai</th>
+                        <th class="text-center" style="width:7%;">Selesai</th>
+                        <th style="width:16%;">Indikator Keberhasilan</th>
+                        <th class="text-center" style="width:8%;">Status</th>
+                        <th class="text-center" style="width:10%;">Progres</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($technicalPlans as $plan)
+                        <tr>
+                            <td class="text-center">{{ $plan->order_no ?? $loop->iteration }}</td>
+                            <td style="font-weight:700;">{{ $plan->competency }}</td>
+                            <td style="font-size:11px; color:#334155;">{{ $plan->specific_goal }}</td>
+                            <td style="font-size:11px;">
+                                <div style="display:flex; flex-direction:column; gap:2px;">
+                                    @foreach(explode(',', $plan->development_methods) as $method)
+                                        <span style="display:inline-flex; align-items:center; gap:4px;">
+                                            <span style="font-size:12px;">👤</span> {{ trim($method) }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </td>
+                            <td style="font-size:11px; white-space:pre-line; color:#334155;">{{ $plan->activity_program }}</td>
+                            <td style="font-size:11px; white-space:pre-line; color:#475569;">{{ $plan->pic_supporter }}</td>
+                            <td class="text-center" style="font-size:11px;">{{ $plan->start_date }}</td>
+                            <td class="text-center" style="font-size:11px;">{{ $plan->end_date }}</td>
+                            <td style="font-size:11px;">{{ $plan->success_indicator }}</td>
+                            <td class="text-center">
+                                @if($plan->status === 'On Progress')
+                                    <span class="badge-outline-blue">On Progress</span>
+                                @elseif($plan->status === 'Planning')
+                                    <span class="badge-outline-orange">Planning</span>
+                                @else
+                                    <span class="badge-outline-green">{{ $plan->status }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div class="progress-bar-wrap" style="flex:1;">
+                                        <div class="progress-bar-fill {{ $plan->progress_percent > 0 ? '' : 'fill-green' }}" style="width: {{ $plan->progress_percent }}%;"></div>
+                                    </div>
+                                    <span style="font-size:11px; font-weight:700; width:28px;">{{ $plan->progress_percent }}%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="11" class="text-center text-muted" style="padding: 24px; color:#64748b; font-size:12px;">
+                                Belum ada rencana pengembangan technical yang ditambahkan. Klik tombol <strong>Tambah Rencana</strong> di atas untuk menambahkan rencana baru.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- D. MONITORING & REVIEW --}}
+    <div class="dashboard-card" style="margin-top: 20px;">
+        <div class="card-header-bar" style="margin-bottom:12px; padding-bottom:8px;">
+            <div class="card-title-wrap">
+                <span class="card-title" style="font-size:13px;">D. Monitoring & Review</span>
             </div>
         </div>
         <div style="display: grid; grid-template-columns: 1.2fr 1fr 1.3fr; gap: 24px;">

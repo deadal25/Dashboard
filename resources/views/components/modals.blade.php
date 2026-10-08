@@ -13,14 +13,51 @@
         <form action="{{ route('karyawan.career-history.store', ['nik' => $employee->nik]) }}" method="POST">
             @csrf
             <div class="modal-body">
+                {{-- Tanggal Efektif (Bulan & Tahun Dropdown) --}}
+                <div class="form-group">
+                    <label class="form-label">Tanggal Efektif <span style="color:#ef4444;">*</span></label>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="add-karir-month" class="form-control" style="flex: 1.2;" required>
+                            <option value="">-- Pilih Bulan --</option>
+                            <option value="Januari">Januari</option>
+                            <option value="Februari">Februari</option>
+                            <option value="Maret">Maret</option>
+                            <option value="April">April</option>
+                            <option value="Mei">Mei</option>
+                            <option value="Juni">Juni</option>
+                            <option value="Juli">Juli</option>
+                            <option value="Agustus">Agustus</option>
+                            <option value="September">September</option>
+                            <option value="Oktober">Oktober</option>
+                            <option value="November">November</option>
+                            <option value="Desember">Desember</option>
+                        </select>
+                        <select id="add-karir-year" class="form-control" style="flex: 1;" required>
+                            <option value="">-- Pilih Tahun --</option>
+                            @for($y = (int)date('Y') + 5; $y >= 1990; $y--)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <input type="hidden" id="add-karir-date" name="effective_date" value="" required>
+                </div>
+
+                {{-- Job Class & Grade Dropdown --}}
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Tanggal Efektif</label>
-                        <input type="text" name="effective_date" class="form-control" placeholder="Contoh: Apr-26" required>
+                        <label class="form-label">Job Class <span style="color:#ef4444;">*</span></label>
+                        <select name="job_class" id="add-karir-jobclass" class="form-control select-jobclass" required>
+                            <option value="">-- Pilih Job Class --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getJobClassList() as $kj)
+                                <option value="{{ $kj }}">{{ $kj }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Job Class & Grade</label>
-                        <input type="text" name="job_class_grade" class="form-control" placeholder="Contoh: JC4 / G4-2" required>
+                        <label class="form-label">Grade <span style="color:#ef4444;">*</span></label>
+                        <select name="grade" id="add-karir-grade" class="form-control select-grade" required>
+                            <option value="">-- Pilih Grade --</option>
+                        </select>
                     </div>
                 </div>
 
@@ -32,7 +69,12 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Jabatan</label>
-                        <input type="text" name="position" class="form-control" placeholder="Contoh: Section Head" required>
+                        <select name="position" class="form-control" required>
+                            <option value="">-- Pilih Jabatan --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getPositionStandards() as $pos)
+                                <option value="{{ $pos }}">{{ $pos }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Jenis Perubahan</label>
@@ -82,23 +124,62 @@
                                     data-date="{{ $ch->effective_date }}"
                                     data-dept="{{ $ch->department_section }}"
                                     data-pos="{{ $ch->position }}"
-                                    data-grade="{{ $ch->job_class_grade }}"
+                                    data-jobclass="{{ $ch->job_class }}"
+                                    data-grade="{{ $ch->grade }}"
+                                    data-gradefull="{{ $ch->job_class_grade }}"
                                     data-type="{{ $ch->change_type }}"
                                     data-notes="{{ $ch->notes }}">
-                                {{ $ch->effective_date }} - {{ $ch->position }} ({{ $ch->job_class_grade }})
+                                {{ $ch->effective_date }} - {{ $ch->position }} ({{ $ch->job_class }} / {{ $ch->grade }})
                             </option>
                         @endforeach
                     </select>
                 </div>
 
+                {{-- Tanggal Efektif (Bulan & Tahun Dropdown) --}}
+                <div class="form-group">
+                    <label class="form-label">Tanggal Efektif <span style="color:#ef4444;">*</span></label>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="edit-karir-month" class="form-control" style="flex: 1.2;" required>
+                            <option value="">-- Pilih Bulan --</option>
+                            <option value="Januari">Januari</option>
+                            <option value="Februari">Februari</option>
+                            <option value="Maret">Maret</option>
+                            <option value="April">April</option>
+                            <option value="Mei">Mei</option>
+                            <option value="Juni">Juni</option>
+                            <option value="Juli">Juli</option>
+                            <option value="Agustus">Agustus</option>
+                            <option value="September">September</option>
+                            <option value="Oktober">Oktober</option>
+                            <option value="November">November</option>
+                            <option value="Desember">Desember</option>
+                        </select>
+                        <select id="edit-karir-year" class="form-control" style="flex: 1;" required>
+                            <option value="">-- Pilih Tahun --</option>
+                            @for($y = (int)date('Y') + 5; $y >= 1990; $y--)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <input type="hidden" id="edit-karir-date" name="effective_date" value="" required>
+                </div>
+
+                {{-- Job Class & Grade Dropdown --}}
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Tanggal Efektif</label>
-                        <input type="text" id="edit-date" name="effective_date" class="form-control" required>
+                        <label class="form-label">Job Class <span style="color:#ef4444;">*</span></label>
+                        <select name="job_class" id="edit-karir-jobclass" class="form-control select-jobclass" required>
+                            <option value="">-- Pilih Job Class --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getJobClassList() as $kj)
+                                <option value="{{ $kj }}">{{ $kj }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Job Class & Grade</label>
-                        <input type="text" id="edit-grade" name="job_class_grade" class="form-control" required>
+                        <label class="form-label">Grade <span style="color:#ef4444;">*</span></label>
+                        <select name="grade" id="edit-karir-grade" class="form-control select-grade" required>
+                            <option value="">-- Pilih Grade --</option>
+                        </select>
                     </div>
                 </div>
 
@@ -110,7 +191,12 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Jabatan</label>
-                        <input type="text" id="edit-pos" name="position" class="form-control" required>
+                        <select id="edit-pos" name="position" class="form-control" required>
+                            <option value="">-- Pilih Jabatan --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getPositionStandards() as $pos)
+                                <option value="{{ $pos }}">{{ $pos }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Jenis Perubahan</label>
@@ -157,7 +243,7 @@
                     <select id="delete-select-karir" class="form-control">
                         @foreach($employee->careerHistories as $ch)
                             <option value="{{ $ch->id }}">
-                                {{ $ch->effective_date }} - {{ $ch->position }} ({{ $ch->change_type }})
+                                {{ $ch->effective_date }} - {{ $ch->position }} ({{ $ch->job_class }} / {{ $ch->grade }})
                             </option>
                         @endforeach
                     </select>
@@ -175,12 +261,452 @@
 </div>
 
 {{-- =========================================================================
+     MODAL GRUP: RIWAYAT PELATIHAN (TAMBAH, EDIT, HAPUS)
+   ========================================================================= --}}
+
+{{-- Modal Tambah Riwayat Pelatihan --}}
+<div id="modal-tambah-pelatihan" class="modal-backdrop">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Tambah Riwayat Pelatihan
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+        <form action="{{ route('karyawan.training-history.store', ['nik' => $employee->nik]) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="modal-body">
+                {{-- Nama Pelatihan --}}
+                <div class="form-group">
+                    <label class="form-label">Nama Pelatihan <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="training_name" class="form-control" placeholder="Contoh: Problem Solving & Decision Making (PSDM)" required>
+                </div>
+
+                {{-- Rentang Tanggal Pelatihan --}}
+                <div class="form-group">
+                    <label class="form-label">Rentang Tanggal Pelatihan <span style="color:#ef4444;">*</span></label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <span style="font-size:11px; color:#64748b; display:block; margin-bottom:3px;">Dari Tanggal:</span>
+                            <input type="date" id="add-training-start-date" name="start_date" class="form-control" required>
+                        </div>
+                        <div>
+                            <span style="font-size:11px; color:#64748b; display:block; margin-bottom:3px;">Sampai Tanggal (Opsional):</span>
+                            <input type="date" id="add-training-end-date" name="end_date" class="form-control">
+                        </div>
+                    </div>
+                    <div id="add-training-date-preview" style="font-size:11.5px; color:#2563eb; font-weight:600; margin-top:5px; display:none;">
+                        📅 Format Tampilan: <span id="add-training-date-preview-text"></span>
+                    </div>
+                    <input type="hidden" id="add-training-date" name="training_date" value="">
+                </div>
+
+                {{-- Kategori & Jenis Pelatihan --}}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Kategori <span style="color:#ef4444;">*</span></label>
+                        <select name="category" class="form-control" required>
+                            <option value="Functional">Functional</option>
+                            <option value="Managerial">Managerial</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Jenis Pelatihan <span style="color:#ef4444;">*</span></label>
+                        <select name="training_type" class="form-control" required>
+                            <option value="Classroom">Classroom</option>
+                            <option value="On the Job">On the Job</option>
+                            <option value="E-Learning">E-Learning</option>
+                            <option value="Workshop">Workshop</option>
+                            <option value="Seminar">Seminar</option>
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Penyelenggara & Durasi --}}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Penyelenggara</label>
+                        <input type="text" name="organizer" class="form-control" placeholder="Contoh: Toyota Institute Indonesia">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Durasi (Jam) <span style="color:#ef4444;">*</span></label>
+                        <input type="number" step="0.5" min="0.5" name="duration_hours" class="form-control" placeholder="Contoh: 16" required>
+                    </div>
+                </div>
+
+                {{-- Dokumentasi Bukti Pelatihan --}}
+                <div class="form-group">
+                    <label class="form-label">Dokumentasi Bukti (Sertifikat / Foto / Dokumen)</label>
+                    <input type="file" name="documentation" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.webp">
+                    <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">
+                        Format yang didukung: <strong>PDF, PNG, JPG, JPEG, WEBP</strong> (Maksimal 10 MB).
+                    </span>
+                </div>
+
+                {{-- Catatan --}}
+                <div class="form-group">
+                    <label class="form-label">Catatan</label>
+                    <input type="text" name="notes" class="form-control" placeholder="Contoh: Sertifikat Kelulusan / Nilai A / Grade Sangat Baik">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan Pelatihan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Modal Edit Riwayat Pelatihan --}}
+<div id="modal-edit-pelatihan" class="modal-backdrop">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                Edit Riwayat Pelatihan
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+        <form id="form-edit-pelatihan" action="" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Pilih Data yang Ingin Diedit</label>
+                    <select id="edit-select-pelatihan" class="form-control">
+                        @foreach($employee->trainingHistories as $th)
+                            <option value="{{ $th->id }}"
+                                    data-name="{{ $th->training_name }}"
+                                    data-start="{{ $th->start_date }}"
+                                    data-end="{{ $th->end_date }}"
+                                    data-date="{{ $th->training_date }}"
+                                    data-cat="{{ $th->category }}"
+                                    data-type="{{ $th->training_type }}"
+                                    data-org="{{ $th->organizer }}"
+                                    data-dur="{{ $th->duration_hours }}"
+                                    data-notes="{{ $th->notes }}"
+                                    data-doc="{{ $th->documentation }}"
+                                    data-is-image="{{ $th->is_image ? '1' : '0' }}"
+                                    data-is-pdf="{{ $th->is_pdf ? '1' : '0' }}">
+                                {{ $th->training_date ?: '-' }} - {{ $th->training_name }} ({{ $th->category }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Nama Pelatihan --}}
+                <div class="form-group">
+                    <label class="form-label">Nama Pelatihan <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="edit-training-name" name="training_name" class="form-control" required>
+                </div>
+
+                {{-- Rentang Tanggal Pelatihan --}}
+                <div class="form-group">
+                    <label class="form-label">Rentang Tanggal Pelatihan <span style="color:#ef4444;">*</span></label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <span style="font-size:11px; color:#64748b; display:block; margin-bottom:3px;">Dari Tanggal:</span>
+                            <input type="date" id="edit-training-start-date" name="start_date" class="form-control">
+                        </div>
+                        <div>
+                            <span style="font-size:11px; color:#64748b; display:block; margin-bottom:3px;">Sampai Tanggal:</span>
+                            <input type="date" id="edit-training-end-date" name="end_date" class="form-control">
+                        </div>
+                    </div>
+                    <div id="edit-training-date-preview" style="font-size:11.5px; color:#2563eb; font-weight:600; margin-top:5px; display:none;">
+                        📅 Format Tampilan: <span id="edit-training-date-preview-text"></span>
+                    </div>
+                    <input type="hidden" id="edit-training-date" name="training_date" value="">
+                </div>
+
+                {{-- Kategori & Jenis Pelatihan --}}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Kategori <span style="color:#ef4444;">*</span></label>
+                        <select id="edit-training-category" name="category" class="form-control" required>
+                            <option value="Functional">Functional</option>
+                            <option value="Managerial">Managerial</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Jenis Pelatihan <span style="color:#ef4444;">*</span></label>
+                        <select id="edit-training-type" name="training_type" class="form-control" required>
+                            <option value="Classroom">Classroom</option>
+                            <option value="On the Job">On the Job</option>
+                            <option value="E-Learning">E-Learning</option>
+                            <option value="Workshop">Workshop</option>
+                            <option value="Seminar">Seminar</option>
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Penyelenggara & Durasi --}}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Penyelenggara</label>
+                        <input type="text" id="edit-training-organizer" name="organizer" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Durasi (Jam) <span style="color:#ef4444;">*</span></label>
+                        <input type="number" step="0.5" min="0.5" id="edit-training-duration" name="duration_hours" class="form-control" required>
+                    </div>
+                </div>
+
+                {{-- Dokumentasi Bukti Pelatihan --}}
+                <div class="form-group">
+                    <label class="form-label">Dokumentasi Bukti (Sertifikat / Foto / Dokumen)</label>
+                    <div id="edit-training-doc-current" style="margin-bottom:8px; font-size:12px; padding:8px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; display:none;">
+                    </div>
+                    <input type="file" id="edit-training-doc-file" name="documentation" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.webp">
+                    <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">
+                        Pilih file baru jika ingin mengganti file bukti (PDF, PNG, JPG, JPEG, WEBP - Maks. 10 MB).
+                    </span>
+                    <label id="edit-training-remove-doc-wrap" style="display:none; align-items:center; gap:6px; margin-top:6px; font-size:12px; color:#dc2626; cursor:pointer;">
+                        <input type="checkbox" name="remove_documentation" value="1" id="edit-training-remove-doc">
+                        <span>Hapus file dokumentasi saat ini</span>
+                    </label>
+                </div>
+
+                {{-- Catatan --}}
+                <div class="form-group">
+                    <label class="form-label">Catatan</label>
+                    <input type="text" id="edit-training-notes" name="notes" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                <button type="submit" class="btn btn-primary">Perbarui Pelatihan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Modal Hapus Riwayat Pelatihan --}}
+<div id="modal-hapus-pelatihan" class="modal-backdrop">
+    <div class="modal-card" style="max-width:460px;">
+        <div class="modal-header" style="background:#b91c1c;">
+            <div class="modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Hapus Riwayat Pelatihan
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+        <form id="form-hapus-pelatihan" action="" method="POST">
+            @csrf
+            @method('DELETE')
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Pilih Data yang Akan Dihapus</label>
+                    <select id="delete-select-pelatihan" class="form-control">
+                        @foreach($employee->trainingHistories as $th)
+                            <option value="{{ $th->id }}">
+                                {{ $th->training_date ?: '-' }} - {{ $th->training_name }} ({{ $th->category }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="font-size:12px; color:#b91c1c; margin-top:8px;">
+                    Perhatian: Data pelatihan beserta berkas dokumentasi yang dihapus tidak dapat dikembalikan.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                <button type="submit" class="btn btn-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626;">Hapus Permanen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- =========================================================================
+     MODAL GRUP: SERTIFIKASI (BAGIAN C RIWAYAT PELATIHAN)
+   ========================================================================= --}}
+
+{{-- Modal Tambah Sertifikasi --}}
+<div id="modal-tambah-sertifikasi" class="modal-backdrop">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Tambah Sertifikasi
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+        <form action="{{ route('karyawan.certification.store', ['nik' => $employee->nik]) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Nama Sertifikasi <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="name" class="form-control" placeholder="Contoh: Certified Supply Chain Professional (CSCP)" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Lembaga Penyelenggara / Penerbit</label>
+                    <input type="text" name="issuer" class="form-control" placeholder="Contoh: APICS / BNSP / PMI">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Diperoleh</label>
+                        <input type="text" name="obtained_date" class="form-control" placeholder="Contoh: 20 Mar 2025">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Masa Berlaku Hingga</label>
+                        <input type="text" name="valid_until" class="form-control" placeholder="Contoh: 20 Mar 2027 atau Seumur Hidup">
+                    </div>
+                </div>
+
+                {{-- Dokumen Bukti Sertifikasi --}}
+                <div class="form-group">
+                    <label class="form-label">Dokumen Bukti Sertifikasi (Sertifikat / Piagam / Berkas)</label>
+                    <input type="file" name="documentation" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.webp">
+                    <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">
+                        Format yang didukung: <strong>PDF, PNG, JPG, JPEG, WEBP</strong> (Maksimal 10 MB).
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#1e293b; cursor:pointer;">
+                        <input type="checkbox" name="is_active" value="1" checked>
+                        <span>Sertifikat masih aktif / berlaku</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan Sertifikasi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Modal Edit Sertifikasi --}}
+<div id="modal-edit-sertifikasi" class="modal-backdrop">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                Edit Sertifikasi
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+        <form id="form-edit-sertifikasi" action="" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Pilih Sertifikasi yang Ingin Diedit</label>
+                    <select id="edit-select-sertifikasi" class="form-control">
+                        @foreach($employee->certifications as $cert)
+                            <option value="{{ $cert->id }}"
+                                    data-name="{{ $cert->name }}"
+                                    data-issuer="{{ $cert->issuer }}"
+                                    data-obtained="{{ $cert->obtained_date }}"
+                                    data-valid="{{ $cert->valid_until }}"
+                                    data-active="{{ $cert->is_active ? '1' : '0' }}"
+                                    data-doc="{{ $cert->documentation }}"
+                                    data-is-image="{{ $cert->is_image ? '1' : '0' }}"
+                                    data-is-pdf="{{ $cert->is_pdf ? '1' : '0' }}">
+                                {{ $cert->name }} ({{ $cert->issuer ?? '-' }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nama Sertifikasi <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="edit-cert-name" name="name" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Lembaga Penyelenggara / Penerbit</label>
+                    <input type="text" id="edit-cert-issuer" name="issuer" class="form-control">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Diperoleh</label>
+                        <input type="text" id="edit-cert-obtained" name="obtained_date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Masa Berlaku Hingga</label>
+                        <input type="text" id="edit-cert-valid" name="valid_until" class="form-control">
+                    </div>
+                </div>
+
+                {{-- Dokumentasi Bukti Sertifikasi --}}
+                <div class="form-group">
+                    <label class="form-label">Dokumen Bukti Sertifikasi (Sertifikat / Piagam / Berkas)</label>
+                    <div id="edit-cert-doc-current" style="margin-bottom:8px; font-size:12px; padding:8px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; display:none;">
+                    </div>
+                    <input type="file" id="edit-cert-doc-file" name="documentation" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.webp">
+                    <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">
+                        Pilih file baru jika ingin mengganti dokumen bukti sertifikasi (PDF, PNG, JPG, JPEG, WEBP - Maks. 10 MB).
+                    </span>
+                    <label id="edit-cert-remove-doc-wrap" style="display:none; align-items:center; gap:6px; margin-top:6px; font-size:12px; color:#dc2626; cursor:pointer;">
+                        <input type="checkbox" name="remove_documentation" value="1" id="edit-cert-remove-doc">
+                        <span>Hapus dokumen sertifikasi saat ini</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#1e293b; cursor:pointer;">
+                        <input type="checkbox" id="edit-cert-active" name="is_active" value="1">
+                        <span>Sertifikat masih aktif / berlaku</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                <button type="submit" class="btn btn-primary">Perbarui Sertifikasi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Modal Hapus Sertifikasi --}}
+<div id="modal-hapus-sertifikasi" class="modal-backdrop">
+    <div class="modal-card" style="max-width:460px;">
+        <div class="modal-header" style="background:#b91c1c;">
+            <div class="modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Hapus Sertifikasi
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+        <form id="form-hapus-sertifikasi" action="" method="POST">
+            @csrf
+            @method('DELETE')
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Pilih Sertifikasi yang Akan Dihapus</label>
+                    <select id="delete-select-sertifikasi" class="form-control">
+                        @foreach($employee->certifications as $cert)
+                            <option value="{{ $cert->id }}">
+                                {{ $cert->name }} ({{ $cert->issuer ?? '-' }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="font-size:12px; color:#b91c1c; margin-top:8px;">
+                    Perhatian: Sertifikasi beserta berkas dokumen yang dihapus tidak dapat dikembalikan dan akan mengurangi total sertifikasi.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                <button type="submit" class="btn btn-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626;">Hapus Permanen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- =========================================================================
      MODAL GRUP 1: TALENT SNAPSHOT (6 FORMS DENGAN PILIHAN BAGIAN)
    ========================================================================= --}}
 
-{{-- 1.1 Modal TAMBAH Talent Snapshot --}}
+{{-- 1.1 Modal TAMBAH Talent Snapshot (Mendukung Lengkap C1 sampai C6) --}}
 <div id="modal-tambah-talent-snapshot" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="modal-card modal-lg">
         <div class="modal-header">
             <div class="modal-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -189,7 +715,7 @@
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
             {{-- Pilihan Bagian yang Ingin Ditambah --}}
             <div class="section-selector-box">
                 <label>
@@ -197,14 +723,298 @@
                     Pilih Bagian yang Ingin Ditambah:
                 </label>
                 <select id="select-tambah-talent-section" class="form-control section-switcher" data-container="container-tambah-talent">
+                    <option value="c1-perf" selected>C1. Performance 3 Tahun Terakhir</option>
+                    <option value="c2-potass">C2. Potential Assessment (POTASS)</option>
+                    <option value="c3-hav">C3. HAV 16 Box & Talent Pool</option>
                     <option value="c4-strength">C4. Kekuatan Utama (Key Strength)</option>
+                    <option value="c5-risk">C5. Flying Risk Assessment</option>
                     <option value="c6-potass">C6. Riwayat POTASS Assessment</option>
                 </select>
             </div>
 
-            {{-- Form C4: Tambah Kekuatan Utama --}}
-            <form id="form-tambah-c4" class="dynamic-subform" data-section="c4-strength" action="{{ route('karyawan.key-strength.store', ['nik' => $employee->nik]) }}" method="POST">
+            {{-- Form C1: Tambah / Input Nilai Performance Appraisal Tahunan --}}
+            <form id="form-tambah-c1" class="dynamic-subform" data-section="c1-perf" action="{{ route('karyawan.performance-appraisal.store', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
+                <input type="hidden" name="tab" value="{{ $tab ?? 'talent-snapshot' }}">
+
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px; display:flex; align-items:center; gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#000000" class="bi bi-graph-up-arrow" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.707l-4.146 4.147a.5.5 0 0 1-.708 0L7 6.707l-5.146 5.147a.5.5 0 0 1-.708-.708l5.5-5.5a.5.5 0 0 1 .708 0L9.5 7.793 13.293 4H10.5a.5.5 0 0 1-.5-.5"/>
+                    </svg>
+                    <span>Formulir C1: Tambah Nilai Performance Appraisal Tahunan</span>
+                </div>
+
+                <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; padding:10px 14px; font-size:11.5px; color:#0369a1; margin-bottom:14px;">
+                    📊 <strong>Sinkronisasi Otomatis:</strong> Nilai yang Anda input akan disimpan ke database riwayat kinerja karyawan, otomatis menjadi bagian dari penilaian 3 tahun terakhir (C1), dan memperbarui baris matriks HAV 16 Box (C3).
+                </div>
+
+                @php
+                    $suggestedYear = (int)($employee->performanceAppraisals->max('year') ?: 2026) + 1;
+                @endphp
+
+                <div class="form-row" style="grid-template-columns: 160px 1fr; gap:12px;">
+                    <div class="form-group">
+                        <label class="form-label">Tahun Penilaian <span style="color:#ef4444;">*</span></label>
+                        <select name="year" id="add-c1-year" class="form-control" required style="font-weight:700;">
+                            @for($y = 2035; $y >= 2020; $y--)
+                                <option value="{{ $y }}" {{ $y == $suggestedYear ? 'selected' : '' }}>
+                                    {{ $y }} (FY{{ substr((string)$y, -2) }})
+                                </option>
+                            @endfor
+                        </select>
+                        <small style="color:#64748b; font-size:10.5px; display:block; margin-top:3px;">Pilih tahun evaluasi</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Predikat / Nilai Kinerja <span style="color:#ef4444;">*</span></label>
+                        <select name="rating" id="add-c1-rating" class="form-control" required style="font-weight:700;">
+                            <option value="S">S – Istimewa (8 Poin)</option>
+                            <option value="AS">AS – Amat Sangat Baik (7 Poin)</option>
+                            <option value="A" selected>A – Sangat Baik (6 Poin)</option>
+                            <option value="B+">B+ – Baik Plus (5 Poin)</option>
+                            <option value="B">B – Baik (4 Poin)</option>
+                            <option value="C">C – Cukup (2 Poin)</option>
+                            <option value="K">K – Kurang (1 Poin)</option>
+                        </select>
+                        <small style="color:#64748b; font-size:10.5px; display:block; margin-top:3px;">Pilih skala predikat kinerja</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Catatan / Keterangan Penilaian</label>
+                    <input type="text" name="notes" id="add-c1-notes" class="form-control" placeholder="Contoh: Pencapaian target KPI tahunan 105%, evaluasi Q4 sangat memuaskan...">
+                    <small style="color:#64748b; font-size:10.5px; display:block; margin-top:3px;">Opsional</small>
+                </div>
+
+                {{-- Ringkasan 3 Tahun Terkini yang Sedang Aktif --}}
+                @php
+                    $threeYearsC1 = $employee->getThreeYearPerformances();
+                @endphp
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:10px 12px; margin-bottom:14px;">
+                    <span style="font-size:11px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">Data 3 Tahun Aktif Saat Ini di Dashboard:</span>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        @foreach($threeYearsC1 as $itemC1)
+                            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; padding:4px 10px; font-size:11px; display:flex; align-items:center; gap:6px;">
+                                <span style="color:#64748b;">{{ $itemC1['year'] }}:</span>
+                                <strong style="color:#0b2545;">{{ $itemC1['rating'] }}</strong>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
+                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Nilai Performance (C1)</button>
+                </div>
+            </form>
+
+            {{-- Form C2: Tambah / Input Potential Assessment (POTASS) --}}
+            <form id="form-tambah-c2" class="dynamic-subform" data-section="c2-potass" style="display:none;" action="{{ route('karyawan.talent-snapshot.potass.update', ['nik' => $employee->nik]) }}" method="POST">
+                @csrf
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px; display:flex; align-items:center; gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#000000" class="bi bi-bullseye" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                        <path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10m0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
+                        <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/>
+                        <path d="M9.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                    </svg>
+                    <span>Formulir C2: Input Potential Assessment (POTASS)</span>
+                </div>
+
+                <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; padding:10px 14px; font-size:11.5px; color:#0369a1; margin-bottom:14px;">
+                    🔗 <strong>Terhubung Otomatis dengan C3:</strong> Mengisi data asesmen ini akan langsung memperbarui kartu C2 dan kolom kuadran pada matriks 16 HAV Box (C3).
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:12px;">
+                    {{-- Kolom Asesmen Sebelumnya --}}
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px;">
+                        <div style="font-weight:700; font-size:12px; color:#475569; margin-bottom:8px;">ASESMEN SEBELUMNYA (Pembanding)</div>
+                        <div class="form-group">
+                            <label class="form-label">Periode <span style="color:#ef4444;">*</span></label>
+                            @php
+                                $addPrevParts = explode('-', $employee->potass_period_prev ?: 'Aug-24');
+                                $addPrevM = $addPrevParts[0] ?? 'Aug';
+                                $addPrevY = substr($addPrevParts[1] ?? '24', -2);
+                            @endphp
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <select class="form-control period-month-select" id="add-c2-prev-month" style="flex:1;">
+                                    @foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as $m)
+                                        <option value="{{ $m }}" {{ $m === $addPrevM ? 'selected' : '' }}>{{ $m }}</option>
+                                    @endforeach
+                                </select>
+                                <span style="color:#94a3b8; font-weight:700;">-</span>
+                                <select class="form-control period-year-select" id="add-c2-prev-year" style="width:85px;">
+                                    @for($y = 20; $y <= 35; $y++)
+                                        @php $yStr = sprintf('%02d', $y); @endphp
+                                        <option value="{{ $yStr }}" {{ $yStr === $addPrevY ? 'selected' : '' }}>{{ $yStr }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <input type="hidden" name="potass_period_prev" id="add-c2-prev-val" value="{{ $employee->potass_period_prev ?: 'Aug-24' }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Score POTASS <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="potass_score_prev" class="form-control" value="{{ $employee->potass_score_prev ?: '94%' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Standar Jabatan <span style="color:#ef4444;">*</span></label>
+                            <select name="potass_position_prev" class="form-control" required>
+                                @php
+                                    $curPrevPosAdd = $employee->potass_position_prev ?: 'SECTION HEAD';
+                                    $posListAdd = \App\Services\TalentCalculatorService::getPositionStandards();
+                                @endphp
+                                @foreach($posListAdd as $pos)
+                                    <option value="{{ $pos }}" {{ strcasecmp(trim($pos), trim($curPrevPosAdd)) === 0 ? 'selected' : '' }}>{{ $pos }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Kategori <span style="color:#ef4444;">*</span></label>
+                            <select name="potass_category_prev" class="form-control" required>
+                                <option value="High" {{ ($employee->potass_category_prev ?: 'Average') === 'High' ? 'selected' : '' }}>High</option>
+                                <option value="Average" {{ ($employee->potass_category_prev ?: 'Average') === 'Average' ? 'selected' : '' }}>Average</option>
+                                <option value="Below Average" {{ ($employee->potass_category_prev ?: 'Average') === 'Below Average' ? 'selected' : '' }}>Below Average</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label">Assessor <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="potass_assessor_prev" class="form-control" value="{{ $employee->potass_assessor_prev ?: 'HR Development' }}" required>
+                        </div>
+                    </div>
+
+                    {{-- Kolom Asesmen Terakhir --}}
+                    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:12px;">
+                        <div style="font-weight:700; font-size:12px; color:#1d4ed8; margin-bottom:8px;">ASESMEN TERAKHIR (Data Baru)</div>
+                        <div class="form-group">
+                            <label class="form-label">Periode <span style="color:#ef4444;">*</span></label>
+                            @php
+                                $addLastParts = explode('-', $employee->potass_period_last ?: 'Aug-26');
+                                $addLastM = $addLastParts[0] ?? 'Aug';
+                                $addLastY = substr($addLastParts[1] ?? '26', -2);
+                            @endphp
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <select class="form-control period-month-select" id="add-c2-last-month" style="flex:1;">
+                                    @foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as $m)
+                                        <option value="{{ $m }}" {{ $m === $addLastM ? 'selected' : '' }}>{{ $m }}</option>
+                                    @endforeach
+                                </select>
+                                <span style="color:#94a3b8; font-weight:700;">-</span>
+                                <select class="form-control period-year-select" id="add-c2-last-year" style="width:85px;">
+                                    @for($y = 20; $y <= 35; $y++)
+                                        @php $yStr = sprintf('%02d', $y); @endphp
+                                        <option value="{{ $yStr }}" {{ $yStr === $addLastY ? 'selected' : '' }}>{{ $yStr }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <input type="hidden" name="potass_period_last" id="add-c2-last-val" value="{{ $employee->potass_period_last ?: 'Aug-26' }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Score POTASS <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="potass_score_last" class="form-control" value="{{ $employee->potass_score_last ?: '106%' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Standar Jabatan <span style="color:#ef4444;">*</span></label>
+                            <select name="potass_position_last" class="form-control" required>
+                                @php
+                                    $curLastPosAdd = $employee->potass_position_last ?: 'MANAGER';
+                                @endphp
+                                @foreach($posListAdd as $pos)
+                                    <option value="{{ $pos }}" {{ strcasecmp(trim($pos), trim($curLastPosAdd)) === 0 ? 'selected' : '' }}>{{ $pos }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Kategori <span style="color:#ef4444;">*</span></label>
+                            <select name="potass_category_last" class="form-control" required>
+                                <option value="High" {{ ($employee->potass_category_last ?: 'High') === 'High' ? 'selected' : '' }}>High</option>
+                                <option value="Average" {{ ($employee->potass_category_last ?: 'High') === 'Average' ? 'selected' : '' }}>Average</option>
+                                <option value="Below Average" {{ ($employee->potass_category_last ?: 'High') === 'Below Average' ? 'selected' : '' }}>Below Average</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label">Assessor <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="potass_assessor_last" class="form-control" value="{{ $employee->potass_assessor_last ?: 'HR Development' }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
+                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Data POTASS (C2)</button>
+                </div>
+            </form>
+
+            {{-- Form C3: Tambah / Atur HAV 16 Box & Talent Pool --}}
+            <form id="form-tambah-c3" class="dynamic-subform" data-section="c3-hav" style="display:none;" action="{{ route('karyawan.talent-snapshot.hav-box.update', ['nik' => $employee->nik]) }}" method="POST">
+                @csrf
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px; display:flex; align-items:center; gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#000000" class="bi bi-grid-3x3-gap-fill" viewBox="0 0 16 16">
+                        <path d="M1 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zM1 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zM1 12a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z"/>
+                    </svg>
+                    <span>Formulir C3: Atur Posisi HAV 16 Box & Talent Pool</span>
+                </div>
+
+                @php
+                    $havCalcAdd = $employee->getHavBoxDetails();
+                    $matrixMapAdd = \App\Services\TalentCalculatorService::getHavMatrixMap();
+                    $flatBoxesAdd = [];
+                    foreach($matrixMapAdd as $rKey => $cols) {
+                        foreach($cols as $cKey => $cell) {
+                            $flatBoxesAdd[$cell['box']] = $cell;
+                        }
+                    }
+                    ksort($flatBoxesAdd);
+                @endphp
+
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:10px 14px; margin-bottom:14px; font-size:11.5px; color:#166534;">
+                    🎯 <strong>Rekomendasi Rumus HAV (C1 & C6):</strong> {{ $havCalcAdd['box_label'] }} – {{ $havCalcAdd['category'] }} 
+                    (Talent Pool: <strong>{{ $havCalcAdd['talent_pool'] }}</strong>)
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Posisi HAV 16 Box <span style="color:#ef4444;">*</span></label>
+                        <select name="hav_box_current" id="select-hav-box-add" class="form-control" required>
+                            @foreach($flatBoxesAdd as $bNum => $bInfo)
+                                <option value="Box {{ $bNum }}" 
+                                        data-name="{{ $bInfo['name'] }}" 
+                                        data-tp="{{ $bInfo['talent_pool'] }}"
+                                        {{ ($employee->hav_box_current ?: $havCalcAdd['box_label']) === 'Box ' . $bNum ? 'selected' : '' }}>
+                                    Box {{ $bNum }} – {{ $bInfo['name'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status Talent Pool <span style="color:#ef4444;">*</span></label>
+                        <select name="talent_pool_status" id="select-hav-tp-add" class="form-control" required>
+                            <option value="YA" {{ ($employee->talent_pool_status ?: $havCalcAdd['talent_pool']) === 'YA' ? 'selected' : '' }}>YA (Masuk Talent Pool)</option>
+                            <option value="TIDAK" {{ ($employee->talent_pool_status ?: $havCalcAdd['talent_pool']) === 'TIDAK' ? 'selected' : '' }}>TIDAK</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Label / Kategori Box <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="hav_box_category" id="input-hav-cat-add" class="form-control" value="{{ $employee->hav_box_category ?: $havCalcAdd['category'] }}" required>
+                </div>
+
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
+                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Posisi HAV Box (C3)</button>
+                </div>
+            </form>
+
+            {{-- Form C4: Tambah Kekuatan Utama --}}
+            <form id="form-tambah-c4" class="dynamic-subform" data-section="c4-strength" style="display:none;" action="{{ route('karyawan.key-strength.store', ['nik' => $employee->nik]) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px; display:flex; align-items:center; gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#000000" class="bi bi-star-fill" viewBox="0 0 16 16">
+                        <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                    </svg>
+                    <span>Formulir C4: Tambah Data Kekuatan Utama</span>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Nama Kekuatan <span style="color:#ef4444;">*</span></label>
                     <input type="text" name="strength" class="form-control" placeholder="Contoh: Strategic Thinking / Technical Problem Solving" required>
@@ -217,48 +1027,381 @@
                     <label class="form-label">Sumber Validasi <span style="color:#ef4444;">*</span></label>
                     <input type="text" name="source" class="form-control" placeholder="Contoh: PA, POTASS, Rekomendasi Atasan" required>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Dokumentasi (Foto / Gambar / PDF)</label>
+                    <input type="file" name="documentation" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif,.pdf">
+                    <small style="display:block; color:#64748b; font-size:11px; margin-top:3px;">Format yang didukung: JPG, PNG, WEBP, GIF, PDF (Maksimal 10MB)</small>
+                </div>
                 <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
                     <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Kekuatan Utama</button>
+                    <button type="submit" class="btn btn-primary">Simpan Kekuatan Utama (C4)</button>
                 </div>
             </form>
 
-            {{-- Form C6: Tambah Riwayat POTASS --}}
+            {{-- Form C5: Tambah / Input Flying Risk Assessment --}}
+            <form id="form-tambah-c5" class="dynamic-subform" data-section="c5-risk" style="display:none;" action="{{ route('karyawan.talent-snapshot.flying-risk.update', ['nik' => $employee->nik]) }}" method="POST">
+                @csrf
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px; display:flex; align-items:center; gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#000000" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                    </svg>
+                    <span>Formulir C5: Input Flying Risk Assessment (C5flyrisk.png)</span>
+                </div>
+
+                @php
+                    $riskDetailsAdd = $employee->getFlyingRiskDetails();
+                @endphp
+
+                <div class="form-group">
+                    <label class="form-label">1. Factor: Career Growth Potential <span style="color:#ef4444;">*</span></label>
+                    <select name="flying_risk_career_growth" id="add-c5-growth" class="form-control c5-factor-select-add" required>
+                        <option value="No clear advancement path" data-pts="2" {{ $riskDetailsAdd['career_growth'] === 'No clear advancement path' ? 'selected' : '' }}>
+                            No clear advancement path (2 Poin)
+                        </option>
+                        <option value="Some opportunities, but limited" data-pts="1" {{ $riskDetailsAdd['career_growth'] === 'Some opportunities, but limited' ? 'selected' : '' }}>
+                            Some opportunities, but limited (1 Poin)
+                        </option>
+                        <option value="Clear advancement opportunities" data-pts="0" {{ $riskDetailsAdd['career_growth'] === 'Clear advancement opportunities' ? 'selected' : '' }}>
+                            Clear advancement opportunities (0 Poin)
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">2. Factor: Job Market Demand for Role <span style="color:#ef4444;">*</span></label>
+                    <select name="flying_risk_job_market" id="add-c5-market" class="form-control c5-factor-select-add" required>
+                        <option value="High demand for similar roles in industry" data-pts="2" {{ $riskDetailsAdd['job_market'] === 'High demand for similar roles in industry' ? 'selected' : '' }}>
+                            High demand for similar roles in industry (2 Poin)
+                        </option>
+                        <option value="Moderate demand" data-pts="1" {{ $riskDetailsAdd['job_market'] === 'Moderate demand' ? 'selected' : '' }}>
+                            Moderate demand (1 Poin)
+                        </option>
+                        <option value="Low demand" data-pts="0" {{ $riskDetailsAdd['job_market'] === 'Low demand' ? 'selected' : '' }}>
+                            Low demand (0 Poin)
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">3. Factor: Compensation Competitiveness <span style="color:#ef4444;">*</span></label>
+                    <select name="flying_risk_compensation" id="add-c5-comp" class="form-control c5-factor-select-add" required>
+                        <option value="Below industry standard" data-pts="2" {{ $riskDetailsAdd['compensation'] === 'Below industry standard' ? 'selected' : '' }}>
+                            Below industry standard (2 Poin)
+                        </option>
+                        <option value="At industry standard" data-pts="1" {{ $riskDetailsAdd['compensation'] === 'At industry standard' ? 'selected' : '' }}>
+                            At industry standard (1 Poin)
+                        </option>
+                        <option value="Above industry standard" data-pts="0" {{ $riskDetailsAdd['compensation'] === 'Above industry standard' ? 'selected' : '' }}>
+                            Above industry standard (0 Poin)
+                        </option>
+                    </select>
+                </div>
+
+                {{-- Live Flying Risk Preview Box --}}
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-size:11.5px; font-weight:700; color:#334155;">Hasil Perhitungan Otomatis:</span>
+                        <span id="add-c5-preview-badge" class="{{ $riskDetailsAdd['badge_class'] }}" style="font-size:11.5px; padding:3px 12px; font-weight:800;">
+                            {{ $riskDetailsAdd['risk_level'] }}
+                        </span>
+                    </div>
+                    <div style="font-size:11px; color:#475569; margin-bottom:6px;">
+                        Total Skor: <strong id="add-c5-preview-total" style="color:#0b2545; font-size:13px;">{{ $riskDetailsAdd['total_score'] }}</strong> / 6 Poin
+                    </div>
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:6px; padding:8px 10px; font-size:11px; color:#1e293b; font-style:italic;">
+                        <span style="font-weight:700; font-style:normal; color:#475569; display:block; margin-bottom:2px;">Alasan Utama (Interpretasi):</span>
+                        "<span id="add-c5-preview-interpretation">{{ $riskDetailsAdd['interpretation'] }}</span>"
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
+                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Flying Risk (C5)</button>
+                </div>
+            </form>
+
+            {{-- Form C6: Tambah Riwayat POTASS dengan 8 Kompetensi Perilaku (C6.xlsx) --}}
             <form id="form-tambah-c6" class="dynamic-subform" data-section="c6-potass" style="display:none;" action="{{ route('karyawan.talent-assessment.store', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px; display:flex; align-items:center; gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#000000" class="bi bi-clock-history" viewBox="0 0 16 16">
+                        <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+                        <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+                        <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+                    </svg>
+                    <span>Formulir C6: Tambah Riwayat POTASS Assessment (C6.xlsx)</span>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Tanggal / Periode Asesmen <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="assessment_date" class="form-control" placeholder="Contoh: Aug-26" required>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <select class="form-control period-month-select" id="add-c6-month" style="flex:1;">
+                                @foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as $m)
+                                    <option value="{{ $m }}" {{ $m === 'Aug' ? 'selected' : '' }}>{{ $m }}</option>
+                                @endforeach
+                            </select>
+                            <span style="color:#94a3b8; font-weight:700;">-</span>
+                            <select class="form-control period-year-select" id="add-c6-year" style="width:85px;">
+                                @for($y = 20; $y <= 35; $y++)
+                                    @php $yStr = sprintf('%02d', $y); @endphp
+                                    <option value="{{ $yStr }}" {{ $yStr === '26' ? 'selected' : '' }}>{{ $yStr }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <input type="hidden" name="assessment_date" id="add-c6-date-val" value="Aug-26" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Standar Jabatan <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="position_standard" class="form-control" placeholder="Contoh: Manager" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Score POTASS <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="potass_score" class="form-control" placeholder="Contoh: 106%" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Kategori <span style="color:#ef4444;">*</span></label>
-                        <select name="category" class="form-control" required>
-                            <option value="High">High</option>
-                            <option value="Average">Average</option>
-                            <option value="Below Average">Below Average</option>
+                        <select name="position_standard" class="form-control" required>
+                            <option value="">-- Pilih Standar Jabatan --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getPositionStandards() as $pos)
+                                <option value="{{ $pos }}" {{ $pos === 'MANAGER' ? 'selected' : '' }}>{{ $pos }}</option>
+                            @endforeach
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">Assessor / Penilai <span style="color:#ef4444;">*</span></label>
+                        <input type="text" name="assessor" class="form-control" value="HR Development" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Assessor / Penilai <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="assessor" class="form-control" value="HR Development" required>
+
+                {{-- 8 Input Kompetensi Perilaku (Sesuai C6.xlsx) --}}
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-bottom:14px;">
+                    <div style="font-weight:700; color:#0b2545; font-size:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>8 Penilaian Kompetensi Perilaku (Bobot Sesuai C6.xlsx):</span>
+                        <span style="font-size:11px; color:#64748b; font-weight:400;">Skala nilai: 1 – 5</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">1. Vision & Bus. Sense <span style="color:#0284c7; font-weight:700;">(15%)</span></label>
+                            <input type="number" step="0.1" min="1" max="5" name="b1_vision_business" class="form-control c6-calc-input-add" value="4.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">2. Cust. Focus <span style="color:#0284c7; font-weight:700;">(15%)</span></label>
+                            <input type="number" step="0.1" min="1" max="5" name="b2_customer_focus" class="form-control c6-calc-input-add" value="4.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">3. Interpers. Skill <span style="color:#0284c7; font-weight:700;">(10%)</span></label>
+                            <input type="number" step="0.1" min="1" max="5" name="b3_interpersonal_skill" class="form-control c6-calc-input-add" value="4.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">4. Analysis & Judgment <span style="color:#0284c7; font-weight:700;">(10%)</span></label>
+                            <input type="number" step="0.1" min="1" max="5" name="b4_analysis_judgment" class="form-control c6-calc-input-add" value="3.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">5. Plan. & Drvg Act. <span style="color:#0284c7; font-weight:700;">(10%)</span></label>
+                            <input type="number" step="0.1" min="1" max="5" name="b5_planning_driving" class="form-control c6-calc-input-add" value="3.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">6. Leading & Motivating <span style="color:#0284c7; font-weight:700;">(15%)</span></label>
+                            <input type="number" step="0.1" min="1" max="5" name="b6_leading_motivating" class="form-control c6-calc-input-add" value="4.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">7. Teamwork <span style="color:#0284c7; font-weight:700;">(10%)</span></label>
+                            <input type="number" step="0.1" min="1" max="5" name="b7_teamwork" class="form-control c6-calc-input-add" value="4.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">8. Drive, Courg & Integ. <span style="color:#0284c7; font-weight:700;">(15%)</span></label>
+                            <input type="number" step="0.1" min="1" max="5" name="b8_drive_courage_integrity" class="form-control c6-calc-input-add" value="4.0" required>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
+
+                {{-- Live Calculation Preview Box --}}
+                <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-bottom:14px;">
+                    <div style="font-weight:700; color:#1e40af; font-size:11.5px; margin-bottom:6px;">
+                        Hasil Perhitungan Otomatis (C6.xlsx):
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; text-align:center;">
+                        <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:6px; padding:6px;">
+                            <small style="color:#64748b; font-size:10px; display:block;">Skor Tertimbang</small>
+                            <strong id="add-c6-preview-weighted" style="font-size:13px; color:#0b2545;">3.70</strong>
+                        </div>
+                        <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:6px; padding:6px;">
+                            <small style="color:#64748b; font-size:10px; display:block;">Skor POTASS (%)</small>
+                            <strong id="add-c6-preview-percentage" style="font-size:13px; color:#16a34a;">74.0%</strong>
+                        </div>
+                        <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:6px; padding:6px;">
+                            <small style="color:#64748b; font-size:10px; display:block;">Kolom HAV</small>
+                            <strong id="add-c6-preview-kolom" style="font-size:13px; color:#0284c7;">C3</strong>
+                        </div>
+                        <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:6px; padding:6px;">
+                            <small style="color:#64748b; font-size:10px; display:block;">Kategori</small>
+                            <strong id="add-c6-preview-category" style="font-size:13px; color:#16a34a;">High</strong>
+                        </div>
+                    </div>
+                    <div style="font-size:10.5px; color:#1d4ed8; margin-top:8px;">
+                        ✨ <em>Hasil ini otomatis disimpan ke riwayat C6, menjadi asesmen terakhir di C2, dan memperbarui kuadran C3 (16 HAV Box).</em>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:10px;">
                     <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Riwayat POTASS</button>
+                    <button type="submit" class="btn btn-primary">Simpan & Sinkronkan C6 ke C2 & C3</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+{{-- 1.0 Modal KELOLA & INPUT PERFORMANCE APPRAISAL TAHUNAN --}}
+<div id="modal-kelola-performance" class="modal-backdrop" style="z-index: 2500;">
+    <div class="modal-card modal-lg" style="box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45); border: 1px solid #cbd5e1;">
+        <div class="modal-header">
+            <div class="modal-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Tambah & Riwayat Data Performance Appraisal
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+
+        <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+            {{-- Form Tambah / Perbarui Nilai Per Tahun --}}
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:20px;">
+                <div style="font-weight:700; color:#0b2545; font-size:12.5px; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Form Input / Perbarui Nilai Performance</span>
+                </div>
+                
+                <form action="{{ route('karyawan.performance-appraisal.store', ['nik' => $employee->nik]) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="tab" value="{{ $tab ?? 'talent-snapshot' }}">
+
+                    <div style="display:grid; grid-template-columns: 160px 140px 1fr; gap:12px; align-items:flex-start;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-weight:700;">Tahun <span style="color:#ef4444;">*</span></label>
+                            @php
+                                $suggestedYear = (int)($employee->performanceAppraisals->max('year') ?: 2026) + 1;
+                            @endphp
+                            <select name="year" id="input-modal-perf-year" class="form-control" required style="font-weight:700;">
+                                @for($y = 2035; $y >= 2020; $y--)
+                                    <option value="{{ $y }}" {{ $y == $suggestedYear ? 'selected' : '' }}>
+                                        {{ $y }} (FY{{ substr((string)$y, -2) }})
+                                    </option>
+                                @endfor
+                            </select>
+                            <small style="color:#64748b; font-size:10.5px; display:block; margin-top:3px;">Pilih tahun penilaian</small>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-weight:700;">Nilai / Rating <span style="color:#ef4444;">*</span></label>
+                            <select name="rating" id="input-modal-perf-rating" class="form-control" required style="font-weight:700;">
+                                @php
+                                    $perfRatingsList = ['S', 'AS', 'A', 'B+', 'B', '-', 'C', 'K'];
+                                @endphp
+                                @foreach($perfRatingsList as $rVal)
+                                    <option value="{{ $rVal }}" {{ $rVal === 'A' ? 'selected' : '' }}>{{ $rVal }}</option>
+                                @endforeach
+                            </select>
+                            <small style="color:#64748b; font-size:10.5px; display:block; margin-top:3px;">Pilih predikat kinerja</small>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-weight:700;">Catatan / Keterangan Penilaian</label>
+                            <input type="text" name="notes" id="input-modal-perf-notes" class="form-control" placeholder="Contoh: Evaluasi tahunan pencapaian target..." value="{{ $employee->performance_notes }}">
+                            <small style="color:#64748b; font-size:10.5px; display:block; margin-top:3px;">Opsional</small>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+                        <button type="submit" class="btn btn-primary" style="padding:6px 16px; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            <span>Simpan Nilai Tahun Ini</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Riwayat Data yang Tersimpan --}}
+            @php
+                $appraisals = $employee->performanceAppraisals()->orderBy('year', 'desc')->get();
+                $threeYears = $employee->getThreeYearPerformances();
+                $displayedYearList = $threeYears->pluck('year')->toArray();
+            @endphp
+            <div>
+                <div style="font-weight:700; color:#0b2545; font-size:12.5px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>Daftar Riwayat Data Performance ({{ $appraisals->count() }} Tahun)</span>
+                    <span style="font-size:11px; font-weight:500; color:#64748b;">
+                        Tahun aktif di frontend: 
+                        <strong style="color:#0b2545;">{{ implode(', ', $displayedYearList) }}</strong>
+                    </span>
+                </div>
+
+                <table class="table-custom" style="font-size:11.5px; width:100%;">
+                    <thead>
+                        <tr style="background:#f1f5f9;">
+                            <th style="width:16%;">Tahun</th>
+                            <th class="text-center" style="width:14%;">Rating</th>
+                            <th class="text-center" style="width:12%;">Skor / Poin</th>
+                            <th style="width:20%;">Status</th>
+                            <th>Catatan</th>
+                            <th class="text-center" style="width:16%;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($appraisals as $appr)
+                            @php
+                                $isDisplayed = in_array($appr->year, $displayedYearList);
+                                $pts = \App\Services\TalentCalculatorService::ratingToPoints($appr->rating);
+                            @endphp
+                            <tr>
+                                <td style="font-weight:700; color:#0b2545;">
+                                    {{ $appr->year }} <span style="color:#64748b; font-weight:500;">(FY{{ substr((string)$appr->year, -2) }})</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="{{ $isDisplayed && $appr->year == max($displayedYearList) ? 'badge-green' : 'badge-table-blue' }}" style="padding:2px 8px; font-weight:700; font-size:11px;">
+                                        {{ $appr->rating }}
+                                    </span>
+                                </td>
+                                <td class="text-center" style="font-weight:800; color:#0284c7; font-size:12px;">
+                                    {{ $pts }}
+                                </td>
+                                <td>
+                                    @if($isDisplayed)
+                                        <span style="color:#15803d; font-weight:600; display:inline-flex; align-items:center; gap:4px; font-size:11px;">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            Aktif (3 Tahun Terakhir)
+                                        </span>
+                                    @else
+                                        <span style="color:#64748b; font-size:11px;">Arsip Historis</span>
+                                    @endif
+                                </td>
+                                <td style="color:#475569;">
+                                    {{ $appr->notes ?: '-' }}
+                                </td>
+                                <td class="text-center">
+                                    <div style="display:flex; justify-content:center; gap:6px;">
+                                        <button type="button" class="btn-mini btn-mini-primary" title="Edit tahun ini" 
+                                            onclick="prefillPerfModal('{{ $appr->year }}', '{{ $appr->rating }}', '{{ addslashes($appr->notes ?? '') }}')">
+                                            Edit
+                                        </button>
+                                        <form action="{{ route('karyawan.performance-appraisal.destroy', ['nik' => $employee->nik, 'id' => $appr->id]) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data performance tahun {{ $appr->year }}?');" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="hidden" name="tab" value="{{ $tab ?? 'profil-individu' }}">
+                                            <button type="submit" class="btn-mini btn-mini-danger" title="Hapus tahun ini">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:16px; color:#64748b;">
+                                    Belum ada data performance tersimpan. Silakan isi form di atas.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="modal-footer" style="padding:12px 16px;">
+            <button type="button" class="btn btn-outline" data-modal-close>Tutup</button>
         </div>
     </div>
 </div>
@@ -291,32 +1434,57 @@
                 </select>
             </div>
 
-            {{-- Form C1: Performance 3 Tahun --}}
+            {{-- Form C1: Performance 3 Tahun Terakhir Berdasarkan C1.xlsx --}}
             <form id="form-edit-c1" class="dynamic-subform" data-section="edit-c1-perf" action="{{ route('karyawan.talent-snapshot.performance.update', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
-                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir C1: Performance Appraisal 3 Tahun Terakhir</div>
-                <div class="form-row" style="grid-template-columns: repeat(4, 1fr);">
-                    <div class="form-group">
-                        <label class="form-label">Tahun FY24</label>
-                        <input type="text" name="performance_fy24" class="form-control" value="{{ $employee->performance_fy24 ?: 'B+' }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Tahun FY25</label>
-                        <input type="text" name="performance_fy25" class="form-control" value="{{ $employee->performance_fy25 ?: 'A' }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Tahun FY26</label>
-                        <input type="text" name="performance_fy26" class="form-control" value="{{ $employee->performance_fy26 ?: 'A' }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Rating Terkini</label>
-                        <input type="text" name="performance_current" class="form-control" value="{{ $employee->performance_current ?: 'A' }}" required>
+                <input type="hidden" name="tab" value="{{ $tab ?? 'talent-snapshot' }}">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <div style="font-weight:700; color:#0b2545; font-size:12.5px;">Formulir C1: Performance Appraisal 3 Tahun Terakhir</div>
+                    <button type="button" class="btn-mini btn-mini-primary" data-modal-target="modal-kelola-performance" style="font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Tambah Performance</span>
+                    </button>
+                </div>
+
+                @php
+                    $threeYearItems = $employee->getThreeYearPerformances();
+                    $ratingsList = ['S', 'AS', 'A', 'B+', 'B', '-', 'C', 'K'];
+                @endphp
+                <div class="form-row" style="grid-template-columns: repeat(3, 1fr); gap:12px;">
+                    @foreach($threeYearItems as $idx => $perfItem)
+                        <div class="form-group">
+                            <label class="form-label">Tahun {{ $perfItem['label'] }} ({{ $perfItem['year'] }}) <span style="color:#ef4444;">*</span></label>
+                            <input type="hidden" name="years[{{ $idx }}]" value="{{ $perfItem['year'] }}">
+                            <select name="ratings[{{ $idx }}]" id="input-c1-yr-{{ $perfItem['year'] }}" class="form-control c1-rating-select" required>
+                                @foreach($ratingsList as $val)
+                                    <option value="{{ $val }}" {{ strtoupper(trim($perfItem['rating'])) === $val ? 'selected' : '' }}>{{ $val }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endforeach
+                </div>
+
+                <input type="hidden" name="performance_current" id="input-c1-current" value="{{ $employee->performance_current ?: 'A' }}">
+
+                {{-- Live C1 Calculation Summary --}}
+                <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid #dbeafe; border-radius:6px; padding:10px 14px;">
+                        <div>
+                            <span style="font-size:11px; color:#64748b; display:block;">Jumlah Skor:</span>
+                            <strong id="c1-preview-total" style="font-size:16px; color:#0b2545;">17</strong>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="font-size:11px; color:#64748b; display:block;">Hasil:</span>
+                            <span id="c1-preview-baris" class="badge-gold" style="font-size:13px; padding:3px 12px; font-weight:800;">R2</span>
+                        </div>
                     </div>
                 </div>
+
                 <div class="form-group">
                     <label class="form-label">Catatan Hasil Penilaian Kinerja</label>
                     <input type="text" name="performance_notes" class="form-control" value="{{ $employee->performance_notes ?: 'Data berasal dari Hasil Penilaian Kinerja tahunan.' }}">
                 </div>
+
                 <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
                     <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
                     <button type="submit" class="btn btn-primary">Perbarui Data Performance (C1)</button>
@@ -328,13 +1496,36 @@
                 @csrf
                 <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir C2: Perbandingan Potential Assessment (POTASS)</div>
                 
+                <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; padding:8px 12px; font-size:11px; color:#0369a1; margin-bottom:14px;">
+                    🔗 <strong>Terhubung Otomatis dengan C6:</strong> Ketika Anda menambah atau mengedit data riwayat C6 (8 Kompetensi Perilaku), asesmen terakhir pada C2 ini akan terisi otomatis. Anda juga dapat menyuntingnya manual di bawah jika diperlukan.
+                </div>
+
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:12px;">
                     {{-- Kolom Sebelumnya --}}
                     <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px;">
                         <div style="font-weight:700; font-size:12px; color:#475569; margin-bottom:8px;">ASESMEN SEBELUMNYA</div>
                         <div class="form-group">
                             <label class="form-label">Periode</label>
-                            <input type="text" name="potass_period_prev" class="form-control" value="{{ $employee->potass_period_prev ?: 'Aug-24' }}">
+                            @php
+                                $prevParts = explode('-', $employee->potass_period_prev ?: 'Aug-24');
+                                $prevM = $prevParts[0] ?? 'Aug';
+                                $prevY = substr($prevParts[1] ?? '24', -2);
+                            @endphp
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <select class="form-control period-month-select" id="edit-c2-prev-month" style="flex:1;">
+                                    @foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as $m)
+                                        <option value="{{ $m }}" {{ $m === $prevM ? 'selected' : '' }}>{{ $m }}</option>
+                                    @endforeach
+                                </select>
+                                <span style="color:#94a3b8; font-weight:700;">-</span>
+                                <select class="form-control period-year-select" id="edit-c2-prev-year" style="width:85px;">
+                                    @for($y = 20; $y <= 35; $y++)
+                                        @php $yStr = sprintf('%02d', $y); @endphp
+                                        <option value="{{ $yStr }}" {{ $yStr === $prevY ? 'selected' : '' }}>{{ $yStr }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <input type="hidden" name="potass_period_prev" id="edit-c2-prev-val" value="{{ $employee->potass_period_prev ?: 'Aug-24' }}">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Score POTASS</label>
@@ -342,7 +1533,25 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Standar Jabatan</label>
-                            <input type="text" name="potass_position_prev" class="form-control" value="{{ $employee->potass_position_prev ?: 'Section Head' }}" required>
+                            <select name="potass_position_prev" class="form-control" required>
+                                @php
+                                    $curPrevPos = $employee->potass_position_prev ?: 'SECTION HEAD';
+                                    $posList = \App\Services\TalentCalculatorService::getPositionStandards();
+                                    $hasMatchPrev = false;
+                                    foreach($posList as $p) {
+                                        if (strcasecmp(trim($p), trim($curPrevPos)) === 0) {
+                                            $hasMatchPrev = true;
+                                            break;
+                                        }
+                                    }
+                                @endphp
+                                @if(!$hasMatchPrev && $curPrevPos)
+                                    <option value="{{ $curPrevPos }}" selected>{{ $curPrevPos }}</option>
+                                @endif
+                                @foreach($posList as $pos)
+                                    <option value="{{ $pos }}" {{ strcasecmp(trim($pos), trim($curPrevPos)) === 0 ? 'selected' : '' }}>{{ $pos }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Kategori</label>
@@ -356,10 +1565,29 @@
 
                     {{-- Kolom Terakhir --}}
                     <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:12px;">
-                        <div style="font-weight:700; font-size:12px; color:#1d4ed8; margin-bottom:8px;">ASESMEN TERAKHIR</div>
+                        <div style="font-weight:700; font-size:12px; color:#1d4ed8; margin-bottom:8px;">ASESMEN TERAKHIR (Hasil dari C6)</div>
                         <div class="form-group">
                             <label class="form-label">Periode</label>
-                            <input type="text" name="potass_period_last" class="form-control" value="{{ $employee->potass_period_last ?: 'Aug-26' }}">
+                            @php
+                                $lastParts = explode('-', $employee->potass_period_last ?: 'Aug-26');
+                                $lastM = $lastParts[0] ?? 'Aug';
+                                $lastY = substr($lastParts[1] ?? '26', -2);
+                            @endphp
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <select class="form-control period-month-select" id="edit-c2-last-month" style="flex:1;">
+                                    @foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as $m)
+                                        <option value="{{ $m }}" {{ $m === $lastM ? 'selected' : '' }}>{{ $m }}</option>
+                                    @endforeach
+                                </select>
+                                <span style="color:#94a3b8; font-weight:700;">-</span>
+                                <select class="form-control period-year-select" id="edit-c2-last-year" style="width:85px;">
+                                    @for($y = 20; $y <= 35; $y++)
+                                        @php $yStr = sprintf('%02d', $y); @endphp
+                                        <option value="{{ $yStr }}" {{ $yStr === $lastY ? 'selected' : '' }}>{{ $yStr }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <input type="hidden" name="potass_period_last" id="edit-c2-last-val" value="{{ $employee->potass_period_last ?: 'Aug-26' }}">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Score POTASS</label>
@@ -367,7 +1595,25 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Standar Jabatan</label>
-                            <input type="text" name="potass_position_last" class="form-control" value="{{ $employee->potass_position_last ?: 'Manager' }}" required>
+                            <select name="potass_position_last" class="form-control" required>
+                                @php
+                                    $curLastPos = $employee->potass_position_last ?: 'MANAGER';
+                                    $posList = \App\Services\TalentCalculatorService::getPositionStandards();
+                                    $hasMatchLast = false;
+                                    foreach($posList as $p) {
+                                        if (strcasecmp(trim($p), trim($curLastPos)) === 0) {
+                                            $hasMatchLast = true;
+                                            break;
+                                        }
+                                    }
+                                @endphp
+                                @if(!$hasMatchLast && $curLastPos)
+                                    <option value="{{ $curLastPos }}" selected>{{ $curLastPos }}</option>
+                                @endif
+                                @foreach($posList as $pos)
+                                    <option value="{{ $pos }}" {{ strcasecmp(trim($pos), trim($curLastPos)) === 0 ? 'selected' : '' }}>{{ $pos }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Kategori</label>
@@ -390,26 +1636,48 @@
             <form id="form-edit-c3" class="dynamic-subform" data-section="edit-c3-hav" style="display:none;" action="{{ route('karyawan.talent-snapshot.hav-box.update', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
                 <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir C3: HAV 16 Box & Status Talent Pool</div>
+                
+                @php
+                    $havCalc = $employee->getHavBoxDetails();
+                    $matrixMap = \App\Services\TalentCalculatorService::getHavMatrixMap();
+                    $flatBoxes = [];
+                    foreach($matrixMap as $rKey => $cols) {
+                        foreach($cols as $cKey => $cell) {
+                            $flatBoxes[$cell['box']] = $cell;
+                        }
+                    }
+                    ksort($flatBoxes);
+                @endphp
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:10px 14px; margin-bottom:14px; font-size:11.5px; color:#166534;">
+                    🎯 <strong>Rekomendasi Rumus HAV (C1 & C6):</strong> {{ $havCalc['box_label'] }} – {{ $havCalc['category'] }} 
+                    (Talent Pool: <strong>{{ $havCalc['talent_pool'] }}</strong>)
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Posisi HAV 16 Box <span style="color:#ef4444;">*</span></label>
-                        <select name="hav_box_current" class="form-control" required>
-                            @for($b = 1; $b <= 16; $b++)
-                                <option value="Box {{ $b }}" {{ ($employee->hav_box_current ?: 'Box 15') === 'Box ' . $b ? 'selected' : '' }}>Box {{ $b }}</option>
-                            @endfor
+                        <select name="hav_box_current" id="select-hav-box-edit" class="form-control" required>
+                            @foreach($flatBoxes as $bNum => $bInfo)
+                                <option value="Box {{ $bNum }}" 
+                                        data-name="{{ $bInfo['name'] }}" 
+                                        data-tp="{{ $bInfo['talent_pool'] }}"
+                                        {{ ($employee->hav_box_current ?: $havCalc['box_label']) === 'Box ' . $bNum ? 'selected' : '' }}>
+                                    Box {{ $bNum }} – {{ $bInfo['name'] }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Status Talent Pool <span style="color:#ef4444;">*</span></label>
-                        <select name="talent_pool_status" class="form-control" required>
-                            <option value="YA" {{ ($employee->talent_pool_status ?: 'YA') === 'YA' ? 'selected' : '' }}>YA (Masuk Talent Pool)</option>
-                            <option value="TIDAK" {{ $employee->talent_pool_status === 'TIDAK' ? 'selected' : '' }}>TIDAK</option>
+                        <select name="talent_pool_status" id="select-hav-tp-edit" class="form-control" required>
+                            <option value="YA" {{ ($employee->talent_pool_status ?: $havCalc['talent_pool']) === 'YA' ? 'selected' : '' }}>YA (Masuk Talent Pool)</option>
+                            <option value="TIDAK" {{ ($employee->talent_pool_status ?: $havCalc['talent_pool']) === 'TIDAK' ? 'selected' : '' }}>TIDAK</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Label / Kategori Box</label>
-                    <input type="text" name="hav_box_category" class="form-control" value="{{ $employee->hav_box_category ?: 'High Performance / High Potential' }}" required>
+                    <label class="form-label">Label / Kategori Box <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="hav_box_category" id="input-hav-cat-edit" class="form-control" value="{{ $employee->hav_box_category ?: $havCalc['category'] }}" required>
                 </div>
                 <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
                     <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
@@ -418,7 +1686,7 @@
             </form>
 
             {{-- Form C4: Edit Kekuatan Utama (Pilih item yang diedit) --}}
-            <form id="form-edit-c4" class="dynamic-subform" data-section="edit-c4-strength" style="display:none;" action="" method="POST">
+            <form id="form-edit-c4" class="dynamic-subform" data-section="edit-c4-strength" style="display:none;" action="" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir C4: Edit Data Kekuatan Utama</div>
@@ -429,7 +1697,10 @@
                             <option value="{{ $st->id }}" 
                                     data-strength="{{ $st->strength }}" 
                                     data-desc="{{ $st->short_description }}" 
-                                    data-source="{{ $st->source }}">
+                                    data-source="{{ $st->source }}"
+                                    data-doc="{{ $st->documentation ?? '' }}"
+                                    data-doc-url="{{ $st->documentation ? asset($st->documentation) : '' }}"
+                                    data-doc-ext="{{ $st->file_extension ?? '' }}">
                                 #{{ $st->order_no }} - {{ $st->strength }}
                             </option>
                         @endforeach
@@ -447,49 +1718,141 @@
                     <label class="form-label">Sumber Validasi <span style="color:#ef4444;">*</span></label>
                     <input type="text" id="edit-c4-source" name="source" class="form-control" required>
                 </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Perbarui Kekuatan Utama (C4)</button>
+                <div class="form-group">
+                    <label class="form-label">Dokumentasi (Foto / Gambar / PDF)</label>
+                    <div id="edit-c4-doc-current-wrap" style="margin-bottom:8px; display:none; padding:8px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px;">
+                        <div style="font-size:11px; color:#64748b; margin-bottom:4px; font-weight:600;">File dokumentasi saat ini:</div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                            <a id="edit-c4-doc-link" href="#" target="_blank" style="font-size:12px; color:#2563eb; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">
+                                <span>Lihat Dokumen</span>
+                            </a>
+                            <label style="font-size:11px; color:#dc2626; margin:0; display:inline-flex; align-items:center; gap:4px; cursor:pointer;">
+                                <input type="checkbox" name="remove_documentation" id="edit-c4-remove-doc" value="1">
+                                <span>Hapus File</span>
+                            </label>
+                        </div>
+                    </div>
+                    <input type="file" id="edit-c4-doc" name="documentation" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif,.pdf">
+                    <small style="display:block; color:#64748b; font-size:11px; margin-top:3px;">Biarkan kosong jika tidak ingin mengubah dokumentasi. Format: JPG, PNG, WEBP, GIF, PDF (Maks. 10MB)</small>
+                </div>
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+                    <button type="button" id="btn-delete-c4-from-edit" class="btn btn-danger" style="background:#dc2626; color:#ffffff; font-size:12px; padding:7px 14px; display:inline-flex; align-items:center; gap:6px; border:none; border-radius:6px; cursor:pointer;" title="Hapus item kekuatan yang dipilih">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Hapus Kekuatan Ini</span>
+                    </button>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                        <button type="submit" class="btn btn-primary">Perbarui Kekuatan Utama (C4)</button>
+                    </div>
                 </div>
             </form>
 
-            {{-- Form C5: Flying Risk Assessment --}}
+            {{-- Hidden Form Delete C4 Direct from Edit --}}
+            <form id="form-delete-c4-direct" method="POST" style="display:none;">
+                @csrf
+                @method('DELETE')
+            </form>
+
+            {{-- Form C5: Flying Risk Assessment Berdasarkan C5flyrisk.png --}}
             <form id="form-edit-c5" class="dynamic-subform" data-section="edit-c5-risk" style="display:none;" action="{{ route('karyawan.talent-snapshot.flying-risk.update', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
-                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir C5: Flying Risk Assessment</div>
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir C5: Flying Risk Assessment (C5flyrisk.png)</div>
+                
+                @php
+                    $riskDetails = $employee->getFlyingRiskDetails();
+                @endphp
+
                 <div class="form-group">
-                    <label class="form-label">Tingkat Flying Risk <span style="color:#ef4444;">*</span></label>
-                    <select name="flying_risk" class="form-control" required>
-                        <option value="LOW" {{ $employee->flying_risk === 'LOW' ? 'selected' : '' }}>LOW (Risiko Rendah)</option>
-                        <option value="MEDIUM" {{ ($employee->flying_risk ?: 'MEDIUM') === 'MEDIUM' ? 'selected' : '' }}>MEDIUM (Risiko Sedang)</option>
-                        <option value="HIGH" {{ $employee->flying_risk === 'HIGH' ? 'selected' : '' }}>HIGH (Risiko Tinggi)</option>
+                    <label class="form-label">1. Factor: Career Growth Potential <span style="color:#ef4444;">*</span></label>
+                    <select name="flying_risk_career_growth" id="edit-c5-growth" class="form-control c5-factor-select" required>
+                        <option value="No clear advancement path" data-pts="2" {{ $riskDetails['career_growth'] === 'No clear advancement path' ? 'selected' : '' }}>
+                            No clear advancement path (2 Poin)
+                        </option>
+                        <option value="Some opportunities, but limited" data-pts="1" {{ $riskDetails['career_growth'] === 'Some opportunities, but limited' ? 'selected' : '' }}>
+                            Some opportunities, but limited (1 Poin)
+                        </option>
+                        <option value="Clear advancement opportunities" data-pts="0" {{ $riskDetails['career_growth'] === 'Clear advancement opportunities' ? 'selected' : '' }}>
+                            Clear advancement opportunities (0 Poin)
+                        </option>
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label class="form-label">Alasan Utama Flying Risk <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="flying_risk_reason" class="form-control" value="{{ $employee->flying_risk_reason ?: 'Career Progression' }}" required>
+                    <label class="form-label">2. Factor: Job Market Demand for Role <span style="color:#ef4444;">*</span></label>
+                    <select name="flying_risk_job_market" id="edit-c5-market" class="form-control c5-factor-select" required>
+                        <option value="High demand for similar roles in industry" data-pts="2" {{ $riskDetails['job_market'] === 'High demand for similar roles in industry' ? 'selected' : '' }}>
+                            High demand for similar roles in industry (2 Poin)
+                        </option>
+                        <option value="Moderate demand" data-pts="1" {{ $riskDetails['job_market'] === 'Moderate demand' ? 'selected' : '' }}>
+                            Moderate demand (1 Poin)
+                        </option>
+                        <option value="Low demand" data-pts="0" {{ $riskDetails['job_market'] === 'Low demand' ? 'selected' : '' }}>
+                            Low demand (0 Poin)
+                        </option>
+                    </select>
                 </div>
+
+                <div class="form-group">
+                    <label class="form-label">3. Factor: Compensation Competitiveness <span style="color:#ef4444;">*</span></label>
+                    <select name="flying_risk_compensation" id="edit-c5-comp" class="form-control c5-factor-select" required>
+                        <option value="Below industry standard" data-pts="2" {{ $riskDetails['compensation'] === 'Below industry standard' ? 'selected' : '' }}>
+                            Below industry standard (2 Poin)
+                        </option>
+                        <option value="At industry standard" data-pts="1" {{ $riskDetails['compensation'] === 'At industry standard' ? 'selected' : '' }}>
+                            At industry standard (1 Poin)
+                        </option>
+                        <option value="Above industry standard" data-pts="0" {{ $riskDetails['compensation'] === 'Above industry standard' ? 'selected' : '' }}>
+                            Above industry standard (0 Poin)
+                        </option>
+                    </select>
+                </div>
+
+                {{-- Live Flying Risk Preview Box --}}
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-size:11.5px; font-weight:700; color:#334155;">Hasil Perhitungan Otomatis:</span>
+                        <span id="c5-preview-badge" class="{{ $riskDetails['badge_class'] }}" style="font-size:11.5px; padding:3px 12px; font-weight:800;">
+                            {{ $riskDetails['risk_level'] }}
+                        </span>
+                    </div>
+                    <div style="font-size:11px; color:#475569; margin-bottom:6px;">
+                        Total Skor: <strong id="c5-preview-total" style="color:#0b2545; font-size:13px;">{{ $riskDetails['total_score'] }}</strong> / 6 Poin
+                    </div>
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:6px; padding:8px 10px; font-size:11px; color:#1e293b; font-style:italic;">
+                        <span style="font-weight:700; font-style:normal; color:#475569; display:block; margin-bottom:2px;">Alasan Utama (Interpretasi):</span>
+                        "<span id="c5-preview-interpretation">{{ $riskDetails['interpretation'] }}</span>"
+                    </div>
+                </div>
+
                 <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
                     <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
                     <button type="submit" class="btn btn-primary">Perbarui Flying Risk (C5)</button>
                 </div>
             </form>
 
-            {{-- Form C6: Edit Riwayat POTASS --}}
+            {{-- Form C6: Edit Riwayat POTASS dengan 8 Kompetensi Perilaku --}}
             <form id="form-edit-c6" class="dynamic-subform" data-section="edit-c6-history" style="display:none;" action="" method="POST">
                 @csrf
                 @method('PUT')
-                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir C6: Edit Riwayat POTASS Assessment</div>
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir C6: Edit Riwayat POTASS Assessment (C6.xlsx)</div>
                 <div class="form-group">
                     <label class="form-label">Pilih Baris Riwayat yang Ingin Diedit:</label>
                     <select id="select-edit-c6-item" class="form-control">
-                        @foreach($employee->talentAssessments as $ta)
+                        @foreach($employee->getSortedTalentAssessments() as $ta)
                             <option value="{{ $ta->id }}" 
                                     data-date="{{ $ta->assessment_date }}" 
                                     data-pos="{{ $ta->position_standard }}" 
                                     data-score="{{ $ta->potass_score }}" 
                                     data-cat="{{ $ta->category }}" 
-                                    data-assessor="{{ $ta->assessor }}">
+                                    data-assessor="{{ $ta->assessor }}"
+                                    data-b1="{{ $ta->b1_vision_business ?? 4.0 }}"
+                                    data-b2="{{ $ta->b2_customer_focus ?? 4.0 }}"
+                                    data-b3="{{ $ta->b3_interpersonal_skill ?? 4.0 }}"
+                                    data-b4="{{ $ta->b4_analysis_judgment ?? 3.0 }}"
+                                    data-b5="{{ $ta->b5_planning_driving ?? 3.0 }}"
+                                    data-b6="{{ $ta->b6_leading_motivating ?? 4.0 }}"
+                                    data-b7="{{ $ta->b7_teamwork ?? 4.0 }}"
+                                    data-b8="{{ $ta->b8_drive_courage_integrity ?? 4.0 }}">
                                 {{ $ta->assessment_date }} - {{ $ta->position_standard }} ({{ $ta->potass_score }})
                             </option>
                         @endforeach
@@ -498,35 +1861,119 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Tanggal Asesmen <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-c6-date" name="assessment_date" class="form-control" required>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <select class="form-control period-month-select" id="edit-c6-month" style="flex:1;">
+                                @foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as $m)
+                                    <option value="{{ $m }}">{{ $m }}</option>
+                                @endforeach
+                            </select>
+                            <span style="color:#94a3b8; font-weight:700;">-</span>
+                            <select class="form-control period-year-select" id="edit-c6-year" style="width:85px;">
+                                @for($y = 20; $y <= 35; $y++)
+                                    @php $yStr = sprintf('%02d', $y); @endphp
+                                    <option value="{{ $yStr }}">{{ $yStr }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <input type="hidden" id="edit-c6-date" name="assessment_date" value="" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Standar Jabatan <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-c6-pos" name="position_standard" class="form-control" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Score POTASS <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-c6-score" name="potass_score" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Kategori <span style="color:#ef4444;">*</span></label>
-                        <select id="edit-c6-cat" name="category" class="form-control" required>
-                            <option value="High">High</option>
-                            <option value="Average">Average</option>
-                            <option value="Below Average">Below Average</option>
+                        <select id="edit-c6-pos" name="position_standard" class="form-control" required>
+                            <option value="">-- Pilih Standar Jabatan --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getPositionStandards() as $pos)
+                                <option value="{{ $pos }}">{{ $pos }}</option>
+                            @endforeach
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">Assessor <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="edit-c6-assessor" name="assessor" class="form-control" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Assessor <span style="color:#ef4444;">*</span></label>
-                    <input type="text" id="edit-c6-assessor" name="assessor" class="form-control" required>
+
+                {{-- 8 Input Kompetensi Perilaku --}}
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:12px;">
+                    <div style="font-weight:700; color:#0b2545; font-size:11.5px; margin-bottom:8px;">
+                        8 Penilaian Kompetensi Perilaku (Bobot Sesuai C6.xlsx):
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">1. Vision & Bus. Sense (15%)</label>
+                            <input type="number" step="0.1" min="1" max="5" id="edit-c6-b1" name="b1_vision_business" class="form-control c6-calc-input-edit" value="4.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">2. Cust. Focus (15%)</label>
+                            <input type="number" step="0.1" min="1" max="5" id="edit-c6-b2" name="b2_customer_focus" class="form-control c6-calc-input-edit" value="4.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">3. Interpers. Skill (10%)</label>
+                            <input type="number" step="0.1" min="1" max="5" id="edit-c6-b3" name="b3_interpersonal_skill" class="form-control c6-calc-input-edit" value="4.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">4. Analysis & Judgment (10%)</label>
+                            <input type="number" step="0.1" min="1" max="5" id="edit-c6-b4" name="b4_analysis_judgment" class="form-control c6-calc-input-edit" value="3.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">5. Plan. & Drvg Act. (10%)</label>
+                            <input type="number" step="0.1" min="1" max="5" id="edit-c6-b5" name="b5_planning_driving" class="form-control c6-calc-input-edit" value="3.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">6. Leading & Motivating (15%)</label>
+                            <input type="number" step="0.1" min="1" max="5" id="edit-c6-b6" name="b6_leading_motivating" class="form-control c6-calc-input-edit" value="4.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">7. Teamwork (10%)</label>
+                            <input type="number" step="0.1" min="1" max="5" id="edit-c6-b7" name="b7_teamwork" class="form-control c6-calc-input-edit" value="4.0" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">8. Drive, Courg & Integ. (15%)</label>
+                            <input type="number" step="0.1" min="1" max="5" id="edit-c6-b8" name="b8_drive_courage_integrity" class="form-control c6-calc-input-edit" value="4.0" required>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Perbarui Riwayat POTASS (C6)</button>
+
+                {{-- Live Edit C6 Calculation Box --}}
+                <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-bottom:14px;">
+                    <div style="font-weight:700; color:#1e40af; font-size:11.5px; margin-bottom:6px;">
+                        Hasil Perhitungan Otomatis:
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; text-align:center;">
+                        <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:6px; padding:6px;">
+                            <small style="color:#64748b; font-size:10px; display:block;">Skor Tertimbang</small>
+                            <strong id="edit-c6-preview-weighted" style="font-size:13px; color:#0b2545;">3.70</strong>
+                        </div>
+                        <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:6px; padding:6px;">
+                            <small style="color:#64748b; font-size:10px; display:block;">Skor POTASS (%)</small>
+                            <strong id="edit-c6-preview-percentage" style="font-size:13px; color:#16a34a;">74.0%</strong>
+                        </div>
+                        <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:6px; padding:6px;">
+                            <small style="color:#64748b; font-size:10px; display:block;">Kolom HAV</small>
+                            <strong id="edit-c6-preview-kolom" style="font-size:13px; color:#0284c7;">C3</strong>
+                        </div>
+                        <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:6px; padding:6px;">
+                            <small style="color:#64748b; font-size:10px; display:block;">Kategori</small>
+                            <strong id="edit-c6-preview-category" style="font-size:13px; color:#16a34a;">High</strong>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+                    <button type="button" id="btn-delete-c6-from-edit" class="btn btn-danger" style="background:#dc2626; color:#ffffff; font-size:12px; padding:7px 14px; display:inline-flex; align-items:center; gap:6px; border:none; border-radius:6px; cursor:pointer;" title="Hapus riwayat asesmen yang dipilih">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Hapus Riwayat Ini</span>
+                    </button>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                        <button type="submit" class="btn btn-primary">Perbarui & Sinkronkan C6 ke C2 & C3</button>
+                    </div>
+                </div>
+            </form>
+
+            {{-- Hidden Form Delete C6 Direct from Edit --}}
+            <form id="form-delete-c6-direct" method="POST" style="display:none;">
+                @csrf
+                @method('DELETE')
             </form>
         </div>
     </div>
@@ -586,7 +2033,7 @@
                 <div class="form-group">
                     <label class="form-label">Pilih Riwayat POTASS yang Akan Dihapus:</label>
                     <select id="select-del-c6-item" class="form-control">
-                        @foreach($employee->talentAssessments as $ta)
+                        @foreach($employee->getSortedTalentAssessments() as $ta)
                             <option value="{{ $ta->id }}">
                                 {{ $ta->assessment_date }} - {{ $ta->position_standard }} ({{ $ta->potass_score }})
                             </option>
@@ -627,7 +2074,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($employee->talentAssessments as $ta)
+                    @foreach($employee->getSortedTalentAssessments() as $ta)
                         <tr>
                             <td style="font-weight:600;">{{ $ta->assessment_date }}</td>
                             <td>{{ $ta->position_standard }}</td>
@@ -697,11 +2144,18 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Job Class <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="job_class" class="form-control" placeholder="Contoh: JC4 atau JC5" required>
+                        <select name="job_class" id="add-d2-jobclass" class="form-control select-jobclass" required>
+                            <option value="">-- Pilih Job Class --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getJobClassList() as $kj)
+                                <option value="{{ $kj }}">{{ $kj }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Grade <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="grade" class="form-control" placeholder="Contoh: G4-3 atau G5-1" required>
+                        <select name="grade" id="add-d2-grade" class="form-control select-grade" required>
+                            <option value="">-- Pilih Grade --</option>
+                        </select>
                     </div>
                 </div>
 
@@ -884,11 +2338,18 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Job Class <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-d2-class" name="job_class" class="form-control" required>
+                        <select id="edit-d2-class" name="job_class" class="form-control select-jobclass" required>
+                            <option value="">-- Pilih Job Class --</option>
+                            @foreach(\App\Services\TalentCalculatorService::getJobClassList() as $kj)
+                                <option value="{{ $kj }}">{{ $kj }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Grade <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-d2-grade" name="grade" class="form-control" required>
+                        <select id="edit-d2-grade" name="grade" class="form-control select-grade" required>
+                            <option value="">-- Pilih Grade --</option>
+                        </select>
                     </div>
                 </div>
 
@@ -1367,7 +2828,7 @@
                     Pilih Bagian yang Ingin Ditambah / Diatur:
                 </label>
                 <select id="select-tambah-gap-section" class="form-control section-switcher" data-container="container-tambah-gap">
-                    <option value="gap-detail">B. Detail Baris Gap Kompetensi Baru</option>
+                    <option value="gap-detail">Detail Baris Gap Kompetensi Baru (B. Manajerial / C. Technical)</option>
                     <option value="gap-target">A. Posisi Target & Metode Asesmen Gap</option>
                 </select>
             </div>
@@ -1375,9 +2836,18 @@
             {{-- Form Gap Detail --}}
             <form id="form-tambah-gap-detail" class="dynamic-subform" data-section="gap-detail" action="{{ route('karyawan.competency-gap.store', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
-                <div class="form-group">
-                    <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="competency" class="form-control" placeholder="Contoh: Digital Transformation / Strategic Planning" required>
+                <div class="form-row">
+                    <div class="form-group" style="flex:2;">
+                        <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
+                        <input type="text" name="competency" class="form-control" placeholder="Contoh: Digital Transformation / PLC Automation" required>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label class="form-label">Kategori Kompetensi <span style="color:#ef4444;">*</span></label>
+                        <select name="competency_type" id="tambah-gap-type" class="form-control" required>
+                            <option value="Manajerial">B. Manajerial</option>
+                            <option value="Technical">C. Technical</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -1390,7 +2860,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Level Standar Target (1 - 5) <span style="color:#ef4444;">*</span></label>
+                        <label class="form-label">Target Level (1 - 5) <span style="color:#ef4444;">*</span></label>
                         <select name="standard_level" class="form-control" required>
                             @for($s = 1; $s <= 5; $s++)
                                 <option value="{{ $s }}" {{ $s == 5 ? 'selected' : '' }}>Level {{ $s }}</option>
@@ -1405,8 +2875,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Deskripsi Level Standar</label>
-                    <input type="text" name="standard_desc" class="form-control" placeholder="Deskripsi tuntutan level target posisi">
+                    <label class="form-label">Deskripsi Target Level</label>
+                    <input type="text" name="standard_desc" class="form-control" placeholder="Deskripsi tuntutan target level posisi target">
                 </div>
 
                 <div class="form-group">
@@ -1462,7 +2932,7 @@
                 </label>
                 <select id="select-edit-gap-section" class="form-control section-switcher" data-container="container-edit-gap">
                     <option value="edit-gap-target">Informasi Posisi Target & Metode Gap</option>
-                    <option value="edit-gap-detail">Detail Baris Gap Kompetensi</option>
+                    <option value="edit-gap-detail">Detail Baris Gap Kompetensi (B. Manajerial / C. Technical)</option>
                 </select>
             </div>
 
@@ -1499,20 +2969,30 @@
                         @foreach($employee->competencyGaps as $gap)
                             <option value="{{ $gap->id }}"
                                     data-comp="{{ $gap->competency }}"
+                                    data-type="{{ $gap->competency_type ?: 'Manajerial' }}"
                                     data-curr="{{ $gap->current_level }}"
                                     data-currdesc="{{ $gap->current_desc }}"
                                     data-std="{{ $gap->standard_level }}"
                                     data-stddesc="{{ $gap->standard_desc }}"
                                     data-improvement="{{ $gap->expected_improvement }}">
-                                #{{ $gap->order_no }} - {{ $gap->competency }} (Gap: {{ $gap->gap }})
+                                [{{ $gap->competency_type ?: 'Manajerial' }}] {{ $gap->competency }} (Gap: {{ $gap->gap }})
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
-                    <input type="text" id="edit-gap-comp" name="competency" class="form-control" required>
+                <div class="form-row">
+                    <div class="form-group" style="flex:2;">
+                        <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="edit-gap-comp" name="competency" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label class="form-label">Kategori Kompetensi <span style="color:#ef4444;">*</span></label>
+                        <select id="edit-gap-type" name="competency_type" class="form-control" required>
+                            <option value="Manajerial">B. Manajerial</option>
+                            <option value="Technical">C. Technical</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -1525,7 +3005,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Level Standar Target (1 - 5) <span style="color:#ef4444;">*</span></label>
+                        <label class="form-label">Target Level (1 - 5) <span style="color:#ef4444;">*</span></label>
                         <select id="edit-gap-std" name="standard_level" class="form-control" required>
                             @for($s = 1; $s <= 5; $s++)
                                 <option value="{{ $s }}">Level {{ $s }}</option>
@@ -1540,7 +3020,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Deskripsi Level Standar</label>
+                    <label class="form-label">Deskripsi Target Level</label>
                     <input type="text" id="edit-gap-stddesc" name="standard_desc" class="form-control">
                 </div>
 
@@ -1576,7 +3056,7 @@
                     Pilih Bagian Gap yang Ingin Dihapus / Direset:
                 </label>
                 <select id="select-hapus-gap-section" class="form-control section-switcher" data-container="container-hapus-gap">
-                    <option value="del-gap-detail">B. Detail Baris Gap Kompetensi (Hapus Baris)</option>
+                    <option value="del-gap-detail">Detail Baris Gap Kompetensi (B. Manajerial / C. Technical)</option>
                     <option value="del-gap-target">A. Posisi Target & Metode Gap (Reset Nilai)</option>
                 </select>
             </div>
@@ -1590,7 +3070,7 @@
                     <select id="select-del-gap-item" class="form-control">
                         @foreach($employee->competencyGaps as $gap)
                             <option value="{{ $gap->id }}">
-                                #{{ $gap->order_no }} - {{ $gap->competency }} (Gap: {{ $gap->gap }})
+                                [{{ $gap->competency_type ?: 'Manajerial' }}] {{ $gap->competency }} (Gap: {{ $gap->gap }})
                             </option>
                         @endforeach
                     </select>
@@ -1644,7 +3124,7 @@
                     Pilih Bagian IDP yang Ingin Ditambah / Diatur:
                 </label>
                 <select id="select-tambah-idp-section" class="form-control section-switcher" data-container="container-tambah-idp">
-                    <option value="idp-action">B. Detail Baris Rencana Aksi (Action Plan)</option>
+                    <option value="idp-action">B/C. Detail Baris Rencana Aksi (Action Plan)</option>
                     <option value="idp-summary">A. Ringkasan Kesiapan & Incumbent</option>
                 </select>
             </div>
@@ -1652,6 +3132,14 @@
             {{-- Form IDP Action Plan --}}
             <form id="form-tambah-idp-action" class="dynamic-subform" data-section="idp-action" action="{{ route('karyawan.idp-action-plan.store', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
+                <div class="form-group">
+                    <label class="form-label">Kategori Rencana Pengembangan <span style="color:#ef4444;">*</span></label>
+                    <select name="competency_type" id="tambah-idp-competency-type" class="form-control" required>
+                        <option value="Manajerial">B. Rencana Pengembangan Manajerial</option>
+                        <option value="Technical">C. Rencana Pengembangan Technical</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Kompetensi yang Dikembangkan <span style="color:#ef4444;">*</span></label>
                     <input type="text" name="competency" class="form-control" placeholder="Contoh: Vision & Business Sense" required>
@@ -1764,7 +3252,7 @@
                 </label>
                 <select id="select-edit-idp-section" class="form-control section-switcher" data-container="container-edit-idp">
                     <option value="edit-idp-summary">A. Ringkasan Kesiapan & Fokus Pengembangan</option>
-                    <option value="edit-idp-action">B. Detail Baris Rencana Aksi (Action Plan)</option>
+                    <option value="edit-idp-action">B/C. Detail Baris Rencana Aksi (Action Plan)</option>
                 </select>
             </div>
 
@@ -1807,6 +3295,7 @@
                         @foreach($employee->idpActionPlans as $plan)
                             <option value="{{ $plan->id }}"
                                     data-comp="{{ $plan->competency }}"
+                                    data-type="{{ $plan->competency_type ?? 'Manajerial' }}"
                                     data-goal="{{ $plan->specific_goal }}"
                                     data-methods="{{ $plan->development_methods }}"
                                     data-program="{{ $plan->activity_program }}"
@@ -1816,9 +3305,17 @@
                                     data-indicator="{{ $plan->success_indicator }}"
                                     data-status="{{ $plan->status }}"
                                     data-progress="{{ $plan->progress_percent }}">
-                                #{{ $plan->order_no }} - {{ $plan->competency }} ({{ $plan->status }} - {{ $plan->progress_percent }}%)
+                                #{{ $plan->order_no }} - {{ $plan->competency }} [{{ $plan->competency_type ?? 'Manajerial' }}] ({{ $plan->status }} - {{ $plan->progress_percent }}%)
                             </option>
                         @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Kategori Rencana Pengembangan <span style="color:#ef4444;">*</span></label>
+                    <select id="edit-idp-competency-type" name="competency_type" class="form-control" required>
+                        <option value="Manajerial">B. Rencana Pengembangan Manajerial</option>
+                        <option value="Technical">C. Rencana Pengembangan Technical</option>
                     </select>
                 </div>
 
@@ -1907,7 +3404,7 @@
                     Pilih Bagian IDP yang Ingin Dihapus / Direset:
                 </label>
                 <select id="select-hapus-idp-section" class="form-control section-switcher" data-container="container-hapus-idp">
-                    <option value="del-idp-action">B. Detail Baris Rencana Aksi (Hapus Baris)</option>
+                    <option value="del-idp-action">B/C. Detail Baris Rencana Aksi (Hapus Baris)</option>
                     <option value="del-idp-summary">A. Ringkasan Kesiapan & Incumbent (Reset Nilai)</option>
                 </select>
             </div>
@@ -1921,7 +3418,7 @@
                     <select id="select-del-idp-item" class="form-control">
                         @foreach($employee->idpActionPlans as $plan)
                             <option value="{{ $plan->id }}">
-                                #{{ $plan->order_no }} - {{ $plan->competency }} ({{ $plan->status }})
+                                #{{ $plan->order_no }} - {{ $plan->competency }} [{{ $plan->competency_type ?? 'Manajerial' }}] ({{ $plan->status }})
                             </option>
                         @endforeach
                     </select>
@@ -1954,6 +3451,262 @@
     </div>
 </div>
 
+{{-- 6.1 Modal Tambah Review Hasil Pengembangan --}}
+<div id="modal-tambah-review" class="modal-backdrop">
+    <div class="modal-card" style="max-width:560px;">
+        <div class="modal-header">
+            <div class="modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Tambah Review Hasil Pengembangan
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+
+        <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+            <form id="form-tambah-review" action="{{ route('karyawan.development-review.store', ['nik' => $employee->nik]) }}" method="POST">
+                @csrf
+                <div class="form-group">
+                    <label class="form-label">Kategori Kompetensi <span style="color:#ef4444;">*</span></label>
+                    <select name="competency_type" id="tambah-review-competency-type" class="form-control" required>
+                        <option value="Manajerial">B. Review per Kompetensi Manajerial</option>
+                        <option value="Technical">C. Review per Kompetensi Technical</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="competency" class="form-control" placeholder="Contoh: Problem Analysis, Leadership, Cloud Architecture" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Periode Review</label>
+                    <input type="text" name="period" class="form-control" value="Juni 2026 – Mei 2027" placeholder="Contoh: Juni 2026 – Mei 2027">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Level Sebelumnya <span style="color:#ef4444;">*</span></label>
+                        <input type="number" name="previous_level" class="form-control" min="0" max="10" value="2" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Level Saat Ini <span style="color:#ef4444;">*</span></label>
+                        <input type="number" name="current_level" class="form-control" min="0" max="10" value="3" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Level Target <span style="color:#ef4444;">*</span></label>
+                        <input type="number" name="target_level" class="form-control" min="0" max="10" value="4" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Status Perkembangan</label>
+                    <select name="status" class="form-control">
+                        <option value="">Otomatis (Sesuai Peningkatan)</option>
+                        <option value="Meningkat">Meningkat</option>
+                        <option value="Stabil">Stabil</option>
+                        <option value="Belum Meningkat">Belum Meningkat</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Catatan Reviewer</label>
+                    <textarea name="reviewer_notes" class="form-control" rows="3" placeholder="Catatan evaluasi perkembangan kompetensi ini..."></textarea>
+                </div>
+
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
+                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- 6.2 Modal Edit Review Hasil Pengembangan --}}
+<div id="modal-edit-review" class="modal-backdrop">
+    <div class="modal-card" style="max-width:560px;">
+        <div class="modal-header">
+            <div class="modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                Edit Review Hasil Pengembangan
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+
+        <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+            <form id="form-edit-review" action="" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="form-group">
+                    <label class="form-label">Pilih Kompetensi yang Ingin Diedit:</label>
+                    <select id="select-edit-review-item" class="form-control">
+                        @foreach($employee->developmentReviews as $rev)
+                            <option value="{{ $rev->id }}"
+                                    data-comp="{{ $rev->competency }}"
+                                    data-type="{{ $rev->competency_type ?? 'Manajerial' }}"
+                                    data-period="{{ $rev->period }}"
+                                    data-prev="{{ $rev->previous_level }}"
+                                    data-curr="{{ $rev->current_level }}"
+                                    data-target="{{ $rev->target_level }}"
+                                    data-status="{{ $rev->status }}"
+                                    data-notes="{{ $rev->reviewer_notes }}">
+                                #{{ $rev->order_no }} - {{ $rev->competency }} [{{ $rev->competency_type ?? 'Manajerial' }}] (Level {{ $rev->previous_level }} &rarr; {{ $rev->current_level }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Kategori Kompetensi <span style="color:#ef4444;">*</span></label>
+                    <select id="edit-review-competency-type" name="competency_type" class="form-control" required>
+                        <option value="Manajerial">B. Review per Kompetensi Manajerial</option>
+                        <option value="Technical">C. Review per Kompetensi Technical</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="edit-review-comp" name="competency" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Periode Review</label>
+                    <input type="text" id="edit-review-period" name="period" class="form-control">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Level Sebelumnya <span style="color:#ef4444;">*</span></label>
+                        <input type="number" id="edit-review-prev" name="previous_level" class="form-control" min="0" max="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Level Saat Ini <span style="color:#ef4444;">*</span></label>
+                        <input type="number" id="edit-review-curr" name="current_level" class="form-control" min="0" max="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Level Target <span style="color:#ef4444;">*</span></label>
+                        <input type="number" id="edit-review-target" name="target_level" class="form-control" min="0" max="10" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Status Perkembangan</label>
+                    <select id="edit-review-status" name="status" class="form-control">
+                        <option value="">Otomatis (Sesuai Peningkatan)</option>
+                        <option value="Meningkat">Meningkat</option>
+                        <option value="Stabil">Stabil</option>
+                        <option value="Belum Meningkat">Belum Meningkat</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Catatan Reviewer</label>
+                    <textarea id="edit-review-notes" name="reviewer_notes" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
+                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                    <button type="submit" class="btn btn-primary">Perbarui Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- 6.3 Modal Hapus Review Hasil Pengembangan --}}
+<div id="modal-hapus-review" class="modal-backdrop">
+    <div class="modal-card" style="max-width:500px;">
+        <div class="modal-header" style="background:#b91c1c;">
+            <div class="modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Hapus Review Hasil Pengembangan
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <form id="form-hapus-review" action="" method="POST">
+                @csrf
+                @method('DELETE')
+                <div class="form-group">
+                    <label class="form-label">Pilih Review yang Akan Dihapus:</label>
+                    <select id="select-del-review-item" class="form-control">
+                        @foreach($employee->developmentReviews as $rev)
+                            <option value="{{ $rev->id }}">
+                                #{{ $rev->order_no }} - {{ $rev->competency }} [{{ $rev->competency_type ?? 'Manajerial' }}] ({{ $rev->status }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="font-size:12px; color:#b91c1c; margin-top:10px;">
+                    Perhatian: Data review kompetensi yang dihapus tidak dapat dipulihkan.
+                </div>
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
+                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                    <button type="submit" class="btn btn-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626;">Hapus Review Ini</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- 6.4 Modal Edit Feedback & Rekomendasi Review --}}
+<div id="modal-edit-feedback-review" class="modal-backdrop">
+    <div class="modal-card" style="max-width:600px;">
+        <div class="modal-header">
+            <div class="modal-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                Edit Feedback Atasan & Rekomendasi Tindak Lanjut
+            </div>
+            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+        </div>
+
+        <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+            <form id="form-edit-feedback-review" action="{{ route('karyawan.development-review.feedback.update', ['nik' => $employee->nik]) }}" method="POST">
+                @csrf
+                <div style="font-size:12px; font-weight:700; color:#0b2545; text-transform:uppercase; margin-bottom:8px; border-bottom:1px solid #e2e8f0; padding-bottom:4px;">
+                    D. Feedback Atasan Langsung
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Catatan Umpan Balik (Feedback) <span style="color:#ef4444;">*</span></label>
+                    <textarea name="review_feedback_text" class="form-control" rows="4" placeholder="Tulis catatan evaluasi dan apresiasi atasan terhadap capaian karyawan...">{{ $employee->review_feedback_text ?: 'Budi Santosoo menunjukkan perkembangan yang baik selama periode ini. Terlihat peningkatan dalam kepemimpinan, komunikasi, dan kemampuan eksekusi. Fokus selanjutnya adalah memperkuat kemampuan analisis strategis dan pengambilan keputusan berbasis data untuk siap menempati posisi Engineering Manager saat penugasan berikutnya.' }}</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Nama Reviewer / Atasan</label>
+                        <input type="text" name="review_reviewer_name" class="form-control" value="{{ $employee->review_reviewer_name ?: 'Andi Wijaya' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Jabatan Reviewer</label>
+                        <input type="text" name="review_reviewer_title" class="form-control" value="{{ $employee->review_reviewer_title ?: 'Engineering Division Head' }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tanggal Review</label>
+                    <input type="text" name="review_date" class="form-control" value="{{ $employee->review_date ?: '20 Mei 2027' }}" placeholder="Contoh: 20 Mei 2027">
+                </div>
+
+                <div style="font-size:12px; font-weight:700; color:#0b2545; text-transform:uppercase; margin:16px 0 8px; border-bottom:1px solid #e2e8f0; padding-bottom:4px;">
+                    E. Rekomendasi Tindak Lanjut
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Daftar Rekomendasi Tindak Lanjut</label>
+                    <textarea name="review_recommendations" class="form-control" rows="5" placeholder="Tulis setiap rekomendasi pada baris baru (tiap baris otomatis menjadi poin bercentang hijau)...">{{ $employee->review_recommendations ?: "Lanjutkan program pengembangan sesuai IDP dengan fokus pada Analysis & Judgement.\nBerikan kesempatan memimpin proyek strategis yang berdampak lintas departemen.\nCoaching/mentoring dengan Engineering Manager untuk mempercepat kesiapan.\nReview berikutnya dilakukan pada Mei 2028." }}</textarea>
+                    <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">Tips: Tekan Enter untuk menambah poin rekomendasi baru.</span>
+                </div>
+
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
+                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Feedback & Rekomendasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 {{-- 9. Modal Riwayat Perubahan Umum --}}
 <div id="modal-riwayat-perubahan" class="modal-backdrop">

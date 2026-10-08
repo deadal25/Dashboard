@@ -1,5 +1,71 @@
 {{-- Tab 2: Riwayat Karir --}}
 <div class="tab-pane-content">
+    <style>
+        .table-karir {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px !important;
+            text-align: left;
+        }
+        .table-karir th {
+            background-color: #f8fafc;
+            color: #334155;
+            font-weight: 700;
+            font-size: 13.5px !important;
+            line-height: 1.35 !important;
+            padding: 9px 12px !important;
+            border: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        .table-karir td {
+            padding: 9px 12px !important;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+            font-size: 13.5px !important;
+            line-height: 1.4 !important;
+            vertical-align: middle;
+        }
+        .table-karir tr:nth-child(even) {
+            background-color: #fbfcfe;
+        }
+        .table-karir tr:hover {
+            background-color: #f1f5f9;
+        }
+        .table-karir .col-date {
+            font-weight: 800 !important;
+            color: #0b2545 !important;
+            letter-spacing: 0.2px;
+        }
+        .table-karir .badge-table-green,
+        .table-karir .badge-table-blue,
+        .table-karir .badge-table-purple,
+        .table-karir .badge-table-orange,
+        .table-karir .badge-table-red,
+        .table-karir .badge-table-gray {
+            font-size: 12px !important;
+            padding: 4px 10px !important;
+            font-weight: 600 !important;
+            border-radius: 5px;
+        }
+        .karir-info-section {
+            font-size: 12.5px;
+        }
+        .karir-info-section h6 {
+            font-size: 13px !important;
+        }
+        .karir-info-section span,
+        .karir-info-section li {
+            font-size: 12.5px;
+        }
+        @media (max-width: 640px) {
+            .table-karir th,
+            .table-karir td {
+                padding: 6px 8px !important;
+                font-size: 12.5px !important;
+            }
+        }
+    </style>
+
     <div class="dashboard-card">
         <div class="card-header-bar">
             <div class="card-title-wrap">
@@ -27,26 +93,28 @@
 
         {{-- Table --}}
         <div class="table-responsive">
-            <table class="table-custom">
+            <table class="table-custom table-karir">
                 <thead>
                     <tr>
                         <th class="text-center" style="width: 5%;">No.</th>
                         <th class="text-center" style="width: 12%;">Tanggal Efektif</th>
-                        <th style="width: 25%;">Departemen / Seksi</th>
+                        <th style="width: 23%;">Departemen / Seksi</th>
                         <th style="width: 15%;">Jabatan</th>
-                        <th class="text-center" style="width: 14%;">Job Class & Grade</th>
+                        <th class="text-center" style="width: 9%;">Job Class</th>
+                        <th class="text-center" style="width: 8%;">Grade</th>
                         <th class="text-center" style="width: 14%;">Jenis Perubahan</th>
-                        <th style="width: 15%;">Keterangan</th>
+                        <th style="width: 14%;">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($employee->careerHistories as $history)
                         <tr>
                             <td class="text-center">{{ $loop->iteration }}</td>
-                            <td class="text-center font-medium">{{ $history->effective_date }}</td>
+                            <td class="text-center col-date">{{ $history->effective_date }}</td>
                             <td>{{ $history->department_section }}</td>
                             <td style="font-weight:600;">{{ $history->position }}</td>
-                            <td class="text-center">{{ $history->job_class_grade }}</td>
+                            <td class="text-center font-semibold" style="color:#0f172a;">{{ $history->job_class }}</td>
+                            <td class="text-center font-bold" style="color:#2563eb;">{{ $history->grade }}</td>
                             <td class="text-center">
                                 @if($history->change_type === 'Kenaikan Pangkat Reguler')
                                     <span class="badge-table-green">Kenaikan Pangkat Reguler</span>
@@ -66,23 +134,23 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted" style="padding: 24px;">Belum ada riwayat karir.</td>
+                            <td colspan="8" class="text-center text-muted" style="padding: 24px;">Belum ada riwayat karir.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        <div style="font-size: 11.5px; color: #64748b; margin-top: 10px; font-weight: 500;">
+        <div style="font-size: 12px; color: #64748b; margin-top: 10px; font-weight: 500;">
             Total {{ $employee->careerHistories->count() }} data
         </div>
 
         {{-- Bottom Details Cards --}}
-        <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; margin-top: 16px;">
+        <div class="karir-info-section" style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; margin-top: 16px;">
             {{-- Left: Legend of Changes --}}
             <div class="info-card-box">
-                <h6 style="margin-bottom: 12px; font-size:12px; font-weight:700;">Keterangan Jenis Perubahan:</h6>
-                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 11.5px;">
+                <h6 style="margin-bottom: 12px; font-size:13px; font-weight:700;">Keterangan Jenis Perubahan:</h6>
+                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12.5px;">
                     <div style="display:flex; align-items:center; gap: 10px;">
                         <span class="badge-table-green" style="min-width: 140px; text-align: center;">Kenaikan Pangkat Reguler</span>
                         <span>: Kenaikan grade secara reguler sesuai kebijakan perusahaan</span>
@@ -112,8 +180,8 @@
 
             {{-- Right: Notes --}}
             <div class="info-card-box">
-                <h6 style="margin-bottom: 10px; font-size:12px; font-weight:700;">Catatan:</h6>
-                <ul style="line-height: 1.8; color: #475569; margin-left: 18px;">
+                <h6 style="margin-bottom: 10px; font-size:13px; font-weight:700;">Catatan:</h6>
+                <ul style="line-height: 1.8; color: #475569; margin-left: 18px; font-size: 12.5px;">
                     <li>Riwayat karir mencakup seluruh perjalanan jabatan, promosi, rotasi, mutasi, kenaikan pangkat reguler maupun demosi.</li>
                     <li>Data ini digunakan sebagai referensi dalam perencanaan karir dan suksesi.</li>
                 </ul>

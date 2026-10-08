@@ -74,7 +74,7 @@
         </div>
         <div style="margin-top: 6px;">
             <div class="jobclass-title">Menjabat Sejak</div>
-            <div class="jobclass-code" style="font-size: 13px; font-weight: 700;">{{ $employee->position_since ?? 'April 2023' }}</div>
+            <div class="jobclass-code" style="font-size: 14.2px; font-weight: 700;">{{ $employee->position_since ?? 'April 2023' }}</div>
         </div>
     </div>
 
@@ -84,7 +84,7 @@
         <div class="ringkasan-list">
             <div class="ringkasan-item">
                 <span class="ringkasan-label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
                     Performance Terakhir (FY26)
                 </span>
                 <span class="badge-green">{{ $employee->performance_current }}</span>
@@ -92,41 +92,44 @@
 
             <div class="ringkasan-item">
                 <span class="ringkasan-label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     POTASS Terakhir
                 </span>
                 <span class="badge-green">{{ $employee->potass_current }}</span>
             </div>
 
+            @php
+                $havHeader = $employee->getHavBoxDetails();
+            @endphp
             <div class="ringkasan-item">
                 <span class="ringkasan-label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
                     HAV 16 Box
                 </span>
-                <span class="ringkasan-val">{{ $employee->hav_box_current }}</span>
+                <span class="ringkasan-val">{{ $havHeader['box_label'] }}</span>
             </div>
 
             <div class="ringkasan-item">
                 <span class="ringkasan-label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                     Talent Pool
                 </span>
-                <span class="ringkasan-val">{{ $employee->talent_pool_status }}</span>
+                <span class="ringkasan-val">{{ $havHeader['talent_pool'] }}</span>
             </div>
 
             <div class="ringkasan-item">
                 <span class="ringkasan-label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
                     Flying Risk
                 </span>
-                <span class="{{ $employee->flying_risk === 'LOW' ? 'badge-green' : ($employee->flying_risk === 'HIGH' ? 'badge-red' : 'badge-orange') }}">
-                    {{ $employee->flying_risk }}
+                <span class="{{ $employee->flying_risk_badge_class }}">
+                    {{ $employee->flying_risk_formatted }}
                 </span>
             </div>
 
             <div class="ringkasan-item">
                 <span class="ringkasan-label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>
                     Next Possible Position
                 </span>
                 <span class="ringkasan-val" style="color:#0056b3;">{{ $employee->next_possible_position }}</span>
@@ -134,7 +137,7 @@
 
             <div class="ringkasan-item">
                 <span class="ringkasan-label">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                     Proyeksi Puncak Karir
                 </span>
                 <span class="ringkasan-val">{{ $employee->career_projection }}</span>

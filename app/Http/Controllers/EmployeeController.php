@@ -15,14 +15,52 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Services\EmployeeExcelService;
+use App\Services\TalentCalculatorService;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class EmployeeController extends Controller
 {
     /**
-     * Display a listing of employees (Kembali ke Daftar / Directory).
+     * Display executive dashboard overview (Beranda / Dashboard Karyawan).
      */
     public function index(Request $request)
+    {
+        $stats = [
+            'total' => Employee::count(),
+            'talent_pool' => Employee::where('talent_pool_status', 'YA')->count(),
+            'high_risk' => Employee::whereIn('flying_risk', ['HIGH', 'High Risk'])->count(),
+            'medium_risk' => Employee::whereIn('flying_risk', ['MEDIUM', 'MODERATE', 'Moderate Risk'])->count(),
+        ];
+
+        // Hitung distribusi seluruh karyawan di 16 HAV Box
+        $havBoxCounts = array_fill(1, 16, 0);
+        $allEmployees = Employee::select('id', 'nik', 'name', 'hav_box_current', 'potass_score_last', 'talent_pool_status')->get();
+        foreach ($allEmployees as $emp) {
+            if (!empty($emp->hav_box_current)) {
+                $boxNum = (int) str_replace('Box ', '', $emp->hav_box_current);
+                if ($boxNum >= 1 && $boxNum <= 16) {
+                    $havBoxCounts[$boxNum]++;
+                    continue;
+                }
+            }
+            $details = $emp->getHavBoxDetails();
+            $boxNum = $details['box_number'] ?? 15;
+            if ($boxNum >= 1 && $boxNum <= 16) {
+                $havBoxCounts[$boxNum]++;
+            }
+        }
+        $havMatrixMap = TalentCalculatorService::getHavMatrixMap();
+
+        // 5 Karyawan terbaru untuk pratinjau ringkas di Dashboard Beranda
+        $recentEmployees = Employee::latest()->take(5)->get();
+
+        return view('karyawan.index', compact('stats', 'havBoxCounts', 'havMatrixMap', 'recentEmployees'));
+    }
+
+    /**
+     * Display the Master Employee Data page (Data Karyawan) with Search, Filters, and CRUD Modals.
+     */
+    public function dataKaryawan(Request $request)
     {
         $query = Employee::query();
 
@@ -39,22 +77,64 @@ class EmployeeController extends Controller
             $query->where('department', $dept);
         }
 
+        if ($pool = $request->input('talent_pool')) {
+            $query->where('talent_pool_status', $pool);
+        }
+
+        if ($risk = $request->input('flying_risk')) {
+            if ($risk === 'HIGH') {
+                $query->whereIn('flying_risk', ['HIGH', 'High Risk']);
+            } elseif ($risk === 'MEDIUM') {
+                $query->whereIn('flying_risk', ['MEDIUM', 'MODERATE', 'Moderate Risk']);
+            } elseif ($risk === 'LOW') {
+                $query->whereIn('flying_risk', ['LOW', 'Low Risk']);
+            } else {
+                $query->where('flying_risk', $risk);
+            }
+        }
+
+        if ($box = $request->input('hav_box')) {
+            $formattedBox = str_starts_with($box, 'Box ') ? $box : 'Box ' . $box;
+            $query->where(function ($q) use ($box, $formattedBox) {
+                $q->where('hav_box_current', $formattedBox)
+                  ->orWhere('hav_box_current', $box);
+            });
+        }
+
         $perPage = (int) $request->input('per_page', 10);
         if (!in_array($perPage, [10, 25, 50, 100])) {
             $perPage = 10;
         }
 
         $employees = $query->paginate($perPage)->withQueryString();
-        $departments = Employee::select('department')->distinct()->pluck('department');
+        $departments = Employee::select('department')->distinct()->whereNotNull('department')->pluck('department');
 
         $stats = [
             'total' => Employee::count(),
             'talent_pool' => Employee::where('talent_pool_status', 'YA')->count(),
-            'high_risk' => Employee::where('flying_risk', 'HIGH')->count(),
-            'medium_risk' => Employee::where('flying_risk', 'MEDIUM')->count(),
+            'high_risk' => Employee::whereIn('flying_risk', ['HIGH', 'High Risk'])->count(),
+            'medium_risk' => Employee::whereIn('flying_risk', ['MEDIUM', 'MODERATE', 'Moderate Risk'])->count(),
         ];
 
-        return view('karyawan.index', compact('employees', 'departments', 'stats'));
+        // Distribusi 16 HAV Box untuk pilihan filter
+        $havBoxCounts = array_fill(1, 16, 0);
+        $allEmployees = Employee::select('id', 'nik', 'hav_box_current', 'potass_score_last', 'talent_pool_status')->get();
+        foreach ($allEmployees as $emp) {
+            if (!empty($emp->hav_box_current)) {
+                $boxNum = (int) str_replace('Box ', '', $emp->hav_box_current);
+                if ($boxNum >= 1 && $boxNum <= 16) {
+                    $havBoxCounts[$boxNum]++;
+                    continue;
+                }
+            }
+            $details = $emp->getHavBoxDetails();
+            $boxNum = $details['box_number'] ?? 15;
+            if ($boxNum >= 1 && $boxNum <= 16) {
+                $havBoxCounts[$boxNum]++;
+            }
+        }
+
+        return view('karyawan.data-karyawan', compact('employees', 'departments', 'stats', 'havBoxCounts'));
     }
 
     /**
@@ -142,25 +222,67 @@ class EmployeeController extends Controller
             'developmentReviews',
             'trainingHistories',
             'certifications',
+            'performanceAppraisals',
         ])->where('nik', $nik)->firstOrFail();
 
         // Calculate specific stats for tabs
+        $allGaps = $employee->competencyGaps;
+        $totalGapCount = $allGaps->count();
+        $rendahGapCount = $allGaps->filter(fn($g) => strtolower($g->gap_severity) === 'rendah')->count();
+        $sedangGapCount = $allGaps->filter(fn($g) => strtolower($g->gap_severity) === 'sedang')->count();
+        $tinggiGapCount = $allGaps->filter(fn($g) => strtolower($g->gap_severity) === 'tinggi')->count();
+
         $gapSummary = [
-            'rendah' => $employee->competencyGaps->where('gap_severity', 'Rendah')->count(),
-            'sedang' => $employee->competencyGaps->where('gap_severity', 'Sedang')->count(),
-            'tinggi' => $employee->competencyGaps->where('gap_severity', 'Tinggi')->count(),
-            'total'  => $employee->competencyGaps->count(),
+            'rendah' => $rendahGapCount,
+            'sedang' => $sedangGapCount,
+            'tinggi' => $tinggiGapCount,
+            'total'  => $totalGapCount,
+            'pct_rendah' => $totalGapCount > 0 ? round(($rendahGapCount / $totalGapCount) * 100, 1) : 0,
+            'pct_sedang' => $totalGapCount > 0 ? round(($sedangGapCount / $totalGapCount) * 100, 1) : 0,
+            'pct_tinggi' => $totalGapCount > 0 ? round(($tinggiGapCount / $totalGapCount) * 100, 1) : 0,
+            'tinggi_manajerial' => $allGaps->filter(fn($g) => (empty($g->competency_type) || strtolower($g->competency_type) === 'manajerial') && strtolower($g->gap_severity) === 'tinggi')->count(),
+            'tinggi_technical' => $allGaps->filter(fn($g) => strtolower($g->competency_type) === 'technical' && strtolower($g->gap_severity) === 'tinggi')->count(),
         ];
+
+        // Dynamic Training Summary (Connected to database records)
+        $currentYear = (int)date('Y');
+        $allTrainings = $employee->trainingHistories;
+        $totalPelatihan = $allTrainings->count();
+        $totalJam = (float)$allTrainings->sum('duration_hours');
+
+        $thisYearTrainings = $allTrainings->filter(function ($t) use ($currentYear) {
+            return $t->year === $currentYear;
+        });
+
+        // Pelatihan tahun ini yang riil dihitung: hanya yang sudah mengupload dokumentasi bukti
+        $thisYearDocumentedTrainings = $thisYearTrainings->filter(function ($t) {
+            return !empty($t->documentation);
+        });
+
+        $tahunIniCount = $thisYearDocumentedTrainings->count();
+        $tahunIniJam = (float)$thisYearDocumentedTrainings->sum('duration_hours');
+
+        $totalSertifikasi = $employee->certifications->count();
 
         $trainingSummary = [
-            'total_pelatihan' => $employee->trainingHistories->count() > 0 ? 27 : 0,
-            'total_jam'       => $employee->trainingHistories->count() > 0 ? 186 : 0,
-            'tahun_ini_count' => $employee->trainingHistories->where('training_date', 'like', '%2026%')->count() ?: 8,
-            'tahun_ini_jam'   => 64,
-            'sertifikasi'     => $employee->certifications->where('is_active', true)->count() ?: 4,
+            'current_year'          => $currentYear,
+            'current_year_fy'       => 'FY' . substr((string)$currentYear, -2),
+            'total_pelatihan'       => $totalPelatihan,
+            'total_jam'             => (fmod($totalJam, 1) === 0.0) ? (int)$totalJam : $totalJam,
+            'tahun_ini_count'       => $tahunIniCount, // Riil dihitung: hanya yang sudah upload dokumentasi
+            'tahun_ini_jam'         => (fmod($tahunIniJam, 1) === 0.0) ? (int)$tahunIniJam : $tahunIniJam,
+            'tahun_ini_total_count' => $thisYearTrainings->count(), // Total seluruh pelatihan tahun ini
+            'sertifikasi'           => $totalSertifikasi,
         ];
 
-        return view('karyawan.show', compact('employee', 'tab', 'gapSummary', 'trainingSummary'));
+        $trainingYears = $allTrainings
+            ->map(fn($t) => $t->year)
+            ->filter()
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        return view('karyawan.show', compact('employee', 'tab', 'gapSummary', 'trainingSummary', 'trainingYears'));
     }
 
     /**
@@ -174,10 +296,20 @@ class EmployeeController extends Controller
             'effective_date' => 'required|string|max:50',
             'department_section' => 'required|string|max:255',
             'position' => 'required|string|max:255',
-            'job_class_grade' => 'required|string|max:50',
+            'job_class' => 'required_without:job_class_grade|nullable|string|max:50',
+            'grade' => 'required_without:job_class_grade|nullable|string|max:50',
+            'job_class_grade' => 'nullable|string|max:50',
             'change_type' => 'required|string|max:100',
             'notes' => 'nullable|string',
         ]);
+
+        if (!empty($validated['job_class']) && !empty($validated['grade'])) {
+            $validated['job_class_grade'] = trim($validated['job_class'] . ' / ' . $validated['grade']);
+        } elseif (!empty($validated['job_class_grade'])) {
+            $parts = explode('/', $validated['job_class_grade']);
+            $validated['job_class'] = trim($parts[0] ?? '');
+            $validated['grade'] = trim($parts[1] ?? '');
+        }
 
         $maxOrder = $employee->careerHistories()->max('order_no') ?? 0;
         $validated['order_no'] = $maxOrder + 1;
@@ -200,10 +332,20 @@ class EmployeeController extends Controller
             'effective_date' => 'required|string|max:50',
             'department_section' => 'required|string|max:255',
             'position' => 'required|string|max:255',
-            'job_class_grade' => 'required|string|max:50',
+            'job_class' => 'required_without:job_class_grade|nullable|string|max:50',
+            'grade' => 'required_without:job_class_grade|nullable|string|max:50',
+            'job_class_grade' => 'nullable|string|max:50',
             'change_type' => 'required|string|max:100',
             'notes' => 'nullable|string',
         ]);
+
+        if (!empty($validated['job_class']) && !empty($validated['grade'])) {
+            $validated['job_class_grade'] = trim($validated['job_class'] . ' / ' . $validated['grade']);
+        } elseif (!empty($validated['job_class_grade'])) {
+            $parts = explode('/', $validated['job_class_grade']);
+            $validated['job_class'] = trim($parts[0] ?? '');
+            $validated['grade'] = trim($parts[1] ?? '');
+        }
 
         $history->update($validated);
 
@@ -234,7 +376,7 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'potass_current' => 'required|string|max:50',
             'performance_current' => 'required|string|max:20',
-            'flying_risk' => 'required|string|in:LOW,MEDIUM,HIGH',
+            'flying_risk' => 'required|string|in:LOW,MEDIUM,HIGH,Low Risk,Moderate Risk,High Risk',
             'flying_risk_reason' => 'nullable|string|max:255',
             'talent_pool_status' => 'required|string|in:YA,TIDAK',
         ]);
@@ -246,24 +388,157 @@ class EmployeeController extends Controller
     }
 
     /**
-     * C1. Update Performance 3 Tahun Terakhir
+     * C1. Update Performance 3 Tahun Terakhir (Dynamic Years / Legacy Batch Update)
      */
     public function updateTalentPerformance(Request $request, string $nik)
     {
         $employee = Employee::where('nik', $nik)->firstOrFail();
 
+        $notes = $request->input('performance_notes', $employee->performance_notes);
+        if ($notes !== null) {
+            $employee->performance_notes = $notes;
+        }
+
+        // Jika dikirim dari form dinamis 3 tahun terakhir (years & ratings)
+        if ($request->has('years') && is_array($request->input('years'))) {
+            $years = $request->input('years');
+            $ratings = $request->input('ratings', []);
+
+            $latestYear = 0;
+            $latestRating = $employee->performance_current;
+
+            foreach ($years as $idx => $yearVal) {
+                $yr = (int) $yearVal;
+                $rtg = strtoupper(trim($ratings[$idx] ?? '-'));
+
+                $employee->performanceAppraisals()->updateOrCreate(
+                    ['year' => $yr],
+                    ['rating' => $rtg, 'notes' => $notes]
+                );
+
+                if ($yr === 2024) $employee->performance_fy24 = $rtg;
+                elseif ($yr === 2025) $employee->performance_fy25 = $rtg;
+                elseif ($yr === 2026) $employee->performance_fy26 = $rtg;
+
+                if ($yr >= $latestYear) {
+                    $latestYear = $yr;
+                    $latestRating = $rtg;
+                }
+            }
+
+            if ($latestRating) {
+                $employee->performance_current = $latestRating;
+            }
+        } else {
+            // Fallback input langsung
+            if ($request->has('performance_fy24')) {
+                $employee->performance_fy24 = $request->input('performance_fy24');
+                $employee->performanceAppraisals()->updateOrCreate(['year' => 2024], ['rating' => $request->input('performance_fy24'), 'notes' => $notes]);
+            }
+            if ($request->has('performance_fy25')) {
+                $employee->performance_fy25 = $request->input('performance_fy25');
+                $employee->performanceAppraisals()->updateOrCreate(['year' => 2025], ['rating' => $request->input('performance_fy25'), 'notes' => $notes]);
+            }
+            if ($request->has('performance_fy26')) {
+                $employee->performance_fy26 = $request->input('performance_fy26');
+                $employee->performanceAppraisals()->updateOrCreate(['year' => 2026], ['rating' => $request->input('performance_fy26'), 'notes' => $notes]);
+            }
+            if ($request->has('performance_current')) {
+                $employee->performance_current = $request->input('performance_current');
+            }
+        }
+
+        $employee->save();
+
+        // Otomatis sinkronisasi C1 poin, Baris HAV, dan C3 HAV Box
+        TalentCalculatorService::syncEmployeeTalentSnapshot($employee);
+
+        $tab = $request->input('tab', 'talent-snapshot');
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => $tab])
+            ->with('success', 'Data Performance 3 Tahun Terakhir berhasil diperbarui.');
+    }
+
+    /**
+     * Simpan atau perbarui nilai Performance Appraisal per tahun secara fleksibel (misal tahun 2027, 2028, dst.)
+     */
+    public function storeOrUpdatePerformance(Request $request, string $nik)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+
         $validated = $request->validate([
-            'performance_fy24' => 'required|string|max:20',
-            'performance_fy25' => 'required|string|max:20',
-            'performance_fy26' => 'required|string|max:20',
-            'performance_current' => 'required|string|max:20',
-            'performance_notes' => 'nullable|string',
+            'year' => 'required|integer|min:2000|max:2099',
+            'rating' => 'required|string|max:20',
+            'notes' => 'nullable|string',
+            'tab' => 'nullable|string',
         ]);
 
-        $employee->update($validated);
+        $year = (int) $validated['year'];
+        $rating = strtoupper(trim($validated['rating']));
+        $notes = $validated['notes'] ?? $employee->performance_notes;
 
-        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'talent-snapshot'])
-            ->with('success', 'Data Performance 3 Tahun Terakhir (C1) berhasil diperbarui.');
+        $employee->performanceAppraisals()->updateOrCreate(
+            ['year' => $year],
+            [
+                'rating' => $rating,
+                'notes' => $notes,
+            ]
+        );
+
+        // Jika data tahun yang diinput merupakan tahun tertinggi, perbarui rating terkini karyawan
+        $maxYear = $employee->performanceAppraisals()->max('year');
+        if ($year >= $maxYear) {
+            $employee->performance_current = $rating;
+        }
+
+        // Sinkronkan legacy kolom jika 2024, 2025, atau 2026
+        if ($year === 2024) {
+            $employee->performance_fy24 = $rating;
+        } elseif ($year === 2025) {
+            $employee->performance_fy25 = $rating;
+        } elseif ($year === 2026) {
+            $employee->performance_fy26 = $rating;
+        }
+
+        if ($notes) {
+            $employee->performance_notes = $notes;
+        }
+
+        $employee->save();
+
+        // Otomatis sinkronisasi C1 & C3
+        TalentCalculatorService::syncEmployeeTalentSnapshot($employee);
+
+        $tab = $request->input('tab', 'talent-snapshot');
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => $tab])
+            ->with('success', "Data Performance Tahun {$year} (Rating: {$rating}) berhasil disimpan.");
+    }
+
+    /**
+     * Hapus record performance appraisal tahun tertentu
+     */
+    public function destroyPerformance(Request $request, string $nik, int $id)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+        $record = $employee->performanceAppraisals()->findOrFail($id);
+        $deletedYear = $record->year;
+        $record->delete();
+
+        // Update performance_current ke tahun terbaru yang masih ada
+        $latestRecord = $employee->performanceAppraisals()->orderBy('year', 'desc')->first();
+        if ($latestRecord) {
+            $employee->performance_current = $latestRecord->rating;
+            $employee->save();
+        }
+
+        // Otomatis sinkronisasi C1 & C3
+        TalentCalculatorService::syncEmployeeTalentSnapshot($employee);
+
+        $tab = $request->input('tab', 'talent-snapshot');
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => $tab])
+            ->with('success', "Data Performance Tahun {$deletedYear} berhasil dihapus.");
     }
 
     /**
@@ -291,8 +566,14 @@ class EmployeeController extends Controller
 
         $employee->update($validated);
 
+        // Otomatis sinkronisasi C2 ke Riwayat C6 (talent_assessments)
+        TalentCalculatorService::syncPotassToTalentAssessments($employee, $validated);
+
+        // Sinkronisasi ulang C3 HAV 16 Box
+        TalentCalculatorService::syncEmployeeTalentSnapshot($employee);
+
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'talent-snapshot'])
-            ->with('success', 'Data Potential Assessment POTASS (C2) berhasil diperbarui.');
+            ->with('success', 'Data Potential Assessment POTASS (C2) berhasil diperbarui dan otomatis memperbarui riwayat C6 & C3.');
     }
 
     /**
@@ -325,7 +606,20 @@ class EmployeeController extends Controller
             'strength' => 'required|string|max:255',
             'short_description' => 'required|string',
             'source' => 'required|string|max:255',
+            'documentation' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
         ]);
+
+        if ($request->hasFile('documentation')) {
+            $file = $request->file('documentation');
+            $cleanNik = preg_replace('/[^a-zA-Z0-9_-]/', '', $employee->nik);
+            $filename = 'c4_' . $cleanNik . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/key_strengths');
+            if (!file_exists($destPath)) {
+                mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $validated['documentation'] = '/uploads/key_strengths/' . $filename;
+        }
 
         $maxOrder = $employee->keyStrengths()->max('order_no') ?? 0;
         $validated['order_no'] = $maxOrder + 1;
@@ -348,7 +642,33 @@ class EmployeeController extends Controller
             'strength' => 'required|string|max:255',
             'short_description' => 'required|string',
             'source' => 'required|string|max:255',
+            'documentation' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
+            'remove_documentation' => 'nullable|boolean',
         ]);
+
+        if ($request->boolean('remove_documentation')) {
+            if ($strength->documentation && file_exists(public_path($strength->documentation))) {
+                @unlink(public_path($strength->documentation));
+            }
+            $validated['documentation'] = null;
+        } elseif ($request->hasFile('documentation')) {
+            if ($strength->documentation && file_exists(public_path($strength->documentation))) {
+                @unlink(public_path($strength->documentation));
+            }
+            $file = $request->file('documentation');
+            $cleanNik = preg_replace('/[^a-zA-Z0-9_-]/', '', $employee->nik);
+            $filename = 'c4_' . $cleanNik . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/key_strengths');
+            if (!file_exists($destPath)) {
+                mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $validated['documentation'] = '/uploads/key_strengths/' . $filename;
+        } else {
+            unset($validated['documentation']);
+        }
+
+        unset($validated['remove_documentation']);
 
         $strength->update($validated);
 
@@ -363,6 +683,11 @@ class EmployeeController extends Controller
     {
         $employee = Employee::where('nik', $nik)->firstOrFail();
         $strength = $employee->keyStrengths()->findOrFail($id);
+
+        if ($strength->documentation && file_exists(public_path($strength->documentation))) {
+            @unlink(public_path($strength->documentation));
+        }
+
         $strength->delete();
 
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'talent-snapshot'])
@@ -370,25 +695,38 @@ class EmployeeController extends Controller
     }
 
     /**
-     * C5. Update Flying Risk Assessment
+     * C5. Update Flying Risk Assessment berdasarkan C5flyrisk.png
      */
     public function updateTalentFlyingRisk(Request $request, string $nik)
     {
         $employee = Employee::where('nik', $nik)->firstOrFail();
 
-        $validated = $request->validate([
-            'flying_risk' => 'required|string|in:LOW,MEDIUM,HIGH',
-            'flying_risk_reason' => 'required|string|max:255',
+        $growth = $request->input('flying_risk_career_growth', $employee->flying_risk_career_growth);
+        $market = $request->input('flying_risk_job_market', $employee->flying_risk_job_market);
+        $comp = $request->input('flying_risk_compensation', $employee->flying_risk_compensation);
+
+        $calc = TalentCalculatorService::calculateFlyingRisk($growth, $market, $comp);
+
+        $employee->update([
+            'flying_risk' => $calc['risk_level'],
+            'flying_risk_score' => $calc['total_score'],
+            'flying_risk_career_growth' => $calc['career_growth'],
+            'flying_risk_career_growth_pts' => $calc['career_growth_pts'],
+            'flying_risk_job_market' => $calc['job_market'],
+            'flying_risk_job_market_pts' => $calc['job_market_pts'],
+            'flying_risk_compensation' => $calc['compensation'],
+            'flying_risk_compensation_pts' => $calc['compensation_pts'],
+            'flying_risk_reason' => $calc['interpretation'],
+            'flying_risk_interpretation' => $calc['interpretation'],
         ]);
 
-        $employee->update($validated);
-
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'talent-snapshot'])
-            ->with('success', 'Data Flying Risk Assessment (C5) berhasil diperbarui.');
+            ->with('success', 'Data Flying Risk Assessment (C5) berhasil diperbarui (' . $calc['risk_level'] . ' - Skor: ' . $calc['total_score'] . '/6).');
     }
 
     /**
-     * C6. Store Talent Assessment (Riwayat POTASS)
+     * C6. Store Talent Assessment (Riwayat POTASS & 8 Behavior Competencies)
+     * Otomatis sinkronisasi ke C2 (POTASS) dan C3 (HAV 16 Box)
      */
     public function storeTalentAssessment(Request $request, string $nik)
     {
@@ -397,19 +735,51 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'assessment_date' => 'required|string|max:50',
             'position_standard' => 'required|string|max:100',
-            'potass_score' => 'required|string|max:50',
-            'category' => 'required|string|max:50',
             'assessor' => 'required|string|max:100',
+            'b1_vision_business' => 'nullable|numeric|min:1|max:5',
+            'b2_customer_focus' => 'nullable|numeric|min:1|max:5',
+            'b3_interpersonal_skill' => 'nullable|numeric|min:1|max:5',
+            'b4_analysis_judgment' => 'nullable|numeric|min:1|max:5',
+            'b5_planning_driving' => 'nullable|numeric|min:1|max:5',
+            'b6_leading_motivating' => 'nullable|numeric|min:1|max:5',
+            'b7_teamwork' => 'nullable|numeric|min:1|max:5',
+            'b8_drive_courage_integrity' => 'nullable|numeric|min:1|max:5',
+            'potass_score' => 'nullable|string|max:50',
+            'category' => 'nullable|string|max:50',
         ]);
 
-        $employee->talentAssessments()->create($validated);
+        $comp = TalentCalculatorService::calculateBehaviorCompetency($validated);
+
+        $assessmentData = [
+            'assessment_date' => $validated['assessment_date'],
+            'position_standard' => $validated['position_standard'],
+            'assessor' => $validated['assessor'],
+            'b1_vision_business' => $comp['scores']['b1'],
+            'b2_customer_focus' => $comp['scores']['b2'],
+            'b3_interpersonal_skill' => $comp['scores']['b3'],
+            'b4_analysis_judgment' => $comp['scores']['b4'],
+            'b5_planning_driving' => $comp['scores']['b5'],
+            'b6_leading_motivating' => $comp['scores']['b6'],
+            'b7_teamwork' => $comp['scores']['b7'],
+            'b8_drive_courage_integrity' => $comp['scores']['b8'],
+            'weighted_score' => $comp['weighted_score'],
+            'score_percentage' => $comp['percentage'],
+            'kolom_hav' => $comp['kolom_hav'],
+            'potass_score' => $comp['percentage'] . '%',
+            'category' => $comp['category'],
+        ];
+
+        $employee->talentAssessments()->create($assessmentData);
+
+        // Otomatis sinkronisasi ke C2 dan C3
+        TalentCalculatorService::syncEmployeeTalentSnapshot($employee);
 
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'talent-snapshot'])
-            ->with('success', 'Data Riwayat POTASS Assessment (C6) berhasil ditambahkan.');
+            ->with('success', 'Data Riwayat POTASS Assessment (C6) berhasil ditambahkan dan otomatis memperbarui C2 & C3.');
     }
 
     /**
-     * C6. Update Talent Assessment (Riwayat POTASS)
+     * C6. Update Talent Assessment (Riwayat POTASS & 8 Behavior Competencies)
      */
     public function updateTalentAssessment(Request $request, string $nik, int $id)
     {
@@ -419,15 +789,45 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'assessment_date' => 'required|string|max:50',
             'position_standard' => 'required|string|max:100',
-            'potass_score' => 'required|string|max:50',
-            'category' => 'required|string|max:50',
             'assessor' => 'required|string|max:100',
+            'b1_vision_business' => 'nullable|numeric|min:1|max:5',
+            'b2_customer_focus' => 'nullable|numeric|min:1|max:5',
+            'b3_interpersonal_skill' => 'nullable|numeric|min:1|max:5',
+            'b4_analysis_judgment' => 'nullable|numeric|min:1|max:5',
+            'b5_planning_driving' => 'nullable|numeric|min:1|max:5',
+            'b6_leading_motivating' => 'nullable|numeric|min:1|max:5',
+            'b7_teamwork' => 'nullable|numeric|min:1|max:5',
+            'b8_drive_courage_integrity' => 'nullable|numeric|min:1|max:5',
+            'potass_score' => 'nullable|string|max:50',
+            'category' => 'nullable|string|max:50',
         ]);
 
-        $assessment->update($validated);
+        $comp = TalentCalculatorService::calculateBehaviorCompetency($validated);
+
+        $assessment->update([
+            'assessment_date' => $validated['assessment_date'],
+            'position_standard' => $validated['position_standard'],
+            'assessor' => $validated['assessor'],
+            'b1_vision_business' => $comp['scores']['b1'],
+            'b2_customer_focus' => $comp['scores']['b2'],
+            'b3_interpersonal_skill' => $comp['scores']['b3'],
+            'b4_analysis_judgment' => $comp['scores']['b4'],
+            'b5_planning_driving' => $comp['scores']['b5'],
+            'b6_leading_motivating' => $comp['scores']['b6'],
+            'b7_teamwork' => $comp['scores']['b7'],
+            'b8_drive_courage_integrity' => $comp['scores']['b8'],
+            'weighted_score' => $comp['weighted_score'],
+            'score_percentage' => $comp['percentage'],
+            'kolom_hav' => $comp['kolom_hav'],
+            'potass_score' => $comp['percentage'] . '%',
+            'category' => $comp['category'],
+        ]);
+
+        // Otomatis sinkronisasi ke C2 dan C3
+        TalentCalculatorService::syncEmployeeTalentSnapshot($employee);
 
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'talent-snapshot'])
-            ->with('success', 'Data Riwayat POTASS Assessment (C6) berhasil diperbarui.');
+            ->with('success', 'Data Riwayat POTASS Assessment (C6) berhasil diperbarui dan otomatis memperbarui C2 & C3.');
     }
 
     /**
@@ -438,6 +838,8 @@ class EmployeeController extends Controller
         $employee = Employee::where('nik', $nik)->firstOrFail();
         $assessment = $employee->talentAssessments()->findOrFail($id);
         $assessment->delete();
+
+        TalentCalculatorService::syncEmployeeTalentSnapshot($employee);
 
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'talent-snapshot'])
             ->with('success', 'Data Riwayat POTASS Assessment (C6) berhasil dihapus.');
@@ -710,12 +1112,17 @@ class EmployeeController extends Controller
 
         $validated = $request->validate([
             'competency' => 'required|string|max:255',
+            'competency_type' => 'nullable|string|in:Manajerial,Technical',
             'current_level' => 'required|integer|min:1|max:5',
             'current_desc' => 'nullable|string|max:255',
             'standard_level' => 'required|integer|min:1|max:5',
             'standard_desc' => 'nullable|string|max:255',
             'expected_improvement' => 'nullable|string',
         ]);
+
+        if (empty($validated['competency_type'])) {
+            $validated['competency_type'] = 'Manajerial';
+        }
 
         $gap = max(0, $validated['standard_level'] - $validated['current_level']);
         $validated['gap'] = $gap;
@@ -740,12 +1147,17 @@ class EmployeeController extends Controller
 
         $validated = $request->validate([
             'competency' => 'required|string|max:255',
+            'competency_type' => 'nullable|string|in:Manajerial,Technical',
             'current_level' => 'required|integer|min:1|max:5',
             'current_desc' => 'nullable|string|max:255',
             'standard_level' => 'required|integer|min:1|max:5',
             'standard_desc' => 'nullable|string|max:255',
             'expected_improvement' => 'nullable|string',
         ]);
+
+        if (empty($validated['competency_type'])) {
+            $validated['competency_type'] = $gapRow->competency_type ?: 'Manajerial';
+        }
 
         $gap = max(0, $validated['standard_level'] - $validated['current_level']);
         $validated['gap'] = $gap;
@@ -799,6 +1211,7 @@ class EmployeeController extends Controller
 
         $validated = $request->validate([
             'competency' => 'required|string|max:255',
+            'competency_type' => 'nullable|string|max:50',
             'specific_goal' => 'nullable|string',
             'development_methods' => 'required|string|max:255',
             'activity_program' => 'required|string',
@@ -809,6 +1222,10 @@ class EmployeeController extends Controller
             'status' => 'required|string|max:50',
             'progress_percent' => 'required|integer|min:0|max:100',
         ]);
+
+        if (empty($validated['competency_type'])) {
+            $validated['competency_type'] = 'Manajerial';
+        }
 
         $maxOrder = $employee->idpActionPlans()->max('order_no') ?? 0;
         $validated['order_no'] = $maxOrder + 1;
@@ -829,6 +1246,7 @@ class EmployeeController extends Controller
 
         $validated = $request->validate([
             'competency' => 'required|string|max:255',
+            'competency_type' => 'nullable|string|max:50',
             'specific_goal' => 'nullable|string',
             'development_methods' => 'required|string|max:255',
             'activity_program' => 'required|string',
@@ -839,6 +1257,10 @@ class EmployeeController extends Controller
             'status' => 'required|string|max:50',
             'progress_percent' => 'required|integer|min:0|max:100',
         ]);
+
+        if (empty($validated['competency_type'])) {
+            $validated['competency_type'] = $plan->competency_type ?: 'Manajerial';
+        }
 
         $plan->update($validated);
 
@@ -857,6 +1279,357 @@ class EmployeeController extends Controller
 
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'idp'])
             ->with('success', 'Rencana Aksi IDP berhasil dihapus.');
+    }
+
+    /**
+     * Riwayat Pelatihan - Store Training History
+     */
+    public function storeTrainingHistory(Request $request, string $nik)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+
+        $validated = $request->validate([
+            'training_name' => 'required|string|max:255',
+            'start_date' => 'nullable|string|max:50',
+            'end_date' => 'nullable|string|max:50',
+            'training_date' => 'nullable|string|max:100',
+            'category' => 'required|string|max:50',
+            'training_type' => 'required|string|max:50',
+            'organizer' => 'nullable|string|max:255',
+            'duration_hours' => 'required|numeric|min:0',
+            'notes' => 'nullable|string',
+            'documentation' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
+        ]);
+
+        if (empty($validated['training_date']) && !empty($validated['start_date'])) {
+            $validated['training_date'] = \App\Models\TrainingHistory::formatDateRange($validated['start_date'], $validated['end_date'] ?? null);
+        }
+
+        if ($request->hasFile('documentation')) {
+            $file = $request->file('documentation');
+            $cleanNik = preg_replace('/[^a-zA-Z0-9_-]/', '', $employee->nik);
+            $filename = 'tr_' . $cleanNik . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/training_histories');
+            if (!file_exists($destPath)) {
+                mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $validated['documentation'] = '/uploads/training_histories/' . $filename;
+        }
+
+        $maxOrder = $employee->trainingHistories()->max('order_no') ?? 0;
+        $validated['order_no'] = $maxOrder + 1;
+
+        $employee->trainingHistories()->create($validated);
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'riwayat-pelatihan'])
+            ->with('success', 'Riwayat pelatihan berhasil ditambahkan.');
+    }
+
+    /**
+     * Riwayat Pelatihan - Update Training History
+     */
+    public function updateTrainingHistory(Request $request, string $nik, int $id)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+        $training = $employee->trainingHistories()->findOrFail($id);
+
+        $validated = $request->validate([
+            'training_name' => 'required|string|max:255',
+            'start_date' => 'nullable|string|max:50',
+            'end_date' => 'nullable|string|max:50',
+            'training_date' => 'nullable|string|max:100',
+            'category' => 'required|string|max:50',
+            'training_type' => 'required|string|max:50',
+            'organizer' => 'nullable|string|max:255',
+            'duration_hours' => 'required|numeric|min:0',
+            'notes' => 'nullable|string',
+            'documentation' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
+            'remove_documentation' => 'nullable|boolean',
+        ]);
+
+        if (empty($validated['training_date']) && !empty($validated['start_date'])) {
+            $validated['training_date'] = \App\Models\TrainingHistory::formatDateRange($validated['start_date'], $validated['end_date'] ?? null);
+        }
+
+        if ($request->boolean('remove_documentation')) {
+            if ($training->documentation && file_exists(public_path($training->documentation))) {
+                @unlink(public_path($training->documentation));
+            }
+            $validated['documentation'] = null;
+        } elseif ($request->hasFile('documentation')) {
+            if ($training->documentation && file_exists(public_path($training->documentation))) {
+                @unlink(public_path($training->documentation));
+            }
+            $file = $request->file('documentation');
+            $cleanNik = preg_replace('/[^a-zA-Z0-9_-]/', '', $employee->nik);
+            $filename = 'tr_' . $cleanNik . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/training_histories');
+            if (!file_exists($destPath)) {
+                mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $validated['documentation'] = '/uploads/training_histories/' . $filename;
+        } else {
+            unset($validated['documentation']);
+        }
+
+        unset($validated['remove_documentation']);
+
+        $training->update($validated);
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'riwayat-pelatihan'])
+            ->with('success', 'Data riwayat pelatihan berhasil diperbarui.');
+    }
+
+    /**
+     * Riwayat Pelatihan - Destroy Training History
+     */
+    public function destroyTrainingHistory(string $nik, int $id)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+        $training = $employee->trainingHistories()->findOrFail($id);
+
+        if ($training->documentation && file_exists(public_path($training->documentation))) {
+            @unlink(public_path($training->documentation));
+        }
+
+        $training->delete();
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'riwayat-pelatihan'])
+            ->with('success', 'Data riwayat pelatihan berhasil dihapus.');
+    }
+
+    /**
+     * Riwayat Pelatihan (Bagian C) - Store Certification
+     */
+    public function storeCertification(Request $request, string $nik)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'issuer' => 'nullable|string|max:255',
+            'obtained_date' => 'nullable|string|max:100',
+            'valid_until' => 'nullable|string|max:100',
+            'is_active' => 'nullable|boolean',
+            'documentation' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
+        ]);
+
+        $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
+
+        if ($request->hasFile('documentation')) {
+            $file = $request->file('documentation');
+            $cleanNik = preg_replace('/[^a-zA-Z0-9_-]/', '', $employee->nik);
+            $filename = 'cert_' . $cleanNik . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/certifications');
+            if (!file_exists($destPath)) {
+                mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $validated['documentation'] = '/uploads/certifications/' . $filename;
+        }
+
+        $maxOrder = $employee->certifications()->max('order_no') ?? 0;
+        $validated['order_no'] = $maxOrder + 1;
+
+        $employee->certifications()->create($validated);
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'riwayat-pelatihan'])
+            ->with('success', 'Data sertifikasi berhasil ditambahkan.');
+    }
+
+    /**
+     * Riwayat Pelatihan (Bagian C) - Update Certification
+     */
+    public function updateCertification(Request $request, string $nik, int $id)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+        $cert = $employee->certifications()->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'issuer' => 'nullable|string|max:255',
+            'obtained_date' => 'nullable|string|max:100',
+            'valid_until' => 'nullable|string|max:100',
+            'is_active' => 'nullable|boolean',
+            'documentation' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
+            'remove_documentation' => 'nullable|boolean',
+        ]);
+
+        $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
+
+        if ($request->boolean('remove_documentation')) {
+            if ($cert->documentation && file_exists(public_path($cert->documentation))) {
+                @unlink(public_path($cert->documentation));
+            }
+            $validated['documentation'] = null;
+        } elseif ($request->hasFile('documentation')) {
+            if ($cert->documentation && file_exists(public_path($cert->documentation))) {
+                @unlink(public_path($cert->documentation));
+            }
+            $file = $request->file('documentation');
+            $cleanNik = preg_replace('/[^a-zA-Z0-9_-]/', '', $employee->nik);
+            $filename = 'cert_' . $cleanNik . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/certifications');
+            if (!file_exists($destPath)) {
+                mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $validated['documentation'] = '/uploads/certifications/' . $filename;
+        } else {
+            unset($validated['documentation']);
+        }
+
+        unset($validated['remove_documentation']);
+
+        $cert->update($validated);
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'riwayat-pelatihan'])
+            ->with('success', 'Data sertifikasi berhasil diperbarui.');
+    }
+
+    /**
+     * Riwayat Pelatihan (Bagian C) - Destroy Certification
+     */
+    public function destroyCertification(string $nik, int $id)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+        $cert = $employee->certifications()->findOrFail($id);
+
+        if ($cert->documentation && file_exists(public_path($cert->documentation))) {
+            @unlink(public_path($cert->documentation));
+        }
+
+        $cert->delete();
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'riwayat-pelatihan'])
+            ->with('success', 'Data sertifikasi berhasil dihapus.');
+    }
+
+    /**
+     * Store Review Hasil Pengembangan (Manajerial / Technical)
+     */
+    public function storeDevelopmentReview(Request $request, string $nik)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+
+        $validated = $request->validate([
+            'competency' => 'required|string|max:255',
+            'competency_type' => 'nullable|string|in:Manajerial,Technical',
+            'period' => 'nullable|string|max:100',
+            'previous_level' => 'required|integer|min:0|max:10',
+            'current_level' => 'required|integer|min:0|max:10',
+            'target_level' => 'required|integer|min:0|max:10',
+            'status' => 'nullable|string|max:50',
+            'reviewer_notes' => 'nullable|string',
+        ]);
+
+        if (empty($validated['competency_type'])) {
+            $validated['competency_type'] = 'Manajerial';
+        }
+
+        if (empty($validated['period'])) {
+            $validated['period'] = 'Juni 2026 – Mei 2027';
+        }
+
+        $growth = (int)$validated['current_level'] - (int)$validated['previous_level'];
+        $validated['growth'] = $growth;
+
+        if (empty($validated['status'])) {
+            if ($growth > 0) {
+                $validated['status'] = 'Meningkat';
+            } elseif ($growth === 0) {
+                $validated['status'] = 'Stabil';
+            } else {
+                $validated['status'] = 'Belum Meningkat';
+            }
+        }
+
+        $maxOrder = $employee->developmentReviews()->max('order_no') ?? 0;
+        $validated['order_no'] = $maxOrder + 1;
+
+        $employee->developmentReviews()->create($validated);
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+            ->with('success', "Review kompetensi {$validated['competency_type']} berhasil ditambahkan.");
+    }
+
+    /**
+     * Update Review Hasil Pengembangan (Manajerial / Technical)
+     */
+    public function updateDevelopmentReview(Request $request, string $nik, int $id)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+        $review = $employee->developmentReviews()->findOrFail($id);
+
+        $validated = $request->validate([
+            'competency' => 'required|string|max:255',
+            'competency_type' => 'nullable|string|in:Manajerial,Technical',
+            'period' => 'nullable|string|max:100',
+            'previous_level' => 'required|integer|min:0|max:10',
+            'current_level' => 'required|integer|min:0|max:10',
+            'target_level' => 'required|integer|min:0|max:10',
+            'status' => 'nullable|string|max:50',
+            'reviewer_notes' => 'nullable|string',
+        ]);
+
+        if (empty($validated['competency_type'])) {
+            $validated['competency_type'] = $review->competency_type ?: 'Manajerial';
+        }
+
+        $growth = (int)$validated['current_level'] - (int)$validated['previous_level'];
+        $validated['growth'] = $growth;
+
+        if (empty($validated['status'])) {
+            if ($growth > 0) {
+                $validated['status'] = 'Meningkat';
+            } elseif ($growth === 0) {
+                $validated['status'] = 'Stabil';
+            } else {
+                $validated['status'] = 'Belum Meningkat';
+            }
+        }
+
+        $review->update($validated);
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+            ->with('success', "Review kompetensi '{$review->competency}' berhasil diperbarui.");
+    }
+
+    /**
+     * Delete Review Hasil Pengembangan
+     */
+    public function destroyDevelopmentReview(string $nik, int $id)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+        $review = $employee->developmentReviews()->findOrFail($id);
+        $compName = $review->competency;
+        $review->delete();
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+            ->with('success', "Review kompetensi '{$compName}' berhasil dihapus.");
+    }
+
+    /**
+     * Update Feedback Atasan Langsung & Rekomendasi Tindak Lanjut
+     */
+    public function updateReviewFeedback(Request $request, string $nik)
+    {
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+
+        $validated = $request->validate([
+            'review_feedback_text' => 'nullable|string',
+            'review_reviewer_name' => 'nullable|string|max:150',
+            'review_reviewer_title' => 'nullable|string|max:150',
+            'review_date' => 'nullable|string|max:50',
+            'review_recommendations' => 'nullable|string',
+        ]);
+
+        $employee->update($validated);
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+            ->with('success', 'Feedback atasan dan rekomendasi tindak lanjut berhasil diperbarui.');
     }
 
     /**
@@ -883,14 +1656,15 @@ class EmployeeController extends Controller
 
             switch ($type) {
                 case 'riwayat-karir':
-                    fputcsv($handle, ['No', 'Tanggal Efektif', 'Departemen / Seksi', 'Jabatan', 'Job Class & Grade', 'Jenis Perubahan', 'Keterangan']);
+                    fputcsv($handle, ['No', 'Tanggal Efektif', 'Departemen / Seksi', 'Jabatan', 'Job Class', 'Grade', 'Jenis Perubahan', 'Keterangan']);
                     foreach ($employee->careerHistories()->orderBy('order_no')->get() as $idx => $row) {
                         fputcsv($handle, [
                             $idx + 1,
                             $row->effective_date,
                             $row->department_section,
                             $row->position,
-                            $row->job_class_grade,
+                            $row->job_class,
+                            $row->grade,
                             $row->change_type,
                             $row->notes ?? '-',
                         ]);
@@ -898,7 +1672,7 @@ class EmployeeController extends Controller
                     break;
 
                 case 'riwayat-pelatihan':
-                    fputcsv($handle, ['No', 'Tanggal', 'Nama Pelatihan', 'Kategori', 'Jenis Pelatihan', 'Penyelenggara', 'Durasi (Jam)', 'Catatan']);
+                    fputcsv($handle, ['No', 'Tanggal', 'Nama Pelatihan', 'Kategori', 'Jenis Pelatihan', 'Penyelenggara', 'Durasi (Jam)', 'Dokumentasi', 'Catatan']);
                     foreach ($employee->trainingHistories()->orderBy('order_no')->get() as $idx => $row) {
                         fputcsv($handle, [
                             $idx + 1,
@@ -908,16 +1682,18 @@ class EmployeeController extends Controller
                             $row->training_type,
                             $row->organizer,
                             $row->duration_hours,
+                            $row->documentation ? url($row->documentation) : '-',
                             $row->notes ?? '-',
                         ]);
                     }
                     break;
 
                 case 'development-gap':
-                    fputcsv($handle, ['No', 'Kompetensi', 'Level Saat Ini', 'Deskripsi Level Saat Ini', 'Level Standar Target', 'Deskripsi Level Standar', 'Gap', 'Tingkat Gap', 'Peningkatan yang Diharapkan']);
+                    fputcsv($handle, ['No', 'Kategori', 'Kompetensi', 'Level Saat Ini', 'Deskripsi Level Saat Ini', 'Target Level', 'Deskripsi Target Level', 'Gap', 'Tingkat Gap', 'Peningkatan yang Diharapkan']);
                     foreach ($employee->competencyGaps()->orderBy('order_no')->get() as $idx => $row) {
                         fputcsv($handle, [
                             $idx + 1,
+                            $row->competency_type ?: 'Manajerial',
                             $row->competency,
                             $row->current_level,
                             $row->current_desc,
@@ -941,10 +1717,11 @@ class EmployeeController extends Controller
                     break;
 
                 case 'review-pengembangan':
-                    fputcsv($handle, ['No', 'Periode', 'Kompetensi', 'Level Sebelumnya', 'Level Terkini', 'Level Target', 'Peningkatan', 'Status', 'Catatan Reviewer']);
+                    fputcsv($handle, ['No', 'Kategori', 'Periode', 'Kompetensi', 'Level Sebelumnya', 'Level Terkini', 'Level Target', 'Peningkatan', 'Status', 'Catatan Reviewer']);
                     foreach ($employee->developmentReviews()->orderBy('order_no')->get() as $idx => $row) {
                         fputcsv($handle, [
                             $idx + 1,
+                            $row->competency_type ?: 'Manajerial',
                             $row->period,
                             $row->competency,
                             $row->previous_level,
@@ -958,10 +1735,11 @@ class EmployeeController extends Controller
                     break;
 
                 case 'idp':
-                    fputcsv($handle, ['No', 'Kompetensi yang Dikembangkan', 'Tujuan Spesifik', 'Metode Pengembangan', 'Aktivitas / Program', 'PIC / Pendukung', 'Mulai', 'Selesai', 'Indikator Keberhasilan', 'Status', 'Progres (%)']);
+                    fputcsv($handle, ['No', 'Kategori', 'Kompetensi yang Dikembangkan', 'Tujuan Spesifik', 'Metode Pengembangan', 'Aktivitas / Program', 'PIC / Pendukung', 'Mulai', 'Selesai', 'Indikator Keberhasilan', 'Status', 'Progres (%)']);
                     foreach ($employee->idpActionPlans()->orderBy('order_no')->get() as $idx => $row) {
                         fputcsv($handle, [
                             $idx + 1,
+                            $row->competency_type ?: 'Manajerial',
                             $row->competency,
                             $row->specific_goal,
                             $row->development_methods,
@@ -1126,7 +1904,7 @@ class EmployeeController extends Controller
         $name = $employee->name;
         $employee->delete();
 
-        return redirect()->route('beranda')
+        return redirect()->route('data-karyawan')
             ->with('success', "Karyawan {$name} (NIK: {$nik}) berhasil dihapus dari sistem oleh Super Admin.");
     }
 
@@ -1174,7 +1952,7 @@ class EmployeeController extends Controller
             return redirect()->back()->with('error', $result['message']);
         }
 
-        $redirect = redirect()->route('beranda')->with('success', $result['message']);
+        $redirect = redirect()->route('data-karyawan')->with('success', $result['message']);
 
         if (!empty($result['errors'])) {
             $errorSummary = implode('; ', array_slice($result['errors'], 0, 4));

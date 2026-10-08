@@ -17,10 +17,13 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('beranda');
     });
 
-    // Beranda Karyawan (Halaman Utama Super Admin & HR Admin)
+    // Beranda Karyawan (Dashboard Utama Super Admin & HR Admin)
     Route::get('/beranda', [EmployeeController::class, 'index'])->name('beranda');
+
+    // Data Karyawan (Master Data, Filter, Tabel, Tambah & Impor)
+    Route::get('/data-karyawan', [EmployeeController::class, 'dataKaryawan'])->name('data-karyawan');
     Route::get('/karyawan', function () {
-        return redirect()->route('beranda', request()->query());
+        return redirect()->route('data-karyawan', request()->query());
     })->name('karyawan.index');
 
     // Super Admin Employee Management Routes
@@ -47,9 +50,11 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/karyawan/{nik}/career-history/{id}', [EmployeeController::class, 'updateCareerHistory'])->name('karyawan.career-history.update');
     Route::delete('/karyawan/{nik}/career-history/{id}', [EmployeeController::class, 'destroyCareerHistory'])->name('karyawan.career-history.destroy');
 
-    // CRUD Operations: Talent Snapshot (6 cards)
+    // CRUD Operations: Talent Snapshot (6 cards) & Performance Appraisals
     Route::post('/karyawan/{nik}/talent-snapshot', [EmployeeController::class, 'updateTalentSnapshot'])->name('karyawan.talent-snapshot.update');
     Route::post('/karyawan/{nik}/talent-snapshot/performance', [EmployeeController::class, 'updateTalentPerformance'])->name('karyawan.talent-snapshot.performance.update');
+    Route::post('/karyawan/{nik}/performance-appraisal', [EmployeeController::class, 'storeOrUpdatePerformance'])->name('karyawan.performance-appraisal.store');
+    Route::delete('/karyawan/{nik}/performance-appraisal/{id}', [EmployeeController::class, 'destroyPerformance'])->name('karyawan.performance-appraisal.destroy');
     Route::post('/karyawan/{nik}/talent-snapshot/potass', [EmployeeController::class, 'updateTalentPotass'])->name('karyawan.talent-snapshot.potass.update');
     Route::post('/karyawan/{nik}/talent-snapshot/hav-box', [EmployeeController::class, 'updateTalentHavBox'])->name('karyawan.talent-snapshot.hav-box.update');
     Route::post('/karyawan/{nik}/talent-snapshot/flying-risk', [EmployeeController::class, 'updateTalentFlyingRisk'])->name('karyawan.talent-snapshot.flying-risk.update');
@@ -89,6 +94,22 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/karyawan/{nik}/idp-action-plan', [EmployeeController::class, 'storeIdpActionPlan'])->name('karyawan.idp-action-plan.store');
     Route::put('/karyawan/{nik}/idp-action-plan/{id}', [EmployeeController::class, 'updateIdpActionPlan'])->name('karyawan.idp-action-plan.update');
     Route::delete('/karyawan/{nik}/idp-action-plan/{id}', [EmployeeController::class, 'destroyIdpActionPlan'])->name('karyawan.idp-action-plan.destroy');
+
+    // CRUD Operations: Riwayat Pelatihan
+    Route::post('/karyawan/{nik}/training-history', [EmployeeController::class, 'storeTrainingHistory'])->name('karyawan.training-history.store');
+    Route::put('/karyawan/{nik}/training-history/{id}', [EmployeeController::class, 'updateTrainingHistory'])->name('karyawan.training-history.update');
+    Route::delete('/karyawan/{nik}/training-history/{id}', [EmployeeController::class, 'destroyTrainingHistory'])->name('karyawan.training-history.destroy');
+
+    // CRUD Operations: Sertifikasi (Bagian C Riwayat Pelatihan)
+    Route::post('/karyawan/{nik}/certification', [EmployeeController::class, 'storeCertification'])->name('karyawan.certification.store');
+    Route::put('/karyawan/{nik}/certification/{id}', [EmployeeController::class, 'updateCertification'])->name('karyawan.certification.update');
+    Route::delete('/karyawan/{nik}/certification/{id}', [EmployeeController::class, 'destroyCertification'])->name('karyawan.certification.destroy');
+
+    // CRUD Operations: Review Hasil Pengembangan
+    Route::post('/karyawan/{nik}/development-review', [EmployeeController::class, 'storeDevelopmentReview'])->name('karyawan.development-review.store');
+    Route::put('/karyawan/{nik}/development-review/{id}', [EmployeeController::class, 'updateDevelopmentReview'])->name('karyawan.development-review.update');
+    Route::delete('/karyawan/{nik}/development-review/{id}', [EmployeeController::class, 'destroyDevelopmentReview'])->name('karyawan.development-review.destroy');
+    Route::post('/karyawan/{nik}/development-review/feedback', [EmployeeController::class, 'updateReviewFeedback'])->name('karyawan.development-review.feedback.update');
 
     // Update Employee Photo / Avatar (Super Admin & HR Admin)
     Route::post('/karyawan/{nik}/avatar', [EmployeeController::class, 'updateAvatar'])->name('karyawan.avatar.update');

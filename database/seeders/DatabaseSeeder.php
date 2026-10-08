@@ -133,6 +133,16 @@ class DatabaseSeeder extends Seeder
             $budi->careerHistories()->create($ch);
         }
 
+        // Performance Appraisals (Historis & 3 Tahun Terakhir)
+        $perfAppraisals = [
+            ['year' => 2024, 'rating' => 'B+', 'notes' => 'Pencapaian KPI 98%'],
+            ['year' => 2025, 'rating' => 'A', 'notes' => 'Pencapaian KPI 104%, implementasi Kaizen line manufacturing'],
+            ['year' => 2026, 'rating' => 'A', 'notes' => 'Pencapaian KPI 108%, memimpin proyek digitalisasi shopfloor'],
+        ];
+        foreach ($perfAppraisals as $pa) {
+            $budi->performanceAppraisals()->create($pa);
+        }
+
         // Talent Assessments
         $assessments = [
             ['assessment_date' => 'Aug-26', 'position_standard' => 'Manager', 'potass_score' => '106%', 'category' => 'High', 'assessor' => 'HR Development'],

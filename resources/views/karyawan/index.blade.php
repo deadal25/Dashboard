@@ -228,16 +228,6 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding-top:12px; border-top:1px solid #e2e8f0; flex-wrap:wrap; gap:10px; font-size:11.5px; color:#64748b;">
             <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
                 <div style="display:inline-flex; align-items:center; gap:6px;">
-                    <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#16a34a;"></span>
-                    <strong style="color:#0f172a;">Talent Pool:</strong>
-                    <span>Kandidat Unggulan & Suksesi</span>
-                </div>
-                <div style="display:inline-flex; align-items:center; gap:6px;">
-                    <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#ea580c;"></span>
-                    <strong style="color:#0f172a;">Non-Talent Pool:</strong>
-                    <span>Perlu Pengembangan / Evaluasi</span>
-                </div>
-                <div style="display:inline-flex; align-items:center; gap:6px;">
                     <span style="display:inline-block; width:16px; height:3px; background:#dc2626;"></span>
                     <strong style="color:#dc2626;">Garis Merah Tebal:</strong>
                     <span>Batas Minimum Kualifikasi Talent Pool</span>

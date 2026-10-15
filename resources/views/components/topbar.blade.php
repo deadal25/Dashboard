@@ -1,6 +1,13 @@
 <header class="topbar">
     <div class="topbar-brand">
-        <a href="{{ route('beranda') }}" style="display:flex; align-items:baseline; gap:12px;">
+        <button type="button" id="mobile-sidebar-toggle" class="mobile-sidebar-toggle-btn" aria-label="Buka Menu Navigasi" title="Buka Menu Navigasi">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <a href="{{ route('dashboard') }}" class="brand-link" style="display:flex; align-items:baseline; gap:12px;">
             <span class="brand-title">MAP-IN</span>
             <span class="brand-subtitle">TALENT & CAREER MANAGEMENT</span>
         </a>

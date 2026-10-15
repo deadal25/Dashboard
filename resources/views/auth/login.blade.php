@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - MAP-IN: Talent & Career Management</title>
-    <link rel="stylesheet" href="/css/map-in.css">
+    <link rel="stylesheet" href="{{ asset('css/map-in.css') }}">
     <style>
         .login-page-body {
             background: linear-gradient(135deg, #0d1b2e 0%, #1a2a44 50%, #243b5e 100%);

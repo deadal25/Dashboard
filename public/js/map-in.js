@@ -79,6 +79,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const trainingCountInfo = document.getElementById('training-table-count-info');
 
     if (trainingTable && (searchTrainingInput || filterYear || filterCategory || filterType)) {
+        const sectionSummary = document.getElementById('section-ringkasan-pelatihan');
+
+        // Dynamically detect all years from table rows in Bagian B
+        const rowsForYears = trainingTable.querySelectorAll('tr:not(.empty-filter-row)');
+        const detectedYears = [];
+        rowsForYears.forEach(r => {
+            const rawY = (r.getAttribute('data-year') || '').trim();
+            const y = parseInt(rawY, 10);
+            if (!isNaN(y) && !detectedYears.includes(y)) {
+                detectedYears.push(y);
+            }
+        });
+        detectedYears.sort((a, b) => b - a); // descending order: e.g. [2027, 2026, 2025, ...]
+
+        // Ensure filterYear dropdown in Bagian B automatically contains all years from the table in order
+        if (filterYear && detectedYears.length > 0) {
+            const existingYearValues = Array.from(filterYear.options).map(o => o.value);
+            detectedYears.forEach(y => {
+                const strY = String(y);
+                if (!existingYearValues.includes(strY)) {
+                    const opt = document.createElement('option');
+                    opt.value = strY;
+                    opt.textContent = strY;
+
+                    // Insert in descending order after 'all' option
+                    let inserted = false;
+                    for (let i = 1; i < filterYear.options.length; i++) {
+                        const existingVal = parseInt(filterYear.options[i].value, 10);
+                        if (!isNaN(existingVal) && y > existingVal) {
+                            filterYear.insertBefore(opt, filterYear.options[i]);
+                            inserted = true;
+                            break;
+                        }
+                    }
+                    if (!inserted) {
+                        filterYear.appendChild(opt);
+                    }
+                }
+            });
+        }
+
+        // The latest year is the maximum year found in the table, or sectionSummary data-attribute, or current year
+        const latestDetectedYear = detectedYears.length > 0 ? detectedYears[0] : null;
+        const defaultCurrentYear = latestDetectedYear
+            ? String(latestDetectedYear)
+            : (sectionSummary ? (sectionSummary.getAttribute('data-current-year') || '2026') : '2026');
+        const defaultCurrentYearFy = 'FY' + defaultCurrentYear.slice(-2);
+
+        const statTotalPelatihan = document.getElementById('stat-total-pelatihan');
+        const statTotalJam = document.getElementById('stat-total-jam');
+        const statTahunIniTitle = document.getElementById('stat-tahun-ini-title');
+        const statTahunIniCount = document.getElementById('stat-tahun-ini-count');
+        const statTahunIniSub = document.getElementById('stat-tahun-ini-sub');
+        const statTahunIniJamTitle = document.getElementById('stat-tahun-ini-jam-title');
+        const statTahunIniJam = document.getElementById('stat-tahun-ini-jam');
+
         const filterRows = () => {
             const query = searchTrainingInput ? searchTrainingInput.value.toLowerCase().trim() : '';
             const yr = filterYear ? filterYear.value : 'all';
@@ -90,6 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
             let visibleDuration = 0;
             let totalRowsCount = 0;
 
+            const targetYear = (yr === 'all') ? String(defaultCurrentYear) : String(yr);
+            const targetFy = (yr === 'all') ? defaultCurrentYearFy : ('FY' + String(yr).slice(-2));
+
+            let targetYearDocCount = 0;
+            let targetYearDocHours = 0;
+
             rows.forEach(row => {
                 // Skip if it's the server-side empty message row
                 if (row.querySelector('td[colspan]')) return;
@@ -100,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rowCat = (row.getAttribute('data-category') || '').trim();
                 const rowType = (row.getAttribute('data-type') || '').trim();
                 const rowDur = parseFloat(row.getAttribute('data-duration') || '0');
+                const rowHasDoc = (row.getAttribute('data-has-doc') || '0') === '1';
 
                 const matchesSearch = !query || text.includes(query);
                 const matchesYear = (yr === 'all' || rowYear === yr);
@@ -109,11 +172,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (matchesSearch && matchesYear && matchesCat && matchesType) {
                     row.style.display = '';
                     visibleCount++;
-                    visibleDuration += isNaN(rowDur) ? 0 : rowDur;
+                    const dur = isNaN(rowDur) ? 0 : rowDur;
+                    visibleDuration += dur;
+
+                    if (rowYear === targetYear) {
+                        if (rowHasDoc) {
+                            targetYearDocCount++;
+                            targetYearDocHours += dur;
+                        }
+                    }
                 } else {
                     row.style.display = 'none';
                 }
             });
+
+            // Update Section A - Ringkasan Pelatihan
+            if (statTotalPelatihan) {
+                statTotalPelatihan.textContent = visibleCount;
+            }
+            if (statTotalJam) {
+                const formattedTotalDur = (visibleDuration % 1 === 0) ? visibleDuration : visibleDuration.toFixed(1);
+                statTotalJam.textContent = formattedTotalDur;
+            }
+            if (statTahunIniTitle) {
+                statTahunIniTitle.textContent = (yr === 'all' || String(yr) === String(defaultCurrentYear))
+                    ? `Pelatihan Tahun Ini (${defaultCurrentYearFy})`
+                    : `Pelatihan (${targetFy})`;
+            }
+            if (statTahunIniCount) {
+                statTahunIniCount.textContent = targetYearDocCount;
+            }
+            if (statTahunIniSub) {
+                statTahunIniSub.textContent = 'Kelas / Program';
+            }
+            if (statTahunIniJamTitle) {
+                statTahunIniJamTitle.textContent = (yr === 'all' || String(yr) === String(defaultCurrentYear))
+                    ? 'Jam Pelatihan Tahun Ini'
+                    : `Jam Pelatihan (${targetFy})`;
+            }
+            if (statTahunIniJam) {
+                const formattedDocHours = (targetYearDocHours % 1 === 0) ? targetYearDocHours : targetYearDocHours.toFixed(1);
+                statTahunIniJam.textContent = formattedDocHours;
+            }
 
             // Update info text
             if (trainingCountInfo) {
@@ -350,6 +450,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const formatIndonesianSingleDate = (isoDateStr) => {
+        if (!isoDateStr) return '';
+        const parts = isoDateStr.split('-');
+        if (parts.length < 3) return isoDateStr;
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10);
+        const day = parseInt(parts[2], 10);
+        if (!year || !month || !day) return isoDateStr;
+        return `${day} ${idTrainingMonths[month] || month} ${year}`;
+    };
+
+    const parseIndonesianDateToIso = (dateStr) => {
+        if (!dateStr) return '';
+        dateStr = dateStr.trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+        if (/seumur hidup/i.test(dateStr) || /tanpa batas/i.test(dateStr)) return '';
+        const monthsMap = {
+            'jan': '01', 'januari': '01',
+            'feb': '02', 'februari': '02',
+            'mar': '03', 'maret': '03',
+            'apr': '04', 'april': '04',
+            'mei': '05', 'may': '05',
+            'jun': '06', 'juni': '06',
+            'jul': '07', 'juli': '07',
+            'agu': '08', 'agt': '08', 'agustus': '08', 'aug': '08',
+            'sep': '09', 'september': '09',
+            'okt': '10', 'oktober': '10', 'oct': '10',
+            'nov': '11', 'november': '11',
+            'des': '12', 'desember': '12', 'dec': '12'
+        };
+        const m = dateStr.match(/^(\d{1,2})\s+([a-zA-Z]+)\s+(\d{4})$/);
+        if (m) {
+            const day = m[1].padStart(2, '0');
+            const monthKey = m[2].toLowerCase();
+            const month = monthsMap[monthKey];
+            const year = m[3];
+            if (month) return `${year}-${month}-${day}`;
+        }
+        return '';
+    };
+
     const setupTrainingDateRange = (startId, endId, previewId, textId, hiddenId) => {
         const startEl = document.getElementById(startId);
         const endEl = document.getElementById(endId);
@@ -391,11 +532,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectEditPelatihan && formEditPelatihan) {
         const updateEditPelatihanFields = () => {
             const opt = selectEditPelatihan.selectedOptions[0];
-            if (!opt) return;
+            const btnDelPel = document.getElementById('btn-delete-pelatihan-from-edit');
+            if (!opt) {
+                if (btnDelPel) btnDelPel.style.display = 'none';
+                return;
+            }
+            if (btnDelPel) btnDelPel.style.display = 'inline-flex';
 
             const id = opt.value;
+            const baseAction = formEditPelatihan.getAttribute('data-base-action');
             const currentNik = window.location.pathname.split('/')[2] || '012345';
-            formEditPelatihan.action = `/karyawan/${currentNik}/training-history/${id}`;
+            formEditPelatihan.action = baseAction ? `${baseAction}/${id}` : `/karyawan/${currentNik}/training-history/${id}`;
 
             const nameEl = document.getElementById('edit-training-name');
             if (nameEl) nameEl.value = opt.getAttribute('data-name') || '';
@@ -477,6 +624,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectEditPelatihan.addEventListener('change', updateEditPelatihanFields);
         updateEditPelatihanFields();
+
+        document.querySelectorAll('[data-modal-target="modal-edit-pelatihan"]').forEach(btn => {
+            btn.addEventListener('click', updateEditPelatihanFields);
+        });
+
+        // Delete Training History from Edit Modal
+        const btnDeletePelatihanFromEdit = document.getElementById('btn-delete-pelatihan-from-edit');
+        if (btnDeletePelatihanFromEdit) {
+            btnDeletePelatihanFromEdit.addEventListener('click', function() {
+                const opt = selectEditPelatihan.selectedOptions[0];
+                if (!opt) return;
+                const trainingName = opt.getAttribute('data-name') || opt.textContent.trim();
+                if (confirm(`Apakah Anda yakin ingin menghapus data pelatihan "${trainingName}"?`)) {
+                    const formDel = document.getElementById('form-hapus-pelatihan');
+                    if (formDel) {
+                        const id = opt.value;
+                        const baseAction = formDel.getAttribute('data-base-action');
+                        const currentNik = window.location.pathname.split('/')[2] || '012345';
+                        formDel.action = baseAction ? `${baseAction}/${id}` : `/karyawan/${currentNik}/training-history/${id}`;
+                        formDel.submit();
+                    }
+                }
+            });
+        }
     }
 
     // 5.3 Pre-fill Delete Training History Modal
@@ -485,25 +656,179 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectDeletePelatihan && formDeletePelatihan) {
         const updateDeletePelatihanAction = () => {
             const id = selectDeletePelatihan.value;
+            const baseAction = formDeletePelatihan.getAttribute('data-base-action');
             const currentNik = window.location.pathname.split('/')[2] || '012345';
-            formDeletePelatihan.action = `/karyawan/${currentNik}/training-history/${id}`;
+            formDeletePelatihan.action = baseAction ? `${baseAction}/${id}` : `/karyawan/${currentNik}/training-history/${id}`;
         };
 
         selectDeletePelatihan.addEventListener('change', updateDeletePelatihanAction);
         updateDeletePelatihanAction();
+
+        document.querySelectorAll('[data-modal-target="modal-hapus-pelatihan"]').forEach(btn => {
+            btn.addEventListener('click', updateDeletePelatihanAction);
+        });
     }
 
-    // 5.4 Pre-fill Edit Certification Modal
+    // 5.4.1 Add Certification Modal Listeners & Document Validation
+    const formTambahSertifikasi = document.getElementById('form-tambah-sertifikasi');
+    const addCertObtained = document.getElementById('add-cert-obtained');
+    const addCertObtainedPreview = document.getElementById('add-cert-obtained-preview');
+    const addCertObtainedPreviewText = document.getElementById('add-cert-obtained-preview-text');
+    const addCertValid = document.getElementById('add-cert-valid');
+    const addCertValidPreview = document.getElementById('add-cert-valid-preview');
+    const addCertValidPreviewText = document.getElementById('add-cert-valid-preview-text');
+    const addCertLifetime = document.getElementById('add-cert-lifetime');
+    const addCertDocFile = document.getElementById('add-cert-doc-file');
+    const addCertDocError = document.getElementById('add-cert-doc-error');
+
+    if (addCertObtained) {
+        const updateAddObtainedPreview = () => {
+            const val = addCertObtained.value;
+            if (val && addCertObtainedPreview && addCertObtainedPreviewText) {
+                addCertObtainedPreviewText.textContent = formatIndonesianSingleDate(val);
+                addCertObtainedPreview.style.display = 'block';
+            } else if (addCertObtainedPreview) {
+                addCertObtainedPreview.style.display = 'none';
+            }
+        };
+        addCertObtained.addEventListener('input', updateAddObtainedPreview);
+        addCertObtained.addEventListener('change', updateAddObtainedPreview);
+    }
+
+    if (addCertValid) {
+        const updateAddValidPreview = () => {
+            if (addCertLifetime && addCertLifetime.checked) {
+                if (addCertValidPreview && addCertValidPreviewText) {
+                    addCertValidPreviewText.textContent = 'Seumur Hidup / Tanpa Batas Waktu';
+                    addCertValidPreview.style.display = 'block';
+                }
+                return;
+            }
+            const val = addCertValid.value;
+            if (val && addCertValidPreview && addCertValidPreviewText) {
+                addCertValidPreviewText.textContent = formatIndonesianSingleDate(val);
+                addCertValidPreview.style.display = 'block';
+            } else if (addCertValidPreview) {
+                addCertValidPreview.style.display = 'none';
+            }
+        };
+        addCertValid.addEventListener('input', updateAddValidPreview);
+        addCertValid.addEventListener('change', updateAddValidPreview);
+
+        if (addCertLifetime) {
+            addCertLifetime.addEventListener('change', () => {
+                if (addCertLifetime.checked) {
+                    addCertValid.value = '';
+                    addCertValid.disabled = true;
+                    if (addCertValidPreview && addCertValidPreviewText) {
+                        addCertValidPreviewText.textContent = 'Seumur Hidup / Tanpa Batas Waktu';
+                        addCertValidPreview.style.display = 'block';
+                    }
+                } else {
+                    addCertValid.disabled = false;
+                    updateAddValidPreview();
+                }
+            });
+        }
+    }
+
+    if (formTambahSertifikasi && addCertDocFile) {
+        formTambahSertifikasi.addEventListener('submit', function (e) {
+            if (!addCertDocFile.files || addCertDocFile.files.length === 0) {
+                e.preventDefault();
+                if (addCertDocError) addCertDocError.style.display = 'block';
+                alert('Dokumen bukti sertifikasi wajib diunggah sebelum menyimpan sertifikasi!');
+                addCertDocFile.focus();
+                return false;
+            }
+            if (addCertDocError) addCertDocError.style.display = 'none';
+        });
+
+        addCertDocFile.addEventListener('change', function () {
+            if (addCertDocFile.files && addCertDocFile.files.length > 0) {
+                if (addCertDocError) addCertDocError.style.display = 'none';
+            }
+        });
+    }
+
+    // 5.4.2 Pre-fill & Handlers for Edit Certification Modal
     const selectEditSertifikasi = document.getElementById('edit-select-sertifikasi');
     const formEditSertifikasi = document.getElementById('form-edit-sertifikasi');
+    const editCertObtained = document.getElementById('edit-cert-obtained');
+    const editCertObtainedPreview = document.getElementById('edit-cert-obtained-preview');
+    const editCertObtainedPreviewText = document.getElementById('edit-cert-obtained-preview-text');
+    const editCertValid = document.getElementById('edit-cert-valid');
+    const editCertValidPreview = document.getElementById('edit-cert-valid-preview');
+    const editCertValidPreviewText = document.getElementById('edit-cert-valid-preview-text');
+    const editCertLifetime = document.getElementById('edit-cert-lifetime');
+    const editCertDocFile = document.getElementById('edit-cert-doc-file');
+    const editCertDocError = document.getElementById('edit-cert-doc-error');
+
+    if (editCertObtained) {
+        const updateEditObtainedPreview = () => {
+            const val = editCertObtained.value;
+            if (val && editCertObtainedPreview && editCertObtainedPreviewText) {
+                editCertObtainedPreviewText.textContent = formatIndonesianSingleDate(val);
+                editCertObtainedPreview.style.display = 'block';
+            } else if (editCertObtainedPreview) {
+                editCertObtainedPreview.style.display = 'none';
+            }
+        };
+        editCertObtained.addEventListener('input', updateEditObtainedPreview);
+        editCertObtained.addEventListener('change', updateEditObtainedPreview);
+    }
+
+    if (editCertValid) {
+        const updateEditValidPreview = () => {
+            if (editCertLifetime && editCertLifetime.checked) {
+                if (editCertValidPreview && editCertValidPreviewText) {
+                    editCertValidPreviewText.textContent = 'Seumur Hidup / Tanpa Batas Waktu';
+                    editCertValidPreview.style.display = 'block';
+                }
+                return;
+            }
+            const val = editCertValid.value;
+            if (val && editCertValidPreview && editCertValidPreviewText) {
+                editCertValidPreviewText.textContent = formatIndonesianSingleDate(val);
+                editCertValidPreview.style.display = 'block';
+            } else if (editCertValidPreview) {
+                editCertValidPreview.style.display = 'none';
+            }
+        };
+        editCertValid.addEventListener('input', updateEditValidPreview);
+        editCertValid.addEventListener('change', updateEditValidPreview);
+
+        if (editCertLifetime) {
+            editCertLifetime.addEventListener('change', () => {
+                if (editCertLifetime.checked) {
+                    editCertValid.value = '';
+                    editCertValid.disabled = true;
+                    if (editCertValidPreview && editCertValidPreviewText) {
+                        editCertValidPreviewText.textContent = 'Seumur Hidup / Tanpa Batas Waktu';
+                        editCertValidPreview.style.display = 'block';
+                    }
+                } else {
+                    editCertValid.disabled = false;
+                    updateEditValidPreview();
+                }
+            });
+        }
+    }
+
     if (selectEditSertifikasi && formEditSertifikasi) {
         const updateEditSertifikasiFields = () => {
             const opt = selectEditSertifikasi.selectedOptions[0];
-            if (!opt) return;
+            const btnDelCert = document.getElementById('btn-delete-sertifikasi-from-edit');
+            if (!opt) {
+                if (btnDelCert) btnDelCert.style.display = 'none';
+                return;
+            }
+            if (btnDelCert) btnDelCert.style.display = 'inline-flex';
 
             const id = opt.value;
+            const baseAction = formEditSertifikasi.getAttribute('data-base-action');
             const currentNik = window.location.pathname.split('/')[2] || '012345';
-            formEditSertifikasi.action = `/karyawan/${currentNik}/certification/${id}`;
+            formEditSertifikasi.action = baseAction ? `${baseAction}/${id}` : `/karyawan/${currentNik}/certification/${id}`;
 
             const nameEl = document.getElementById('edit-cert-name');
             if (nameEl) nameEl.value = opt.getAttribute('data-name') || '';
@@ -511,23 +836,54 @@ document.addEventListener('DOMContentLoaded', () => {
             const issuerEl = document.getElementById('edit-cert-issuer');
             if (issuerEl) issuerEl.value = opt.getAttribute('data-issuer') || '';
 
-            const obtainedEl = document.getElementById('edit-cert-obtained');
-            if (obtainedEl) obtainedEl.value = opt.getAttribute('data-obtained') || '';
+            // Tanggal Diperoleh
+            const rawObtainedIso = opt.getAttribute('data-obtained-iso') || parseIndonesianDateToIso(opt.getAttribute('data-obtained') || '');
+            if (editCertObtained) {
+                editCertObtained.value = rawObtainedIso || '';
+                if (rawObtainedIso && editCertObtainedPreview && editCertObtainedPreviewText) {
+                    editCertObtainedPreviewText.textContent = formatIndonesianSingleDate(rawObtainedIso);
+                    editCertObtainedPreview.style.display = 'block';
+                } else if (editCertObtainedPreview) {
+                    editCertObtainedPreview.style.display = 'none';
+                }
+            }
 
-            const validEl = document.getElementById('edit-cert-valid');
-            if (validEl) validEl.value = opt.getAttribute('data-valid') || '';
+            // Masa Berlaku Hingga & Seumur Hidup
+            const isLifetime = opt.getAttribute('data-is-lifetime') === '1' || (opt.getAttribute('data-valid') || '').toLowerCase().includes('seumur hidup');
+            if (editCertLifetime) editCertLifetime.checked = isLifetime;
+
+            if (editCertValid) {
+                if (isLifetime) {
+                    editCertValid.value = '';
+                    editCertValid.disabled = true;
+                    if (editCertValidPreview && editCertValidPreviewText) {
+                        editCertValidPreviewText.textContent = 'Seumur Hidup / Tanpa Batas Waktu';
+                        editCertValidPreview.style.display = 'block';
+                    }
+                } else {
+                    editCertValid.disabled = false;
+                    const rawValidIso = opt.getAttribute('data-valid-iso') || parseIndonesianDateToIso(opt.getAttribute('data-valid') || '');
+                    editCertValid.value = rawValidIso || '';
+                    if (rawValidIso && editCertValidPreview && editCertValidPreviewText) {
+                        editCertValidPreviewText.textContent = formatIndonesianSingleDate(rawValidIso);
+                        editCertValidPreview.style.display = 'block';
+                    } else if (editCertValidPreview) {
+                        editCertValidPreview.style.display = 'none';
+                    }
+                }
+            }
 
             const activeEl = document.getElementById('edit-cert-active');
             if (activeEl) activeEl.checked = (opt.getAttribute('data-active') === '1');
 
-            // Documentation preview & remove checkbox
+            // Documentation preview & validation status
             const docPath = opt.getAttribute('data-doc') || '';
             const docCurrentEl = document.getElementById('edit-cert-doc-current');
-            const removeWrapEl = document.getElementById('edit-cert-remove-doc-wrap');
-            const removeCheckbox = document.getElementById('edit-cert-remove-doc');
-            const fileInput = document.getElementById('edit-cert-doc-file');
-            if (fileInput) fileInput.value = '';
-            if (removeCheckbox) removeCheckbox.checked = false;
+            const docWarningEl = document.getElementById('edit-cert-doc-warning');
+            const docRequiredBadge = document.getElementById('edit-cert-doc-required-badge');
+            const docHelpEl = document.getElementById('edit-cert-doc-help');
+            if (editCertDocFile) editCertDocFile.value = '';
+            if (editCertDocError) editCertDocError.style.display = 'none';
 
             if (docPath && docCurrentEl) {
                 const isImg = opt.getAttribute('data-is-image') === '1';
@@ -549,16 +905,68 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
                 docCurrentEl.style.display = 'block';
-                if (removeWrapEl) removeWrapEl.style.display = 'flex';
-            } else if (docCurrentEl) {
-                docCurrentEl.innerHTML = '<span style="color:#94a3b8; font-style:italic;">Belum ada dokumen sertifikat yang diunggah.</span>';
-                docCurrentEl.style.display = 'block';
-                if (removeWrapEl) removeWrapEl.style.display = 'none';
+                if (docWarningEl) docWarningEl.style.display = 'none';
+                if (docRequiredBadge) docRequiredBadge.style.display = 'none';
+                if (editCertDocFile) editCertDocFile.required = false;
+                if (docHelpEl) docHelpEl.textContent = 'Pilih file baru jika ingin mengganti dokumen bukti sertifikasi (PDF, PNG, JPG, JPEG, WEBP - Maks. 10 MB).';
+            } else {
+                if (docCurrentEl) docCurrentEl.style.display = 'none';
+                if (docWarningEl) docWarningEl.style.display = 'block';
+                if (docRequiredBadge) docRequiredBadge.style.display = 'inline';
+                if (editCertDocFile) editCertDocFile.required = true;
+                if (docHelpEl) docHelpEl.textContent = 'Wajib mengunggah berkas dokumen bukti sertifikasi (PDF, PNG, JPG, JPEG, WEBP - Maks. 10 MB).';
             }
         };
 
         selectEditSertifikasi.addEventListener('change', updateEditSertifikasiFields);
         updateEditSertifikasiFields();
+
+        document.querySelectorAll('[data-modal-target="modal-edit-sertifikasi"]').forEach(btn => {
+            btn.addEventListener('click', updateEditSertifikasiFields);
+        });
+
+        if (editCertDocFile) {
+            editCertDocFile.addEventListener('change', function () {
+                if (editCertDocFile.files && editCertDocFile.files.length > 0) {
+                    if (editCertDocError) editCertDocError.style.display = 'none';
+                }
+            });
+        }
+
+        formEditSertifikasi.addEventListener('submit', function (e) {
+            const opt = selectEditSertifikasi.selectedOptions[0];
+            const hasExistingDoc = opt && !!opt.getAttribute('data-doc');
+            const hasNewFile = editCertDocFile && editCertDocFile.files && editCertDocFile.files.length > 0;
+
+            if (!hasExistingDoc && !hasNewFile) {
+                e.preventDefault();
+                if (editCertDocError) editCertDocError.style.display = 'block';
+                alert('Dokumen bukti sertifikasi wajib diunggah sebelum menyimpan sertifikasi!');
+                if (editCertDocFile) editCertDocFile.focus();
+                return false;
+            }
+            if (editCertDocError) editCertDocError.style.display = 'none';
+        });
+
+        // Delete Certification from Edit Modal
+        const btnDeleteSertifikasiFromEdit = document.getElementById('btn-delete-sertifikasi-from-edit');
+        if (btnDeleteSertifikasiFromEdit) {
+            btnDeleteSertifikasiFromEdit.addEventListener('click', function() {
+                const opt = selectEditSertifikasi.selectedOptions[0];
+                if (!opt) return;
+                const certName = opt.getAttribute('data-name') || opt.textContent.trim();
+                if (confirm(`Apakah Anda yakin ingin menghapus data sertifikasi "${certName}"?`)) {
+                    const formDel = document.getElementById('form-hapus-sertifikasi');
+                    if (formDel) {
+                        const id = opt.value;
+                        const baseAction = formDel.getAttribute('data-base-action');
+                        const currentNik = window.location.pathname.split('/')[2] || '012345';
+                        formDel.action = baseAction ? `${baseAction}/${id}` : `/karyawan/${currentNik}/certification/${id}`;
+                        formDel.submit();
+                    }
+                }
+            });
+        }
     }
 
     // 5.5 Pre-fill Delete Certification Modal
@@ -567,12 +975,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectDeleteSertifikasi && formDeleteSertifikasi) {
         const updateDeleteSertifikasiAction = () => {
             const id = selectDeleteSertifikasi.value;
+            const baseAction = formDeleteSertifikasi.getAttribute('data-base-action');
             const currentNik = window.location.pathname.split('/')[2] || '012345';
-            formDeleteSertifikasi.action = `/karyawan/${currentNik}/certification/${id}`;
+            formDeleteSertifikasi.action = baseAction ? `${baseAction}/${id}` : `/karyawan/${currentNik}/certification/${id}`;
         };
 
         selectDeleteSertifikasi.addEventListener('change', updateDeleteSertifikasiAction);
         updateDeleteSertifikasiAction();
+
+        document.querySelectorAll('[data-modal-target="modal-hapus-sertifikasi"]').forEach(btn => {
+            btn.addEventListener('click', updateDeleteSertifikasiAction);
+        });
     }
 
     // 6. Sub-tab Switcher for ICP (D1 vs D2)
@@ -1073,6 +1486,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         switcher.value = section;
                         switcher.dispatchEvent(new Event('change'));
                     }
+                    if (targetModalId === 'modal-tambah-review' && typeof window.switchTambahReviewSection === 'function') {
+                        window.switchTambahReviewSection(section);
+                    }
+                    if (targetModalId === 'modal-edit-review' && typeof window.switchEditReviewSection === 'function') {
+                        window.switchEditReviewSection(section);
+                    }
                 }
                 const preselectType = btn.getAttribute('data-preselect-type');
                 if (preselectType) {
@@ -1081,8 +1500,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         typeSelect.value = preselectType;
                         typeSelect.dispatchEvent(new Event('change'));
                     }
-                    if (targetModalId === 'modal-edit-review' || targetModalId === 'modal-hapus-review') {
-                        const selectItem = targetModal.querySelector('#select-edit-review-item, #select-del-review-item');
+                    if (targetModalId === 'modal-edit-review' || targetModalId === 'modal-hapus-review' || targetModalId === 'modal-edit-idp' || targetModalId === 'modal-hapus-idp') {
+                        const selectItem = targetModal.querySelector('#select-edit-review-item, #select-del-review-item, #select-edit-idp-item, #select-del-idp-item, #select-edit-idp-b-item, #select-edit-idp-c-item, #select-del-idp-b-item, #select-del-idp-c-item');
                         if (selectItem) {
                             for (let i = 0; i < selectItem.options.length; i++) {
                                 const opt = selectItem.options[i];
@@ -1099,6 +1518,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+    });
+
+    // Sync review modal section switcher when opened from top toolbar
+    document.querySelectorAll('[data-modal-target="modal-tambah-review"], [data-modal-target="modal-edit-review"]').forEach(btn => {
+        if (!btn.hasAttribute('data-preselect-section')) {
+            btn.addEventListener('click', () => {
+                const targetModalId = btn.getAttribute('data-modal-target');
+                const targetModal = document.getElementById(targetModalId);
+                if (targetModal) {
+                    const switcher = targetModal.querySelector('.section-switcher');
+                    if (switcher) {
+                        const sec = switcher.value || 'B';
+                        if (targetModalId === 'modal-tambah-review' && typeof window.switchTambahReviewSection === 'function') {
+                            window.switchTambahReviewSection(sec);
+                        }
+                        if (targetModalId === 'modal-edit-review' && typeof window.switchEditReviewSection === 'function') {
+                            window.switchEditReviewSection(sec);
+                        }
+                    }
+                }
+            });
+        }
     });
 
     // 11.3 C4 Kekuatan Utama: Pre-fill Edit and Action
@@ -1432,7 +1873,104 @@ document.addEventListener('DOMContentLoaded', () => {
         updateE2Del();
     }
 
-    // 11.13 Competency Gap: Pre-fill Edit and Action
+    // 11.13 Competency Gap: Pre-fill Edit and Action (Bagian B - Manajerial)
+    const selectEditGapB = document.getElementById('select-edit-gap-b-item');
+    const formEditGapB = document.getElementById('form-edit-gap-b');
+    if (selectEditGapB && formEditGapB) {
+        const updateGapEditB = () => {
+            const opt = selectEditGapB.selectedOptions[0];
+            if (!opt || !opt.value) return;
+            const id = opt.value;
+            const nik = getCurrentEmployeeNik();
+            formEditGapB.action = `/karyawan/${nik}/competency-gap/${id}`;
+            const compInput = document.getElementById('edit-gap-b-comp');
+            const currInput = document.getElementById('edit-gap-b-curr');
+            const currDescInput = document.getElementById('edit-gap-b-currdesc');
+            const stdInput = document.getElementById('edit-gap-b-std');
+            const stdDescInput = document.getElementById('edit-gap-b-stddesc');
+            const impInput = document.getElementById('edit-gap-b-improvement');
+            if (compInput) compInput.value = opt.getAttribute('data-comp') || '';
+            if (currInput) currInput.value = opt.getAttribute('data-curr') || '1';
+            if (currDescInput) currDescInput.value = opt.getAttribute('data-currdesc') || '';
+            if (stdInput) stdInput.value = opt.getAttribute('data-std') || '1';
+            if (stdDescInput) stdDescInput.value = opt.getAttribute('data-stddesc') || '';
+            if (impInput) impInput.value = opt.getAttribute('data-improvement') || '';
+        };
+        selectEditGapB.addEventListener('change', updateGapEditB);
+        updateGapEditB();
+    }
+
+    // 11.13b Competency Gap: Pre-fill Edit and Action (Bagian C - Technical)
+    const selectEditGapC = document.getElementById('select-edit-gap-c-item');
+    const formEditGapC = document.getElementById('form-edit-gap-c');
+    if (selectEditGapC && formEditGapC) {
+        const updateGapEditC = () => {
+            const opt = selectEditGapC.selectedOptions[0];
+            if (!opt || !opt.value) return;
+            const id = opt.value;
+            const nik = getCurrentEmployeeNik();
+            formEditGapC.action = `/karyawan/${nik}/competency-gap/${id}`;
+            const compInput = document.getElementById('edit-gap-c-comp');
+            const currInput = document.getElementById('edit-gap-c-curr');
+            const currDescInput = document.getElementById('edit-gap-c-currdesc');
+            const stdInput = document.getElementById('edit-gap-c-std');
+            const stdDescInput = document.getElementById('edit-gap-c-stddesc');
+            const impInput = document.getElementById('edit-gap-c-improvement');
+            if (compInput) compInput.value = opt.getAttribute('data-comp') || '';
+            if (currInput) currInput.value = opt.getAttribute('data-curr') || '1';
+            if (currDescInput) currDescInput.value = opt.getAttribute('data-currdesc') || '';
+            if (stdInput) stdInput.value = opt.getAttribute('data-std') || '1';
+            if (stdDescInput) stdDescInput.value = opt.getAttribute('data-stddesc') || '';
+            if (impInput) impInput.value = opt.getAttribute('data-improvement') || '';
+        };
+        selectEditGapC.addEventListener('change', updateGapEditC);
+        updateGapEditC();
+    }
+
+    // 11.13c Inline Delete Buttons in Edit Modal (Kiri Bawah)
+    const btnHapusGapB = document.getElementById('btn-hapus-gap-b');
+    if (btnHapusGapB) {
+        btnHapusGapB.addEventListener('click', () => {
+            const select = document.getElementById('select-edit-gap-b-item');
+            if (!select || !select.value) {
+                alert('Pilih data gap kompetensi manajerial yang ingin dihapus terlebih dahulu.');
+                return;
+            }
+            const opt = select.selectedOptions[0];
+            const compName = opt ? (opt.getAttribute('data-comp') || opt.textContent.trim()) : 'data ini';
+            if (confirm(`Apakah Anda yakin ingin menghapus gap kompetensi manajerial "${compName}"?`)) {
+                const formDel = document.getElementById('form-inline-hapus-gap');
+                if (formDel) {
+                    const nik = getCurrentEmployeeNik();
+                    formDel.action = `/karyawan/${nik}/competency-gap/${select.value}`;
+                    formDel.submit();
+                }
+            }
+        });
+    }
+
+    const btnHapusGapC = document.getElementById('btn-hapus-gap-c');
+    if (btnHapusGapC) {
+        btnHapusGapC.addEventListener('click', () => {
+            const select = document.getElementById('select-edit-gap-c-item');
+            if (!select || !select.value) {
+                alert('Pilih data gap kompetensi technical yang ingin dihapus terlebih dahulu.');
+                return;
+            }
+            const opt = select.selectedOptions[0];
+            const compName = opt ? (opt.getAttribute('data-comp') || opt.textContent.trim()) : 'data ini';
+            if (confirm(`Apakah Anda yakin ingin menghapus gap kompetensi technical "${compName}"?`)) {
+                const formDel = document.getElementById('form-inline-hapus-gap');
+                if (formDel) {
+                    const nik = getCurrentEmployeeNik();
+                    formDel.action = `/karyawan/${nik}/competency-gap/${select.value}`;
+                    formDel.submit();
+                }
+            }
+        });
+    }
+
+    // Backwards-compatible legacy gap handlers
     const selectEditGap = document.getElementById('select-edit-gap-item');
     const formEditGap = document.getElementById('form-edit-gap-detail');
     if (selectEditGap && formEditGap) {
@@ -1461,7 +1999,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateGapEdit();
     }
 
-    // 11.14 Competency Gap: Pre-fill Delete Action
     const selectDelGap = document.getElementById('select-del-gap-item');
     const formDelGap = document.getElementById('form-hapus-gap');
     if (selectDelGap && formDelGap) {
@@ -1474,55 +2011,316 @@ document.addEventListener('DOMContentLoaded', () => {
         updateGapDel();
     }
 
-    // 11.15 IDP Action Plan: Pre-fill Edit and Action
-    const selectEditIdp = document.getElementById('select-edit-idp-item');
-    const formEditIdp = document.getElementById('form-edit-idp-action');
-    if (selectEditIdp && formEditIdp) {
-        const updateIdpEdit = () => {
-            const opt = selectEditIdp.selectedOptions[0];
-            if (!opt) return;
+    // Helper: Parse display date (e.g. "Jun 2026", "15 Jun 2026", "2026-06-01") to ISO "YYYY-MM-DD" for calendar inputs
+    const parseToIsoDate = (str) => {
+        if (!str) return '';
+        str = str.trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+            return str;
+        }
+        const monthMap = {
+            'jan': '01', 'januari': '01', 'january': '01',
+            'feb': '02', 'februari': '02', 'february': '02',
+            'mar': '03', 'maret': '03', 'march': '03',
+            'apr': '04', 'april': '04',
+            'mei': '05', 'may': '05',
+            'jun': '06', 'juni': '06', 'june': '06',
+            'jul': '07', 'juli': '07', 'july': '07',
+            'agu': '08', 'ags': '08', 'agust': '08', 'agustus': '08', 'aug': '08', 'august': '08',
+            'sep': '09', 'sept': '09', 'september': '09',
+            'okt': '10', 'oktober': '10', 'oct': '10', 'october': '10',
+            'nov': '11', 'nop': '11', 'nopember': '11', 'november': '11',
+            'des': '12', 'desember': '12', 'dec': '12', 'december': '12'
+        };
+        const matchDayMonthYear = str.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
+        if (matchDayMonthYear) {
+            const day = matchDayMonthYear[1].padStart(2, '0');
+            const moName = matchDayMonthYear[2].toLowerCase();
+            const year = matchDayMonthYear[3];
+            const month = monthMap[moName] || '01';
+            return `${year}-${month}-${day}`;
+        }
+        const matchMonthYear = str.match(/^([A-Za-z]+)\s+(\d{4})$/);
+        if (matchMonthYear) {
+            const moName = matchMonthYear[1].toLowerCase();
+            const year = matchMonthYear[2];
+            const month = monthMap[moName] || '01';
+            return `${year}-${month}-01`;
+        }
+        if (/^\d{4}$/.test(str)) {
+            return `${str}-01-01`;
+        }
+        return '';
+    };
+
+    // 11.15 IDP Action Plan: Separate Handlers for Bagian B (Manajerial) & Bagian C (Technical)
+    const setupIdpEditSubform = (prefix, selectId, formId, deleteBtnId) => {
+        const selectItem = document.getElementById(selectId);
+        const formElement = document.getElementById(formId);
+        if (!selectItem || !formElement) return;
+
+        const updateForm = () => {
+            const opt = selectItem.selectedOptions[0];
+            if (!opt || !opt.value) return;
             const id = opt.value;
             const nik = getCurrentEmployeeNik();
-            formEditIdp.action = `/karyawan/${nik}/idp-action-plan/${id}`;
-            const compInput = document.getElementById('edit-idp-comp');
-            const goalInput = document.getElementById('edit-idp-goal');
-            const methodsInput = document.getElementById('edit-idp-methods');
-            const progInput = document.getElementById('edit-idp-program');
-            const picInput = document.getElementById('edit-idp-pic');
-            const statusInput = document.getElementById('edit-idp-status');
-            const startInput = document.getElementById('edit-idp-start');
-            const endInput = document.getElementById('edit-idp-end');
-            const indInput = document.getElementById('edit-idp-indicator');
-            const progressInput = document.getElementById('edit-idp-progress');
-            const typeInput = document.getElementById('edit-idp-competency-type');
-            if (typeInput) typeInput.value = opt.getAttribute('data-type') || 'Manajerial';
+            formElement.action = `/karyawan/${nik}/idp-action-plan/${id}`;
+
+            const compInput = document.getElementById(`${prefix}-comp`);
+            const goalInput = document.getElementById(`${prefix}-goal`);
+            const methodsInput = document.getElementById(`${prefix}-methods`);
+            const progInput = document.getElementById(`${prefix}-program`);
+            const picInput = document.getElementById(`${prefix}-pic`);
+            const statusInput = document.getElementById(`${prefix}-status`);
+            const startInput = document.getElementById(`${prefix}-start`);
+            const endInput = document.getElementById(`${prefix}-end`);
+            const indInput = document.getElementById(`${prefix}-indicator`);
+            const indCustom = document.getElementById(`${prefix}-indicator-custom`);
+            const progressInput = document.getElementById(`${prefix}-progress`);
+
             if (compInput) compInput.value = opt.getAttribute('data-comp') || '';
             if (goalInput) goalInput.value = opt.getAttribute('data-goal') || '';
-            if (methodsInput) methodsInput.value = opt.getAttribute('data-methods') || '';
+
+            // Development methods
+            const methodVal = opt.getAttribute('data-methods') || '';
+            if (methodsInput) {
+                let found = false;
+                for (let i = 0; i < methodsInput.options.length; i++) {
+                    if (methodsInput.options[i].value.toLowerCase() === methodVal.trim().toLowerCase()) {
+                        methodsInput.selectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found && methodVal.trim()) {
+                    const newOpt = new Option(methodVal, methodVal, true, true);
+                    methodsInput.add(newOpt);
+                }
+            }
+
             if (progInput) progInput.value = opt.getAttribute('data-program') || '';
-            if (picInput) picInput.value = opt.getAttribute('data-pic') || '';
+
+            // PIC supporter checkboxes (multi-select)
+            const picVal = opt.getAttribute('data-pic') || '';
+            const selectedPics = picVal.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+
+            // Remove any previously appended custom PIC labels
+            formElement.querySelectorAll('.pic-custom-item').forEach(el => el.remove());
+
+            const picCheckboxes = formElement.querySelectorAll('input[name="pic_supporter[]"]');
+            const existingValues = [];
+            picCheckboxes.forEach(cb => {
+                existingValues.push(cb.value.trim().toLowerCase());
+                cb.checked = selectedPics.includes(cb.value.trim().toLowerCase());
+            });
+
+            // Append extra checkboxes if data-pic contains items not in the default list
+            const rawPics = picVal.split(',').map(s => s.trim()).filter(Boolean);
+            const picGroup = formElement.querySelector('.pic-checkbox-group');
+            if (picGroup) {
+                rawPics.forEach(picItem => {
+                    if (!existingValues.includes(picItem.toLowerCase())) {
+                        const lbl = document.createElement('label');
+                        lbl.className = 'pic-custom-item';
+                        lbl.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:12px; color:#334155; cursor:pointer; font-weight:500; margin:0; user-select:none;';
+                        lbl.innerHTML = `<input type="checkbox" name="pic_supporter[]" value="${picItem}" checked class="idp-pic-checkbox" style="width:15px; height:15px; accent-color:#0284c7; cursor:pointer;"> <span>${picItem}</span>`;
+                        picGroup.appendChild(lbl);
+                    }
+                });
+                picGroup.style.borderColor = '#cbd5e1';
+            }
+
+            const feedback = formElement.querySelector('.pic-validation-feedback');
+            if (feedback) feedback.style.display = 'none';
+
             if (statusInput) statusInput.value = opt.getAttribute('data-status') || 'On Progress';
-            if (startInput) startInput.value = opt.getAttribute('data-start') || '';
-            if (endInput) endInput.value = opt.getAttribute('data-end') || '';
-            if (indInput) indInput.value = opt.getAttribute('data-indicator') || '';
-            if (progressInput) progressInput.value = opt.getAttribute('data-progress') || '0';
+
+            // Calendar Date Inputs (converted to ISO YYYY-MM-DD for <input type="date">)
+            if (startInput) startInput.value = parseToIsoDate(opt.getAttribute('data-start') || '');
+            if (endInput) endInput.value = parseToIsoDate(opt.getAttribute('data-end') || '');
+
+            // Success indicator
+            const indVal = opt.getAttribute('data-indicator') || '';
+            if (indInput) {
+                let found = false;
+                for (let i = 0; i < indInput.options.length; i++) {
+                    if (indInput.options[i].value !== 'custom' && indInput.options[i].value.trim().toLowerCase() === indVal.trim().toLowerCase()) {
+                        indInput.selectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found && indVal.trim()) {
+                    indInput.value = 'custom';
+                    if (indCustom) {
+                        indCustom.style.display = 'block';
+                        indCustom.value = indVal;
+                    }
+                } else {
+                    if (indCustom) {
+                        indCustom.style.display = 'none';
+                        indCustom.value = '';
+                    }
+                }
+            }
+
+            // Progress percent (Direct integer number input)
+            const rawProg = String(opt.getAttribute('data-progress') || '0').replace(/[^0-9]/g, '');
+            if (progressInput) {
+                progressInput.value = rawProg !== '' ? parseInt(rawProg, 10) : 0;
+            }
         };
-        selectEditIdp.addEventListener('change', updateIdpEdit);
-        updateIdpEdit();
+
+        selectItem.addEventListener('change', updateForm);
+        updateForm();
+
+        const btnDel = document.getElementById(deleteBtnId);
+        if (btnDel) {
+            btnDel.onclick = (e) => {
+                e.preventDefault();
+                const opt = selectItem.selectedOptions[0];
+                if (!opt || !opt.value) return;
+                const id = opt.value;
+                const nik = getCurrentEmployeeNik();
+                const comp = opt.getAttribute('data-comp') || 'rencana aksi ini';
+                if (confirm(`Apakah Anda yakin ingin menghapus rencana aksi IDP "${comp}"?`)) {
+                    const delForm = document.createElement('form');
+                    delForm.method = 'POST';
+                    delForm.action = `/karyawan/${nik}/idp-action-plan/${id}`;
+                    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                    const tokenInput = document.querySelector('input[name="_token"]');
+                    const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : (tokenInput ? tokenInput.value : '');
+                    delForm.innerHTML = `<input type="hidden" name="_token" value="${csrfToken}"><input type="hidden" name="_method" value="DELETE">`;
+                    document.body.appendChild(delForm);
+                    delForm.submit();
+                }
+            };
+        }
+    };
+
+    setupIdpEditSubform('edit-idp-b', 'select-edit-idp-b-item', 'form-edit-idp-b', 'btn-delete-from-edit-idp-b');
+    setupIdpEditSubform('edit-idp-c', 'select-edit-idp-c-item', 'form-edit-idp-c', 'btn-delete-from-edit-idp-c');
+
+    // Delete / Reset IDP Summary (Bagian A) directly from Edit Modal
+    const btnDelSummary = document.getElementById('btn-delete-from-edit-idp-summary');
+    if (btnDelSummary) {
+        btnDelSummary.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Apakah Anda yakin ingin menghapus / mereset data Ringkasan Kesiapan & Fokus IDP (Bagian A)?')) {
+                const nik = getCurrentEmployeeNik();
+                const resetForm = document.createElement('form');
+                resetForm.method = 'POST';
+                resetForm.action = `/karyawan/${nik}/idp/summary`;
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const tokenInput = document.querySelector('input[name="_token"]');
+                const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : (tokenInput ? tokenInput.value : '');
+                resetForm.innerHTML = `
+                    <input type="hidden" name="_token" value="${csrfToken}">
+                    <input type="hidden" name="readiness_level" value="-">
+                    <input type="hidden" name="idp_readiness_desc" value="-">
+                    <input type="hidden" name="retirement_year" value="-">
+                    <input type="hidden" name="idp_primary_goal" value="-">
+                `;
+                document.body.appendChild(resetForm);
+                resetForm.submit();
+            }
+        });
     }
 
-    // 11.16 IDP Action Plan: Pre-fill Delete Action
-    const selectDelIdp = document.getElementById('select-del-idp-item');
-    const formDelIdp = document.getElementById('form-hapus-idp');
-    if (selectDelIdp && formDelIdp) {
-        const updateIdpDel = () => {
-            const id = selectDelIdp.value;
-            const nik = getCurrentEmployeeNik();
-            formDelIdp.action = `/karyawan/${nik}/idp-action-plan/${id}`;
-        };
-        selectDelIdp.addEventListener('change', updateIdpDel);
-        updateIdpDel();
-    }
+    // Validation: Require at least one PIC / Pendukung checkbox checked before submitting IDP forms
+    ['form-tambah-idp-b', 'form-tambah-idp-c', 'form-edit-idp-b', 'form-edit-idp-c'].forEach(fId => {
+        const formEl = document.getElementById(fId);
+        if (formEl) {
+            formEl.addEventListener('submit', (e) => {
+                const checked = formEl.querySelectorAll('input[name="pic_supporter[]"]:checked');
+                const feedback = formEl.querySelector('.pic-validation-feedback');
+                const group = formEl.querySelector('.pic-checkbox-group');
+                if (checked.length === 0) {
+                    e.preventDefault();
+                    if (feedback) feedback.style.display = 'block';
+                    if (group) {
+                        group.style.borderColor = '#ef4444';
+                        group.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return false;
+                }
+                if (feedback) feedback.style.display = 'none';
+            });
+
+            formEl.addEventListener('change', (e) => {
+                if (e.target && e.target.name === 'pic_supporter[]') {
+                    const checked = formEl.querySelectorAll('input[name="pic_supporter[]"]:checked');
+                    const feedback = formEl.querySelector('.pic-validation-feedback');
+                    const group = formEl.querySelector('.pic-checkbox-group');
+                    if (checked.length > 0) {
+                        if (feedback) feedback.style.display = 'none';
+                        if (group) group.style.borderColor = '#cbd5e1';
+                    }
+                }
+            });
+        }
+    });
+
+    // Toggle custom indicator in IDP Tambah and Edit modals
+    ['tambah-idp-b', 'tambah-idp-c', 'edit-idp-b', 'edit-idp-c'].forEach(prefix => {
+        const indSelect = document.getElementById(`${prefix}-indicator`);
+        const indCustom = document.getElementById(`${prefix}-indicator-custom`);
+        if (indSelect && indCustom) {
+            indSelect.addEventListener('change', () => {
+                if (indSelect.value === 'custom') {
+                    indCustom.style.display = 'block';
+                    indCustom.focus();
+                } else {
+                    indCustom.style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // Auto-fill Goal when selecting existing competency in Tambah IDP Bagian B & C
+    const setupTambahGoalAutofill = (prefix, selectEditId) => {
+        const compInput = document.getElementById(`${prefix}-competency`);
+        const goalTextarea = document.getElementById(`${prefix}-goal`);
+        const selectEdit = document.getElementById(selectEditId);
+        if (compInput && goalTextarea && selectEdit) {
+            compInput.addEventListener('change', () => {
+                const entered = compInput.value.trim().toLowerCase();
+                if (!entered) return;
+                for (let i = 0; i < selectEdit.options.length; i++) {
+                    const opt = selectEdit.options[i];
+                    const optComp = (opt.getAttribute('data-comp') || '').trim().toLowerCase();
+                    if (optComp === entered) {
+                        const optGoal = opt.getAttribute('data-goal') || '';
+                        if (optGoal && !goalTextarea.value.trim()) {
+                            goalTextarea.value = optGoal;
+                        }
+                        break;
+                    }
+                }
+            });
+        }
+    };
+    setupTambahGoalAutofill('tambah-idp-b', 'select-edit-idp-b-item');
+    setupTambahGoalAutofill('tambah-idp-c', 'select-edit-idp-c-item');
+
+    // 11.16 IDP Action Plan: Pre-fill Delete Action for Bagian B & Bagian C
+    const setupIdpDel = (selectId, formId) => {
+        const selectDel = document.getElementById(selectId);
+        const formDel = document.getElementById(formId);
+        if (selectDel && formDel) {
+            const updateDel = () => {
+                const id = selectDel.value;
+                const nik = getCurrentEmployeeNik();
+                if (id) {
+                    formDel.action = `/karyawan/${nik}/idp-action-plan/${id}`;
+                }
+            };
+            selectDel.addEventListener('change', updateDel);
+            updateDel();
+        }
+    };
+    setupIdpDel('select-del-idp-b-item', 'form-hapus-idp-b');
+    setupIdpDel('select-del-idp-c-item', 'form-hapus-idp-c');
 
     // 11.17 Development Review: Pre-fill Edit and Action
     const selectEditReview = document.getElementById('select-edit-review-item');
@@ -2231,24 +3029,38 @@ document.addEventListener('DOMContentLoaded', () => {
             const isCurrentlyCollapsed = appSidebar.classList.contains('collapsed');
             const willCollapse = shouldCollapse !== undefined ? shouldCollapse : !isCurrentlyCollapsed;
 
+            // Animate only during toggle action
+            appSidebar.classList.add('is-toggling');
+            setTimeout(() => {
+                appSidebar.classList.remove('is-toggling');
+            }, 260);
+
             if (willCollapse) {
                 appSidebar.classList.add('collapsed');
+                document.documentElement.classList.add('sidebar-is-collapsed');
                 appSidebar.style.removeProperty('width');
                 appSidebar.style.removeProperty('min-width');
+                appSidebar.style.removeProperty('max-width');
                 sidebarToggleBtn.setAttribute('title', 'Perluas Sidebar (Geser ke Kanan)');
                 try { localStorage.setItem('mapin_sidebar_collapsed', 'true'); } catch (err) {}
+                document.cookie = "mapin_sidebar_collapsed=true; path=/; max-age=31536000; SameSite=Lax";
             } else {
                 appSidebar.classList.remove('collapsed');
+                document.documentElement.classList.remove('sidebar-is-collapsed');
                 try {
                     const savedWidth = localStorage.getItem('mapin_sidebar_width');
-                    if (savedWidth && parseInt(savedWidth) >= 160) {
+                    if (savedWidth && parseInt(savedWidth) >= 260) {
                         appSidebar.style.width = savedWidth + 'px';
                         appSidebar.style.minWidth = savedWidth + 'px';
+                        appSidebar.style.maxWidth = savedWidth + 'px';
                     } else {
                         appSidebar.style.removeProperty('width');
                         appSidebar.style.removeProperty('min-width');
+                        appSidebar.style.removeProperty('max-width');
+                        try { localStorage.removeItem('mapin_sidebar_width'); } catch (e) {}
                     }
                     localStorage.setItem('mapin_sidebar_collapsed', 'false');
+                    document.cookie = "mapin_sidebar_collapsed=false; path=/; max-age=31536000; SameSite=Lax";
                 } catch (err) {}
                 sidebarToggleBtn.setAttribute('title', 'Ciutkan Sidebar (Geser ke Kiri)');
             }
@@ -2259,8 +3071,54 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleSidebar();
         });
 
+        // Mobile Sidebar Toggle (Hamburger menu button & backdrop overlay)
+        const mobileToggleBtn = document.getElementById('mobile-sidebar-toggle');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+        const openMobileSidebar = () => {
+            appSidebar.classList.add('mobile-open');
+            if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
+            document.body.classList.add('mobile-sidebar-active');
+        };
+
+        const closeMobileSidebar = () => {
+            appSidebar.classList.remove('mobile-open');
+            if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+            document.body.classList.remove('mobile-sidebar-active');
+        };
+
+        if (mobileToggleBtn) {
+            mobileToggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (appSidebar.classList.contains('mobile-open')) {
+                    closeMobileSidebar();
+                } else {
+                    openMobileSidebar();
+                }
+            });
+        }
+
+        if (sidebarBackdrop) {
+            sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+        }
+
+        // Close on ESC key or when clicking nav links on mobile
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && appSidebar.classList.contains('mobile-open')) {
+                closeMobileSidebar();
+            }
+        });
+
+        appSidebar.querySelectorAll('.nav-item').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    closeMobileSidebar();
+                }
+            });
+        });
+
         // Click search button in collapsed mode opens and focuses search input
-        const searchBtnInSidebar = appSidebar.querySelector('.search-btn');
+        const searchBtnInSidebar = appSidebar.querySelector('.sidebar-search-btn, .search-btn');
         if (searchBtnInSidebar) {
             searchBtnInSidebar.addEventListener('click', (e) => {
                 if (appSidebar.classList.contains('collapsed')) {
@@ -2272,21 +3130,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Restore saved collapsed state or width
+        // Restore saved collapsed state or width WITHOUT page-load animations
         try {
             const savedCollapsed = localStorage.getItem('mapin_sidebar_collapsed');
-            if (savedCollapsed === 'true') {
-                toggleSidebar(true);
-            } else if (savedCollapsed === 'false') {
-                toggleSidebar(false);
-            } else if (window.innerWidth <= 850) {
-                // Default to collapsed on mobile & small tablet
-                toggleSidebar(true);
+            if (savedCollapsed === 'true' || (window.innerWidth <= 850 && savedCollapsed !== 'false')) {
+                appSidebar.classList.add('collapsed');
+                document.documentElement.classList.add('sidebar-is-collapsed');
+                sidebarToggleBtn.setAttribute('title', 'Perluas Sidebar (Geser ke Kanan)');
             } else {
+                appSidebar.classList.remove('collapsed');
+                document.documentElement.classList.remove('sidebar-is-collapsed');
+                sidebarToggleBtn.setAttribute('title', 'Ciutkan Sidebar (Geser ke Kiri)');
                 const savedWidth = localStorage.getItem('mapin_sidebar_width');
-                if (savedWidth && parseInt(savedWidth) >= 160) {
+                if (savedWidth && parseInt(savedWidth) >= 260) {
                     appSidebar.style.width = savedWidth + 'px';
                     appSidebar.style.minWidth = savedWidth + 'px';
+                    appSidebar.style.maxWidth = savedWidth + 'px';
+                } else {
+                    appSidebar.style.removeProperty('width');
+                    appSidebar.style.removeProperty('min-width');
+                    appSidebar.style.removeProperty('max-width');
+                    try { localStorage.removeItem('mapin_sidebar_width'); } catch (e) {}
                 }
             }
         } catch (err) {}
@@ -2315,20 +3179,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (newWidth < 120) {
                     if (!appSidebar.classList.contains('collapsed')) {
                         appSidebar.classList.add('collapsed');
+                        document.documentElement.classList.add('sidebar-is-collapsed');
                         appSidebar.style.removeProperty('width');
                         appSidebar.style.removeProperty('min-width');
+                        appSidebar.style.removeProperty('max-width');
                         sidebarToggleBtn.setAttribute('title', 'Perluas Sidebar (Geser ke Kanan)');
                         try { localStorage.setItem('mapin_sidebar_collapsed', 'true'); } catch (err) {}
+                        document.cookie = "mapin_sidebar_collapsed=true; path=/; max-age=31536000; SameSite=Lax";
                     }
                 } else {
                     if (appSidebar.classList.contains('collapsed')) {
                         appSidebar.classList.remove('collapsed');
+                        document.documentElement.classList.remove('sidebar-is-collapsed');
                         sidebarToggleBtn.setAttribute('title', 'Ciutkan Sidebar (Geser ke Kiri)');
                         try { localStorage.setItem('mapin_sidebar_collapsed', 'false'); } catch (err) {}
+                        document.cookie = "mapin_sidebar_collapsed=false; path=/; max-age=31536000; SameSite=Lax";
                     }
-                    newWidth = Math.max(160, Math.min(newWidth, 380));
+                    newWidth = Math.max(260, Math.min(newWidth, 380));
                     appSidebar.style.width = newWidth + 'px';
                     appSidebar.style.minWidth = newWidth + 'px';
+                    appSidebar.style.maxWidth = newWidth + 'px';
                     try { localStorage.setItem('mapin_sidebar_width', Math.round(newWidth)); } catch (err) {}
                 }
             });
@@ -2342,6 +3212,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+    // Toggle Ringkasan Profil on Mobile
+    window.toggleRingkasanMobile = function() {
+        const box = document.getElementById('emp-ringkasan-box');
+        if (box) {
+            box.classList.toggle('is-expanded');
+        }
+    };
 
     window.calcAddC6();
     window.calcEditC6();

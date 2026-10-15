@@ -12,13 +12,16 @@ Route::get('/quick-login/{role}', [AuthController::class, 'quickLogin'])->name('
 
 // Protected Routes - Wajib Login untuk mengakses sistem
 Route::middleware(['auth'])->group(function () {
-    // Redirect root to Beranda (/beranda)
+    // Redirect root to Dashboard (/dashboard)
     Route::get('/', function () {
-        return redirect()->route('beranda');
+        return redirect()->route('dashboard');
     });
 
-    // Beranda Karyawan (Dashboard Utama Super Admin & HR Admin)
-    Route::get('/beranda', [EmployeeController::class, 'index'])->name('beranda');
+    // Dashboard Karyawan (Dashboard Utama Super Admin & HR Admin)
+    Route::get('/dashboard', [EmployeeController::class, 'index'])->name('dashboard');
+    Route::get('/beranda', function () {
+        return redirect()->route('dashboard');
+    })->name('beranda');
 
     // Data Karyawan (Master Data, Filter, Tabel, Tambah & Impor)
     Route::get('/data-karyawan', [EmployeeController::class, 'dataKaryawan'])->name('data-karyawan');
@@ -69,6 +72,7 @@ Route::middleware(['auth'])->group(function () {
 
     // CRUD Operations: Individual Career Plan (ICP)
     Route::post('/karyawan/{nik}/career-plan', [EmployeeController::class, 'updateCareerPlan'])->name('karyawan.career-plan.update');
+    Route::post('/karyawan/{nik}/individual-careerplan', [EmployeeController::class, 'updateCareerPlan'])->name('karyawan.individual-careerplan.update');
     Route::post('/karyawan/{nik}/career-path', [EmployeeController::class, 'updateCareerPlan'])->name('karyawan.career-path.update');
     Route::post('/karyawan/{nik}/job-class-plan', [EmployeeController::class, 'storeJobClassPlan'])->name('karyawan.job-class-plan.store');
     Route::put('/karyawan/{nik}/job-class-plan/{id}', [EmployeeController::class, 'updateJobClassPlan'])->name('karyawan.job-class-plan.update');
@@ -113,6 +117,14 @@ Route::middleware(['auth'])->group(function () {
 
     // Update Employee Photo / Avatar (Super Admin & HR Admin)
     Route::post('/karyawan/{nik}/avatar', [EmployeeController::class, 'updateAvatar'])->name('karyawan.avatar.update');
+
+    // Route Redirects for Legacy Tab URLs to New Slugs
+    Route::get('/karyawan/{nik}/career-plan', function ($nik) {
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-careerplan']);
+    });
+    Route::get('/karyawan/{nik}/idp', function ($nik) {
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-developmentplan']);
+    });
 
     // Employee Profile Views with 9 Tabs
     Route::get('/karyawan/{nik}/{tab?}', [EmployeeController::class, 'show'])->name('karyawan.show');

@@ -21,7 +21,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class EmployeeController extends Controller
 {
     /**
-     * Display executive dashboard overview (Beranda / Dashboard Karyawan).
+     * Display executive dashboard overview (Dashboard Karyawan).
      */
     public function index(Request $request)
     {
@@ -51,7 +51,7 @@ class EmployeeController extends Controller
         }
         $havMatrixMap = TalentCalculatorService::getHavMatrixMap();
 
-        // 5 Karyawan terbaru untuk pratinjau ringkas di Dashboard Beranda
+        // 5 Karyawan terbaru untuk pratinjau ringkas di Dashboard
         $recentEmployees = Employee::latest()->take(5)->get();
 
         return view('karyawan.index', compact('stats', 'havBoxCounts', 'havMatrixMap', 'recentEmployees'));
@@ -193,13 +193,23 @@ class EmployeeController extends Controller
      */
     public function show(string $nik, string $tab = 'profil-individu')
     {
+        // Redirect legacy tab route slugs to new official slugs
+        if ($tab === 'career-plan') {
+            return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-careerplan']);
+        }
+        if ($tab === 'idp') {
+            return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-developmentplan']);
+        }
+
         $validTabs = [
             'profil-individu',
             'riwayat-karir',
             'talent-snapshot',
+            'individual-careerplan',
             'career-plan',
             'status-suksesi',
             'development-gap',
+            'individual-developmentplan',
             'idp',
             'review-pengembangan',
             'riwayat-pelatihan',
@@ -209,7 +219,10 @@ class EmployeeController extends Controller
             $tab = 'profil-individu';
         }
 
-        $employee = Employee::with([
+        $employee = Employee::where('nik', $nik)->firstOrFail();
+        $this->syncIdpAndReviews($employee);
+
+        $employee->load([
             'careerHistories',
             'talentAssessments',
             'keyStrengths',
@@ -223,7 +236,7 @@ class EmployeeController extends Controller
             'trainingHistories',
             'certifications',
             'performanceAppraisals',
-        ])->where('nik', $nik)->firstOrFail();
+        ]);
 
         // Calculate specific stats for tabs
         $allGaps = $employee->competencyGaps;
@@ -245,13 +258,16 @@ class EmployeeController extends Controller
         ];
 
         // Dynamic Training Summary (Connected to database records)
-        $currentYear = (int)date('Y');
         $allTrainings = $employee->trainingHistories;
         $totalPelatihan = $allTrainings->count();
         $totalJam = (float)$allTrainings->sum('duration_hours');
 
-        $thisYearTrainings = $allTrainings->filter(function ($t) use ($currentYear) {
-            return $t->year === $currentYear;
+        // Tahun target terbaru diambil dinamis dari riwayat pelatihan karyawan (misal: 2027), atau tahun kalender jika belum ada
+        $maxTrainingYear = $allTrainings->map(fn($t) => $t->year)->filter()->max();
+        $latestYear = $maxTrainingYear ? (int)$maxTrainingYear : (int)date('Y');
+
+        $thisYearTrainings = $allTrainings->filter(function ($t) use ($latestYear) {
+            return $t->year === $latestYear;
         });
 
         // Pelatihan tahun ini yang riil dihitung: hanya yang sudah mengupload dokumentasi bukti
@@ -262,11 +278,11 @@ class EmployeeController extends Controller
         $tahunIniCount = $thisYearDocumentedTrainings->count();
         $tahunIniJam = (float)$thisYearDocumentedTrainings->sum('duration_hours');
 
-        $totalSertifikasi = $employee->certifications->count();
+        $totalSertifikasi = $employee->certifications->where('is_active', true)->count();
 
         $trainingSummary = [
-            'current_year'          => $currentYear,
-            'current_year_fy'       => 'FY' . substr((string)$currentYear, -2),
+            'current_year'          => $latestYear,
+            'current_year_fy'       => 'FY' . substr((string)$latestYear, -2),
             'total_pelatihan'       => $totalPelatihan,
             'total_jam'             => (fmod($totalJam, 1) === 0.0) ? (int)$totalJam : $totalJam,
             'tahun_ini_count'       => $tahunIniCount, // Riil dihitung: hanya yang sudah upload dokumentasi
@@ -890,7 +906,7 @@ class EmployeeController extends Controller
             $employee->update($empUpdates);
         }
 
-        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'career-plan'])
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-careerplan'])
             ->with('success', 'Informasi Arah Karir (D1) berhasil diperbarui.');
     }
 
@@ -917,7 +933,7 @@ class EmployeeController extends Controller
 
         $employee->jobClassPlans()->create($validated);
 
-        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'career-plan'])
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-careerplan'])
             ->with('success', 'Rencana Job Class & Grade (D2) berhasil ditambahkan.');
     }
 
@@ -942,7 +958,7 @@ class EmployeeController extends Controller
 
         $plan->update($validated);
 
-        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'career-plan'])
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-careerplan'])
             ->with('success', 'Rencana Job Class & Grade (D2) berhasil diperbarui.');
     }
 
@@ -955,7 +971,7 @@ class EmployeeController extends Controller
         $plan = $employee->jobClassPlans()->findOrFail($id);
         $plan->delete();
 
-        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'career-plan'])
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-careerplan'])
             ->with('success', 'Rencana Job Class & Grade (D2) berhasil dihapus.');
     }
 
@@ -1198,8 +1214,132 @@ class EmployeeController extends Controller
 
         $employee->update($validated);
 
-        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'idp'])
-            ->with('success', 'Ringkasan Kesiapan & Fokus IDP berhasil diperbarui.');
+        $msg = ($validated['readiness_level'] === '-' || empty($validated['readiness_level']))
+            ? 'Ringkasan Kesiapan & Fokus IDP berhasil dihapus/direset.'
+            : 'Ringkasan Kesiapan & Fokus IDP berhasil diperbarui.';
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-developmentplan'])
+            ->with('success', $msg);
+    }
+
+    /**
+     * Sinkronisasi dua arah antara IDP Action Plans dan Development Reviews.
+     * Memastikan jumlah dan daftar kompetensi di IDP dan Review Pengembangan selalu sama persis
+     * (1 baris Review per 1 Kompetensi unik di IDP).
+     */
+    private function syncIdpAndReviews(Employee $employee): void
+    {
+        $idpPlans = $employee->idpActionPlans()->get();
+        $reviews = $employee->developmentReviews()->get();
+
+        // Jika IDP kosong tetapi ada Review, buatkan IDP dari Review
+        if ($idpPlans->isEmpty() && $reviews->isNotEmpty()) {
+            foreach ($reviews as $rev) {
+                $isDone = ($rev->status === 'Meningkat' || (int)$rev->current_level >= (int)$rev->target_level);
+                $employee->idpActionPlans()->create([
+                    'order_no' => $rev->order_no ?? 1,
+                    'competency' => $rev->competency,
+                    'competency_type' => $rev->competency_type ?: 'Manajerial',
+                    'specific_goal' => 'Pengembangan kompetensi ' . $rev->competency,
+                    'development_methods' => 'Training, On the Job',
+                    'activity_program' => 'Pelatihan dan implementasi ' . $rev->competency,
+                    'pic_supporter' => 'Atasan Langsung',
+                    'start_date' => 'Jun 2026',
+                    'end_date' => 'Mei 2027',
+                    'success_indicator' => 'Tingkat kompetensi ' . $rev->competency . ' mencapai target.',
+                    'status' => $isDone ? 'Selesai' : 'On Progress',
+                    'progress_percent' => $isDone ? 100 : 70,
+                ]);
+            }
+            return;
+        }
+
+        // Kelompokkan IDP berdasarkan nama kompetensi unik (case-insensitive)
+        $idpGroupedByComp = [];
+        foreach ($idpPlans as $p) {
+            $key = strtolower(trim($p->competency));
+            if (!isset($idpGroupedByComp[$key])) {
+                $idpGroupedByComp[$key] = collect();
+            }
+            $idpGroupedByComp[$key]->push($p);
+        }
+
+        // 1. Bersihkan Review: hapus kompetensi yang tidak ada di IDP, dan hapus duplikat review untuk kompetensi yang sama
+        $reviewCompMap = [];
+        foreach ($reviews as $rev) {
+            $key = strtolower(trim($rev->competency));
+            if (!isset($idpGroupedByComp[$key])) {
+                $rev->delete();
+            } elseif (isset($reviewCompMap[$key])) {
+                // Duplikat untuk kompetensi yang sama -> hapus baris duplikat
+                $rev->delete();
+            } else {
+                $reviewCompMap[$key] = $rev;
+            }
+        }
+
+        // 2. Tambah Review untuk setiap kompetensi unik IDP yang belum ada di Review
+        $currentMaxReviewOrder = $employee->developmentReviews()->max('order_no') ?? 0;
+        foreach ($idpGroupedByComp as $key => $plansForComp) {
+            $firstPlan = $plansForComp->first();
+            if (!isset($reviewCompMap[$key])) {
+                $currentMaxReviewOrder++;
+                $isDone = $plansForComp->every(function($plan) {
+                    return in_array(strtolower(trim($plan->status ?? '')), ['selesai', 'completed', 'done']) || (int)($plan->progress_percent ?? 0) >= 100;
+                });
+                
+                $gap = $employee->competencyGaps()->whereRaw('LOWER(competency) = ?', [$key])->first();
+                $prevLevel = $gap ? (int)$gap->current_level : 3;
+                $targetLevel = $gap ? (int)$gap->standard_level : 5;
+                $avgProg = (int) round($plansForComp->avg('progress_percent') ?? 0);
+                $currLevel = $isDone ? $targetLevel : ($prevLevel + ($avgProg >= 60 ? 1 : 0));
+                $currLevel = min($targetLevel, $currLevel);
+                $growth = $currLevel - $prevLevel;
+                $status = $growth > 0 ? 'Meningkat' : ($growth === 0 ? 'Stabil' : 'Belum Meningkat');
+
+                $newRev = $employee->developmentReviews()->create([
+                    'order_no' => $currentMaxReviewOrder,
+                    'period' => 'Juni 2026 – Mei 2027',
+                    'competency' => $firstPlan->competency,
+                    'competency_type' => $firstPlan->competency_type ?: 'Manajerial',
+                    'previous_level' => $prevLevel,
+                    'current_level' => $currLevel,
+                    'target_level' => $targetLevel,
+                    'growth' => $growth,
+                    'status' => $status,
+                    'reviewer_notes' => 'Tersinkronisasi otomatis dari rencana aksi IDP.',
+                ]);
+                $reviewCompMap[$key] = $newRev;
+            } else {
+                // Pastikan competency_type sama jika ada perbedaan
+                $existingRev = $reviewCompMap[$key];
+                if (!empty($firstPlan->competency_type) && $existingRev->competency_type !== $firstPlan->competency_type) {
+                    $existingRev->update(['competency_type' => $firstPlan->competency_type]);
+                }
+            }
+        }
+    }
+
+    /**
+     * Format date input from HTML datepicker (YYYY-MM-DD) to IDP table format (e.g. Jun 2026 or 15 Jun 2026)
+     */
+    private function formatIdpDate(?string $dateStr): ?string
+    {
+        if (empty($dateStr)) return null;
+        $dateStr = trim($dateStr);
+        if (preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $dateStr, $m)) {
+            $y = $m[1];
+            $mo = (int)$m[2];
+            $d = (int)$m[3];
+            $months = [
+                1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+                5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu',
+                9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+            ];
+            $moName = $months[$mo] ?? 'Jan';
+            return $d === 1 ? "{$moName} {$y}" : "{$d} {$moName} {$y}";
+        }
+        return $dateStr;
     }
 
     /**
@@ -1209,6 +1349,19 @@ class EmployeeController extends Controller
     {
         $employee = Employee::where('nik', $nik)->firstOrFail();
 
+        $pics = $request->input('pic_supporter');
+        if (is_array($pics)) {
+            $pics = implode(', ', array_filter(array_map('trim', $pics)));
+        } else {
+            $pics = trim((string)$pics);
+        }
+
+        if (empty($pics)) {
+            return redirect()->back()->with('error', 'Silakan pilih minimal satu PIC / Pendukung.')->withInput();
+        }
+
+        $request->merge(['pic_supporter' => $pics]);
+
         $validated = $request->validate([
             'competency' => 'required|string|max:255',
             'competency_type' => 'nullable|string|max:50',
@@ -1219,9 +1372,18 @@ class EmployeeController extends Controller
             'start_date' => 'required|string|max:50',
             'end_date' => 'required|string|max:50',
             'success_indicator' => 'nullable|string',
+            'success_indicator_custom' => 'nullable|string',
             'status' => 'required|string|max:50',
             'progress_percent' => 'required|integer|min:0|max:100',
         ]);
+
+        if ($request->input('success_indicator') === 'custom' && $request->filled('success_indicator_custom')) {
+            $validated['success_indicator'] = $request->input('success_indicator_custom');
+        }
+        unset($validated['success_indicator_custom']);
+
+        $validated['start_date'] = $this->formatIdpDate($validated['start_date']);
+        $validated['end_date'] = $this->formatIdpDate($validated['end_date']);
 
         if (empty($validated['competency_type'])) {
             $validated['competency_type'] = 'Manajerial';
@@ -1231,9 +1393,10 @@ class EmployeeController extends Controller
         $validated['order_no'] = $maxOrder + 1;
 
         $employee->idpActionPlans()->create($validated);
+        $this->syncIdpAndReviews($employee);
 
-        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'idp'])
-            ->with('success', 'Rencana Aksi IDP berhasil ditambahkan.');
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-developmentplan'])
+            ->with('success', 'Rencana Aksi IDP berhasil ditambahkan dan disinkronkan ke Review Pengembangan.');
     }
 
     /**
@@ -1243,6 +1406,20 @@ class EmployeeController extends Controller
     {
         $employee = Employee::where('nik', $nik)->firstOrFail();
         $plan = $employee->idpActionPlans()->findOrFail($id);
+        $oldCompetency = $plan->competency;
+
+        $pics = $request->input('pic_supporter');
+        if (is_array($pics)) {
+            $pics = implode(', ', array_filter(array_map('trim', $pics)));
+        } else {
+            $pics = trim((string)$pics);
+        }
+
+        if (empty($pics)) {
+            return redirect()->back()->with('error', 'Silakan pilih minimal satu PIC / Pendukung.')->withInput();
+        }
+
+        $request->merge(['pic_supporter' => $pics]);
 
         $validated = $request->validate([
             'competency' => 'required|string|max:255',
@@ -1254,9 +1431,18 @@ class EmployeeController extends Controller
             'start_date' => 'required|string|max:50',
             'end_date' => 'required|string|max:50',
             'success_indicator' => 'nullable|string',
+            'success_indicator_custom' => 'nullable|string',
             'status' => 'required|string|max:50',
             'progress_percent' => 'required|integer|min:0|max:100',
         ]);
+
+        if ($request->input('success_indicator') === 'custom' && $request->filled('success_indicator_custom')) {
+            $validated['success_indicator'] = $request->input('success_indicator_custom');
+        }
+        unset($validated['success_indicator_custom']);
+
+        $validated['start_date'] = $this->formatIdpDate($validated['start_date']);
+        $validated['end_date'] = $this->formatIdpDate($validated['end_date']);
 
         if (empty($validated['competency_type'])) {
             $validated['competency_type'] = $plan->competency_type ?: 'Manajerial';
@@ -1264,8 +1450,22 @@ class EmployeeController extends Controller
 
         $plan->update($validated);
 
-        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'idp'])
-            ->with('success', 'Rencana Aksi IDP berhasil diperbarui.');
+        // Update review yang bersangkutan jika ada
+        $existingReview = $employee->developmentReviews()
+            ->whereRaw('LOWER(competency) = ?', [strtolower(trim($oldCompetency))])
+            ->first();
+
+        if ($existingReview) {
+            $existingReview->update([
+                'competency' => $validated['competency'],
+                'competency_type' => $validated['competency_type'],
+            ]);
+        }
+
+        $this->syncIdpAndReviews($employee);
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-developmentplan'])
+            ->with('success', 'Rencana Aksi IDP berhasil diperbarui dan disinkronkan ke Review Pengembangan.');
     }
 
     /**
@@ -1275,10 +1475,24 @@ class EmployeeController extends Controller
     {
         $employee = Employee::where('nik', $nik)->firstOrFail();
         $plan = $employee->idpActionPlans()->findOrFail($id);
+        $compName = $plan->competency;
         $plan->delete();
 
-        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'idp'])
-            ->with('success', 'Rencana Aksi IDP berhasil dihapus.');
+        // Hapus juga dari development reviews HANYA JIKA tidak ada action plan lain dengan kompetensi yang sama
+        $remainingWithComp = $employee->idpActionPlans()
+            ->whereRaw('LOWER(competency) = ?', [strtolower(trim($compName))])
+            ->count();
+
+        if ($remainingWithComp === 0) {
+            $employee->developmentReviews()
+                ->whereRaw('LOWER(competency) = ?', [strtolower(trim($compName))])
+                ->delete();
+        }
+
+        $this->syncIdpAndReviews($employee);
+
+        return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'individual-developmentplan'])
+            ->with('success', "Rencana Aksi IDP berhasil dihapus.");
     }
 
     /**
@@ -1412,11 +1626,30 @@ class EmployeeController extends Controller
             'issuer' => 'nullable|string|max:255',
             'obtained_date' => 'nullable|string|max:100',
             'valid_until' => 'nullable|string|max:100',
+            'is_lifetime' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
-            'documentation' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
+            'documentation' => 'required|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
+        ], [
+            'name.required' => 'Nama sertifikasi wajib diisi.',
+            'documentation.required' => 'Dokumen bukti sertifikasi wajib diunggah sebelum menyimpan sertifikasi.',
+            'documentation.file' => 'Dokumen bukti sertifikasi harus berupa berkas file.',
+            'documentation.mimes' => 'Format berkas dokumen sertifikasi harus berupa PDF, PNG, JPG, JPEG, atau WEBP.',
+            'documentation.max' => 'Ukuran berkas dokumen sertifikasi maksimal 10 MB.',
         ]);
 
         $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
+
+        if ($request->boolean('is_lifetime')) {
+            $validated['valid_until'] = 'Seumur Hidup';
+        } elseif (!empty($validated['valid_until'])) {
+            $validated['valid_until'] = \App\Models\Certification::formatIndonesianDate($validated['valid_until']);
+        }
+
+        if (!empty($validated['obtained_date'])) {
+            $validated['obtained_date'] = \App\Models\Certification::formatIndonesianDate($validated['obtained_date']);
+        }
+
+        unset($validated['is_lifetime']);
 
         if ($request->hasFile('documentation')) {
             $file = $request->file('documentation');
@@ -1452,19 +1685,48 @@ class EmployeeController extends Controller
             'issuer' => 'nullable|string|max:255',
             'obtained_date' => 'nullable|string|max:100',
             'valid_until' => 'nullable|string|max:100',
+            'is_lifetime' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
             'documentation' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,pdf|max:10240',
             'remove_documentation' => 'nullable|boolean',
+        ], [
+            'name.required' => 'Nama sertifikasi wajib diisi.',
+            'documentation.file' => 'Dokumen bukti sertifikasi harus berupa berkas file.',
+            'documentation.mimes' => 'Format berkas dokumen sertifikasi harus berupa PDF, PNG, JPG, JPEG, atau WEBP.',
+            'documentation.max' => 'Ukuran berkas dokumen sertifikasi maksimal 10 MB.',
         ]);
+
+        // Validasi wajib dokumen: sertifikasi tidak boleh disimpan jika saat ini belum punya dokumen dan tidak mengupload
+        if (empty($cert->documentation) && !$request->hasFile('documentation')) {
+            return redirect()->back()
+                ->withErrors(['documentation' => 'Dokumen bukti sertifikasi wajib diunggah sebelum menyimpan sertifikasi.'])
+                ->with('error', 'Dokumen bukti sertifikasi wajib diunggah sebelum menyimpan sertifikasi.')
+                ->withInput();
+        }
+
+        // Tidak boleh menghapus dokumen tanpa mengunggah dokumen pengganti baru
+        if ($request->boolean('remove_documentation') && !$request->hasFile('documentation')) {
+            return redirect()->back()
+                ->withErrors(['documentation' => 'Dokumen bukti sertifikasi tidak boleh dihapus tanpa mengunggah dokumen pengganti.'])
+                ->with('error', 'Dokumen bukti sertifikasi wajib ada. Tidak boleh dihapus tanpa mengunggah berkas dokumen pengganti.')
+                ->withInput();
+        }
 
         $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
 
-        if ($request->boolean('remove_documentation')) {
-            if ($cert->documentation && file_exists(public_path($cert->documentation))) {
-                @unlink(public_path($cert->documentation));
-            }
-            $validated['documentation'] = null;
-        } elseif ($request->hasFile('documentation')) {
+        if ($request->boolean('is_lifetime')) {
+            $validated['valid_until'] = 'Seumur Hidup';
+        } elseif (!empty($validated['valid_until'])) {
+            $validated['valid_until'] = \App\Models\Certification::formatIndonesianDate($validated['valid_until']);
+        }
+
+        if (!empty($validated['obtained_date'])) {
+            $validated['obtained_date'] = \App\Models\Certification::formatIndonesianDate($validated['obtained_date']);
+        }
+
+        unset($validated['is_lifetime']);
+
+        if ($request->hasFile('documentation')) {
             if ($cert->documentation && file_exists(public_path($cert->documentation))) {
                 @unlink(public_path($cert->documentation));
             }
@@ -1551,8 +1813,31 @@ class EmployeeController extends Controller
 
         $employee->developmentReviews()->create($validated);
 
+        // Sinkronisasi otomatis ke IDP Action Plan jika belum ada rencana aksi untuk kompetensi ini
+        $existingIdp = $employee->idpActionPlans()->whereRaw('LOWER(competency) = ?', [strtolower(trim($validated['competency']))])->first();
+        if (!$existingIdp) {
+            $isDone = ($validated['status'] === 'Meningkat' || (int)$validated['current_level'] >= (int)$validated['target_level']);
+            $maxIdpOrder = $employee->idpActionPlans()->max('order_no') ?? 0;
+            $employee->idpActionPlans()->create([
+                'order_no' => $maxIdpOrder + 1,
+                'competency' => $validated['competency'],
+                'competency_type' => $validated['competency_type'] ?? 'Manajerial',
+                'specific_goal' => 'Pengembangan kompetensi ' . $validated['competency'],
+                'development_methods' => 'Training, On the Job',
+                'activity_program' => 'Pelatihan dan implementasi ' . $validated['competency'],
+                'pic_supporter' => 'Atasan Langsung',
+                'start_date' => 'Jun 2026',
+                'end_date' => 'Mei 2027',
+                'success_indicator' => 'Tingkat kompetensi ' . $validated['competency'] . ' mencapai target.',
+                'status' => $isDone ? 'Selesai' : 'On Progress',
+                'progress_percent' => $isDone ? 100 : min(90, max(50, (int)round(((int)$validated['current_level'] / max(1, (int)$validated['target_level'])) * 100))),
+            ]);
+        }
+
+        $this->syncIdpAndReviews($employee);
+
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
-            ->with('success', "Review kompetensi {$validated['competency_type']} berhasil ditambahkan.");
+            ->with('success', "Review kompetensi {$validated['competency_type']} berhasil ditambahkan dan disinkronkan ke IDP.");
     }
 
     /**
@@ -1591,10 +1876,25 @@ class EmployeeController extends Controller
             }
         }
 
+        $oldCompetency = $review->competency;
         $review->update($validated);
 
+        // Update IDP action plan yang bersangkutan jika ada
+        $existingIdp = $employee->idpActionPlans()->whereRaw('LOWER(competency) = ?', [strtolower(trim($oldCompetency))])->first();
+        if ($existingIdp) {
+            $isDone = ($validated['status'] === 'Meningkat' || (int)$validated['current_level'] >= (int)$validated['target_level']);
+            $existingIdp->update([
+                'competency' => $validated['competency'],
+                'competency_type' => $validated['competency_type'],
+                'status' => $isDone ? 'Selesai' : 'On Progress',
+                'progress_percent' => $isDone ? 100 : min(90, max(50, (int)round(((int)$validated['current_level'] / max(1, (int)$validated['target_level'])) * 100))),
+            ]);
+        }
+
+        $this->syncIdpAndReviews($employee);
+
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
-            ->with('success', "Review kompetensi '{$review->competency}' berhasil diperbarui.");
+            ->with('success', "Review kompetensi '{$review->competency}' berhasil diperbarui dan disinkronkan ke IDP.");
     }
 
     /**
@@ -1607,8 +1907,13 @@ class EmployeeController extends Controller
         $compName = $review->competency;
         $review->delete();
 
+        // Hapus juga IDP action plan yang bersangkutan jika ada
+        $employee->idpActionPlans()->whereRaw('LOWER(competency) = ?', [strtolower(trim($compName))])->delete();
+
+        $this->syncIdpAndReviews($employee);
+
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
-            ->with('success', "Review kompetensi '{$compName}' berhasil dihapus.");
+            ->with('success', "Review kompetensi '{$compName}' dan Rencana Aksi IDP terkait berhasil dihapus.");
     }
 
     /**
@@ -1618,18 +1923,184 @@ class EmployeeController extends Controller
     {
         $employee = Employee::where('nik', $nik)->firstOrFail();
 
-        $validated = $request->validate([
-            'review_feedback_text' => 'nullable|string',
-            'review_reviewer_name' => 'nullable|string|max:150',
-            'review_reviewer_title' => 'nullable|string|max:150',
-            'review_date' => 'nullable|string|max:50',
-            'review_recommendations' => 'nullable|string',
-        ]);
+        // Helper untuk memparsing daftar feedback (bisa 1 atau banyak komentar)
+        $getFeedbackList = function($emp) {
+            $decoded = json_decode($emp->review_feedback_text ?? '', true);
+            if (is_array($decoded) && !empty($decoded) && isset($decoded[0]['text'])) {
+                return $decoded;
+            }
+            if (!empty($emp->review_feedback_text)) {
+                return [
+                    [
+                        'text' => $emp->review_feedback_text,
+                        'reviewer_name' => $emp->review_reviewer_name ?: 'Andi Wijaya',
+                        'reviewer_title' => $emp->review_reviewer_title ?: 'Engineering Division Head',
+                        'date' => $emp->review_date ?: '20 Mei 2027',
+                    ]
+                ];
+            }
+            return [
+                [
+                    'text' => 'Budi Santosoo menunjukkan perkembangan yang baik selama periode ini. Terlihat peningkatan dalam kepemimpinan, komunikasi, dan kemampuan eksekusi. Fokus selanjutnya adalah memperkuat kemampuan analisis strategis dan pengambilan keputusan berbasis data untuk siap menempati posisi Engineering Manager saat penugasan berikutnya.',
+                    'reviewer_name' => 'Andi Wijaya',
+                    'reviewer_title' => 'Engineering Division Head',
+                    'date' => '20 Mei 2027',
+                ]
+            ];
+        };
 
-        $employee->update($validated);
+        // Helper untuk memformat tanggal YYYY-MM-DD menjadi format teks Indonesia (contoh: 20 Mei 2027)
+        $formatDateIndo = function($val) {
+            if (empty($val)) return date('d F Y');
+            $val = trim($val);
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $val)) {
+                $months = [
+                    '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
+                    '04' => 'April', '05' => 'Mei', '06' => 'Juni',
+                    '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
+                    '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+                ];
+                $parts = explode('-', $val);
+                $d = ltrim($parts[2], '0');
+                $m = $parts[1];
+                $y = $parts[0];
+                return $d . ' ' . ($months[$m] ?? $m) . ' ' . $y;
+            }
+            return $val;
+        };
+
+        // 1. Aksi Khusus Bagian D (Feedback)
+        if ($request->filled('feedback_action')) {
+            $action = $request->input('feedback_action');
+            $feedbacks = $getFeedbackList($employee);
+
+            if ($action === 'add_new') {
+                $newComment = [
+                    'text' => $request->input('review_feedback_text', ''),
+                    'reviewer_name' => $request->input('review_reviewer_name', 'Atasan Langsung'),
+                    'reviewer_title' => $request->input('review_reviewer_title', 'Department Head'),
+                    'date' => $formatDateIndo($request->input('review_date', date('Y-m-d'))),
+                ];
+                $feedbacks[] = $newComment;
+                $employee->review_feedback_text = json_encode(array_values($feedbacks));
+                $employee->review_reviewer_name = $feedbacks[0]['reviewer_name'];
+                $employee->review_reviewer_title = $feedbacks[0]['reviewer_title'];
+                $employee->review_date = $feedbacks[0]['date'];
+                $employee->save();
+
+                return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+                    ->with('success', 'Komentar feedback baru berhasil ditambahkan (kini terdapat ' . count($feedbacks) . ' komentar).');
+            }
+
+            if ($action === 'delete_item') {
+                $idx = (int) $request->input('feedback_index', 0);
+                if (isset($feedbacks[$idx])) {
+                    array_splice($feedbacks, $idx, 1);
+                }
+                if (empty($feedbacks)) {
+                    $employee->review_feedback_text = null;
+                } else {
+                    $employee->review_feedback_text = json_encode(array_values($feedbacks));
+                    $employee->review_reviewer_name = $feedbacks[0]['reviewer_name'];
+                    $employee->review_reviewer_title = $feedbacks[0]['reviewer_title'];
+                    $employee->review_date = $feedbacks[0]['date'];
+                }
+                $employee->save();
+
+                return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+                    ->with('success', 'Komentar feedback berhasil dihapus.');
+            }
+
+            if ($action === 'update_item') {
+                $idx = (int) $request->input('feedback_index', 0);
+                if (!isset($feedbacks[$idx])) {
+                    $idx = 0;
+                }
+                $feedbacks[$idx] = [
+                    'text' => $request->input('review_feedback_text', ''),
+                    'reviewer_name' => $request->input('review_reviewer_name', 'Atasan Langsung'),
+                    'reviewer_title' => $request->input('review_reviewer_title', 'Department Head'),
+                    'date' => $formatDateIndo($request->input('review_date', date('Y-m-d'))),
+                ];
+                $employee->review_feedback_text = json_encode(array_values($feedbacks));
+                $employee->review_reviewer_name = $feedbacks[0]['reviewer_name'];
+                $employee->review_reviewer_title = $feedbacks[0]['reviewer_title'];
+                $employee->review_date = $feedbacks[0]['date'];
+                $employee->save();
+
+                return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+                    ->with('success', 'Komentar feedback berhasil diperbarui.');
+            }
+        }
+
+        // 2. Aksi Khusus Bagian E (Rekomendasi Tindak Lanjut)
+        if ($request->filled('recommendation_action')) {
+            $recAction = $request->input('recommendation_action');
+
+            if ($recAction === 'delete_item') {
+                $delIdx = $request->input('delete_recommendation_index');
+                $rawRecs = $employee->review_recommendations;
+                $lines = array_values(array_filter(array_map('trim', explode("\n", $rawRecs ?: ''))));
+                if (empty($lines)) {
+                    $lines = [
+                        'Lanjutkan program pengembangan sesuai IDP dengan fokus pada Analysis & Judgement.',
+                        'Berikan kesempatan memimpin proyek strategis yang berdampak lintas departemen.',
+                        'Coaching/mentoring dengan Engineering Manager untuk mempercepat kesiapan.',
+                        'Review berikutnya dilakukan pada Mei 2028.'
+                    ];
+                }
+
+                if ($delIdx !== null && $delIdx !== '' && isset($lines[(int)$delIdx])) {
+                    array_splice($lines, (int)$delIdx, 1);
+                    $employee->review_recommendations = implode("\n", $lines);
+                    $employee->save();
+                    return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+                        ->with('success', 'Poin rekomendasi tindak lanjut terpilih berhasil dihapus.');
+                } else {
+                    $employee->review_recommendations = '';
+                    $employee->save();
+                    return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+                        ->with('success', 'Seluruh rekomendasi tindak lanjut berhasil dihapus.');
+                }
+            }
+
+            if ($recAction === 'update_all') {
+                $employee->review_recommendations = $request->input('review_recommendations', '');
+                $employee->save();
+                return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+                    ->with('success', 'Daftar rekomendasi tindak lanjut berhasil diperbarui.');
+            }
+        }
+
+        // Tambah rekomendasi tindak lanjut baru jika ada input item baru dari mode Tambah
+        if ($request->filled('new_recommendation_item')) {
+            $current = trim($employee->review_recommendations ?: '');
+            $newItem = trim($request->input('new_recommendation_item'));
+            $employee->review_recommendations = $current ? ($current . "\n" . $newItem) : $newItem;
+            $employee->save();
+
+            return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
+                ->with('success', 'Rekomendasi tindak lanjut baru berhasil ditambahkan.');
+        }
+
+        // Update default jika ada request generik
+        $updateData = [];
+        foreach (['review_feedback_text', 'review_reviewer_name', 'review_reviewer_title', 'review_date', 'review_recommendations'] as $field) {
+            if ($request->has($field)) {
+                if ($field === 'review_date') {
+                    $updateData[$field] = $formatDateIndo($request->input($field));
+                } else {
+                    $updateData[$field] = $request->input($field);
+                }
+            }
+        }
+
+        if (!empty($updateData)) {
+            $employee->update($updateData);
+        }
 
         return redirect()->route('karyawan.show', ['nik' => $nik, 'tab' => 'review-pengembangan'])
-            ->with('success', 'Feedback atasan dan rekomendasi tindak lanjut berhasil diperbarui.');
+            ->with('success', 'Data berhasil diperbarui.');
     }
 
     /**
@@ -1735,6 +2206,7 @@ class EmployeeController extends Controller
                     break;
 
                 case 'idp':
+                case 'individual-developmentplan':
                     fputcsv($handle, ['No', 'Kategori', 'Kompetensi yang Dikembangkan', 'Tujuan Spesifik', 'Metode Pengembangan', 'Aktivitas / Program', 'PIC / Pendukung', 'Mulai', 'Selesai', 'Indikator Keberhasilan', 'Status', 'Progres (%)']);
                     foreach ($employee->idpActionPlans()->orderBy('order_no')->get() as $idx => $row) {
                         fputcsv($handle, [

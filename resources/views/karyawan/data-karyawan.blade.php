@@ -218,7 +218,7 @@
                             </td>
                             <td>
                                 <div style="display:flex; align-items:center; gap:12px;">
-                                    <img src="{{ $emp->avatar ?: '/images/avatar-budi.png' }}" alt="{{ $emp->name }}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:2px solid #2563eb;">
+                                    <img src="{{ asset($emp->avatar ?: 'images/avatar-budi.png') }}" alt="{{ $emp->name }}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:2px solid #2563eb;">
                                     <div>
                                         <div style="font-weight:700; color:#0f172a; font-size:13px;">{{ $emp->name }}</div>
                                         <div style="font-size:11px; color:#64748b;">{{ $emp->position }}</div>

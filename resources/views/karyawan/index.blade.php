@@ -66,7 +66,7 @@
         </div>
     </div>
 
-    {{-- 16 HAV Box Matrix Widget (Tampil di Beranda Super Admin & HR Admin) --}}
+    {{-- 16 HAV Box Matrix Widget (Tampil di Dashboard Super Admin & HR Admin) --}}
     @php
         $rows = ['R3', 'R2', 'R1', 'R0'];
         $cols = ['C0', 'C1', 'C2', 'C3'];
@@ -271,7 +271,7 @@
                             <td class="text-center" style="font-weight:600; color:#64748b;">{{ $loop->iteration }}</td>
                             <td>
                                 <div style="display:flex; align-items:center; gap:12px;">
-                                    <img src="{{ $emp->avatar ?: '/images/avatar-budi.png' }}" alt="{{ $emp->name }}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:2px solid #2563eb;">
+                                    <img src="{{ asset($emp->avatar ?: 'images/avatar-budi.png') }}" alt="{{ $emp->name }}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:2px solid #2563eb;">
                                     <div>
                                         <div style="font-weight:700; color:#0f172a; font-size:13px;">{{ $emp->name }}</div>
                                         <div style="font-size:11px; color:#64748b;">{{ $emp->position }}</div>

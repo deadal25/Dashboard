@@ -266,7 +266,7 @@
 
 {{-- Modal Tambah Riwayat Pelatihan --}}
 <div id="modal-tambah-pelatihan" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 680px;">
         <div class="modal-header">
             <div class="modal-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -276,42 +276,48 @@
         </div>
         <form action="{{ route('karyawan.training-history.store', ['nik' => $employee->nik]) }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <div class="modal-body">
-                {{-- Nama Pelatihan --}}
-                <div class="form-group">
-                    <label class="form-label">Nama Pelatihan <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="training_name" class="form-control" placeholder="Contoh: Problem Solving & Decision Making (PSDM)" required>
+            <div class="modal-body" style="max-height:75vh; overflow-y:auto; padding: 16px 20px 10px 20px;">
+                {{-- Nama Pelatihan & Penyelenggara --}}
+                <div class="form-row" style="margin-bottom: 12px; gap: 12px;">
+                    <div class="form-group" style="flex: 1.3; margin-bottom: 0;">
+                        <label class="form-label">Nama Pelatihan <span style="color:#ef4444;">*</span></label>
+                        <input type="text" name="training_name" class="form-control" placeholder="Contoh: Problem Solving & Decision Making (PSDM)" required>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label class="form-label">Penyelenggara</label>
+                        <input type="text" name="organizer" class="form-control" placeholder="Contoh: Internal / Lembaga">
+                    </div>
                 </div>
 
                 {{-- Rentang Tanggal Pelatihan --}}
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 12px;">
                     <label class="form-label">Rentang Tanggal Pelatihan <span style="color:#ef4444;">*</span></label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div>
                             <span style="font-size:11px; color:#64748b; display:block; margin-bottom:3px;">Dari Tanggal:</span>
-                            <input type="date" id="add-training-start-date" name="start_date" class="form-control" required>
+                            <input type="date" id="add-training-start-date" name="start_date" class="form-control" style="cursor:pointer;" onclick="this.showPicker && this.showPicker()" required>
                         </div>
                         <div>
                             <span style="font-size:11px; color:#64748b; display:block; margin-bottom:3px;">Sampai Tanggal (Opsional):</span>
-                            <input type="date" id="add-training-end-date" name="end_date" class="form-control">
+                            <input type="date" id="add-training-end-date" name="end_date" class="form-control" style="cursor:pointer;" onclick="this.showPicker && this.showPicker()">
                         </div>
                     </div>
-                    <div id="add-training-date-preview" style="font-size:11.5px; color:#2563eb; font-weight:600; margin-top:5px; display:none;">
+                    <div id="add-training-date-preview" style="font-size:11.5px; color:#2563eb; font-weight:600; margin-top:4px; display:none;">
                         📅 Format Tampilan: <span id="add-training-date-preview-text"></span>
                     </div>
                     <input type="hidden" id="add-training-date" name="training_date" value="">
                 </div>
 
-                {{-- Kategori & Jenis Pelatihan --}}
-                <div class="form-row">
-                    <div class="form-group">
+                {{-- Kategori, Jenis Pelatihan & Durasi --}}
+                <div class="form-row" style="margin-bottom: 12px; gap: 12px;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
                         <label class="form-label">Kategori <span style="color:#ef4444;">*</span></label>
                         <select name="category" class="form-control" required>
                             <option value="Functional">Functional</option>
                             <option value="Managerial">Managerial</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
                         <label class="form-label">Jenis Pelatihan <span style="color:#ef4444;">*</span></label>
                         <select name="training_type" class="form-control" required>
                             <option value="Classroom">Classroom</option>
@@ -321,22 +327,14 @@
                             <option value="Seminar">Seminar</option>
                         </select>
                     </div>
-                </div>
-
-                {{-- Penyelenggara & Durasi --}}
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Penyelenggara</label>
-                        <input type="text" name="organizer" class="form-control" placeholder="Contoh: Toyota Institute Indonesia">
-                    </div>
-                    <div class="form-group">
+                    <div class="form-group" style="flex: 0.8; margin-bottom: 0;">
                         <label class="form-label">Durasi (Jam) <span style="color:#ef4444;">*</span></label>
                         <input type="number" step="0.5" min="0.5" name="duration_hours" class="form-control" placeholder="Contoh: 16" required>
                     </div>
                 </div>
 
                 {{-- Dokumentasi Bukti Pelatihan --}}
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 12px;">
                     <label class="form-label">Dokumentasi Bukti (Sertifikat / Foto / Dokumen)</label>
                     <input type="file" name="documentation" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.webp">
                     <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">
@@ -345,14 +343,14 @@
                 </div>
 
                 {{-- Catatan --}}
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 0;">
                     <label class="form-label">Catatan</label>
                     <input type="text" name="notes" class="form-control" placeholder="Contoh: Sertifikat Kelulusan / Nilai A / Grade Sangat Baik">
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan Pelatihan</button>
+                <div class="modal-footer modal-footer-standard modal-footer-end">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                    <button type="submit" class="btn-modal-action btn-modal-submit">Tambah</button>
+                </div>
             </div>
         </form>
     </div>
@@ -360,7 +358,7 @@
 
 {{-- Modal Edit Riwayat Pelatihan --}}
 <div id="modal-edit-pelatihan" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 680px; max-height: 88vh; display: flex; flex-direction: column;">
         <div class="modal-header">
             <div class="modal-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -368,13 +366,13 @@
             </div>
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
-        <form id="form-edit-pelatihan" action="" method="POST" enctype="multipart/form-data">
+        <form id="form-edit-pelatihan" action="" method="POST" enctype="multipart/form-data" data-base-action="{{ url('/karyawan/' . $employee->nik . '/training-history') }}">
             @csrf
             @method('PUT')
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Pilih Data yang Ingin Diedit</label>
-                    <select id="edit-select-pelatihan" class="form-control">
+            <div class="modal-body" style="max-height:75vh; overflow-y:auto; padding: 16px 20px 10px 20px;">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label class="form-label" style="font-weight: 600;">Pilih Data yang Ingin Diedit</label>
+                    <select id="edit-select-pelatihan" class="form-control" style="background:#f8fafc; font-weight:600; color:#1e293b;">
                         @foreach($employee->trainingHistories as $th)
                             <option value="{{ $th->id }}"
                                     data-name="{{ $th->training_name }}"
@@ -395,41 +393,47 @@
                     </select>
                 </div>
 
-                {{-- Nama Pelatihan --}}
-                <div class="form-group">
-                    <label class="form-label">Nama Pelatihan <span style="color:#ef4444;">*</span></label>
-                    <input type="text" id="edit-training-name" name="training_name" class="form-control" required>
+                {{-- Nama Pelatihan & Penyelenggara --}}
+                <div class="form-row" style="margin-bottom: 12px; gap: 12px;">
+                    <div class="form-group" style="flex: 1.3; margin-bottom: 0;">
+                        <label class="form-label">Nama Pelatihan <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="edit-training-name" name="training_name" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label class="form-label">Penyelenggara</label>
+                        <input type="text" id="edit-training-organizer" name="organizer" class="form-control" placeholder="Contoh: Internal / Lembaga">
+                    </div>
                 </div>
 
                 {{-- Rentang Tanggal Pelatihan --}}
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 12px;">
                     <label class="form-label">Rentang Tanggal Pelatihan <span style="color:#ef4444;">*</span></label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div>
                             <span style="font-size:11px; color:#64748b; display:block; margin-bottom:3px;">Dari Tanggal:</span>
-                            <input type="date" id="edit-training-start-date" name="start_date" class="form-control">
+                            <input type="date" id="edit-training-start-date" name="start_date" class="form-control" style="cursor:pointer;" onclick="this.showPicker && this.showPicker()">
                         </div>
                         <div>
                             <span style="font-size:11px; color:#64748b; display:block; margin-bottom:3px;">Sampai Tanggal:</span>
-                            <input type="date" id="edit-training-end-date" name="end_date" class="form-control">
+                            <input type="date" id="edit-training-end-date" name="end_date" class="form-control" style="cursor:pointer;" onclick="this.showPicker && this.showPicker()">
                         </div>
                     </div>
-                    <div id="edit-training-date-preview" style="font-size:11.5px; color:#2563eb; font-weight:600; margin-top:5px; display:none;">
+                    <div id="edit-training-date-preview" style="font-size:11.5px; color:#2563eb; font-weight:600; margin-top:4px; display:none;">
                         📅 Format Tampilan: <span id="edit-training-date-preview-text"></span>
                     </div>
                     <input type="hidden" id="edit-training-date" name="training_date" value="">
                 </div>
 
-                {{-- Kategori & Jenis Pelatihan --}}
-                <div class="form-row">
-                    <div class="form-group">
+                {{-- Kategori, Jenis Pelatihan & Durasi --}}
+                <div class="form-row" style="margin-bottom: 12px; gap: 12px;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
                         <label class="form-label">Kategori <span style="color:#ef4444;">*</span></label>
                         <select id="edit-training-category" name="category" class="form-control" required>
                             <option value="Functional">Functional</option>
                             <option value="Managerial">Managerial</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
                         <label class="form-label">Jenis Pelatihan <span style="color:#ef4444;">*</span></label>
                         <select id="edit-training-type" name="training_type" class="form-control" required>
                             <option value="Classroom">Classroom</option>
@@ -439,44 +443,44 @@
                             <option value="Seminar">Seminar</option>
                         </select>
                     </div>
-                </div>
-
-                {{-- Penyelenggara & Durasi --}}
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Penyelenggara</label>
-                        <input type="text" id="edit-training-organizer" name="organizer" class="form-control">
-                    </div>
-                    <div class="form-group">
+                    <div class="form-group" style="flex: 0.8; margin-bottom: 0;">
                         <label class="form-label">Durasi (Jam) <span style="color:#ef4444;">*</span></label>
                         <input type="number" step="0.5" min="0.5" id="edit-training-duration" name="duration_hours" class="form-control" required>
                     </div>
                 </div>
 
                 {{-- Dokumentasi Bukti Pelatihan --}}
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 12px;">
                     <label class="form-label">Dokumentasi Bukti (Sertifikat / Foto / Dokumen)</label>
-                    <div id="edit-training-doc-current" style="margin-bottom:8px; font-size:12px; padding:8px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; display:none;">
+                    <div id="edit-training-doc-current" style="margin-bottom:6px; font-size:12px; padding:6px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; display:none;">
                     </div>
                     <input type="file" id="edit-training-doc-file" name="documentation" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.webp">
-                    <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">
-                        Pilih file baru jika ingin mengganti file bukti (PDF, PNG, JPG, JPEG, WEBP - Maks. 10 MB).
-                    </span>
-                    <label id="edit-training-remove-doc-wrap" style="display:none; align-items:center; gap:6px; margin-top:6px; font-size:12px; color:#dc2626; cursor:pointer;">
-                        <input type="checkbox" name="remove_documentation" value="1" id="edit-training-remove-doc">
-                        <span>Hapus file dokumentasi saat ini</span>
-                    </label>
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:4px; flex-wrap:wrap;">
+                        <span style="font-size:11px; color:#64748b;">
+                            Format: PDF, PNG, JPG, JPEG, WEBP (Maks. 10 MB).
+                        </span>
+                        <label id="edit-training-remove-doc-wrap" style="display:none; align-items:center; gap:5px; font-size:11.5px; color:#dc2626; cursor:pointer;">
+                            <input type="checkbox" name="remove_documentation" value="1" id="edit-training-remove-doc">
+                            <span>Hapus file saat ini</span>
+                        </label>
+                    </div>
                 </div>
 
                 {{-- Catatan --}}
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 0;">
                     <label class="form-label">Catatan</label>
-                    <input type="text" id="edit-training-notes" name="notes" class="form-control">
+                    <input type="text" id="edit-training-notes" name="notes" class="form-control" placeholder="Contoh: Sertifikat Kelulusan / Nilai A / Grade Sangat Baik">
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Perbarui Pelatihan</button>
+                <div class="modal-footer modal-footer-standard modal-footer-between">
+                    <button type="button" class="btn-modal-action btn-modal-delete" id="btn-delete-pelatihan-from-edit">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Hapus
+                    </button>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                        <button type="submit" class="btn-modal-action btn-modal-submit">Perbarui</button>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
@@ -492,10 +496,10 @@
             </div>
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
-        <form id="form-hapus-pelatihan" action="" method="POST">
+        <form id="form-hapus-pelatihan" action="" method="POST" data-base-action="{{ url('/karyawan/' . $employee->nik . '/training-history') }}">
             @csrf
             @method('DELETE')
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 16px 20px 10px 20px;">
                 <div class="form-group">
                     <label class="form-label">Pilih Data yang Akan Dihapus</label>
                     <select id="delete-select-pelatihan" class="form-control">
@@ -509,10 +513,10 @@
                 <div style="font-size:12px; color:#b91c1c; margin-top:8px;">
                     Perhatian: Data pelatihan beserta berkas dokumentasi yang dihapus tidak dapat dikembalikan.
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626;">Hapus Permanen</button>
+                <div class="modal-footer modal-footer-standard modal-footer-end">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                    <button type="submit" class="btn-modal-action btn-modal-danger-submit">Hapus Permanen</button>
+                </div>
             </div>
         </form>
     </div>
@@ -524,7 +528,7 @@
 
 {{-- Modal Tambah Sertifikasi --}}
 <div id="modal-tambah-sertifikasi" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 680px;">
         <div class="modal-header">
             <div class="modal-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -532,49 +536,70 @@
             </div>
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
-        <form action="{{ route('karyawan.certification.store', ['nik' => $employee->nik]) }}" method="POST" enctype="multipart/form-data">
+        <form id="form-tambah-sertifikasi" action="{{ route('karyawan.certification.store', ['nik' => $employee->nik]) }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Nama Sertifikasi <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="name" class="form-control" placeholder="Contoh: Certified Supply Chain Professional (CSCP)" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Lembaga Penyelenggara / Penerbit</label>
-                    <input type="text" name="issuer" class="form-control" placeholder="Contoh: APICS / BNSP / PMI">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Tanggal Diperoleh</label>
-                        <input type="text" name="obtained_date" class="form-control" placeholder="Contoh: 20 Mar 2025">
+            <div class="modal-body" style="max-height:75vh; overflow-y:auto; padding: 16px 20px 10px 20px;">
+                {{-- Nama Sertifikasi & Lembaga Penyelenggara --}}
+                <div class="form-row" style="margin-bottom: 12px; gap: 12px;">
+                    <div class="form-group" style="flex: 1.2; margin-bottom: 0;">
+                        <label class="form-label">Nama Sertifikasi <span style="color:#ef4444;">*</span></label>
+                        <input type="text" name="name" class="form-control" placeholder="Contoh: Certified Supply Chain Professional (CSCP)" required>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Masa Berlaku Hingga</label>
-                        <input type="text" name="valid_until" class="form-control" placeholder="Contoh: 20 Mar 2027 atau Seumur Hidup">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label class="form-label">Lembaga Penyelenggara / Penerbit</label>
+                        <input type="text" name="issuer" class="form-control" placeholder="Contoh: APICS / BNSP / PMI">
                     </div>
                 </div>
 
-                {{-- Dokumen Bukti Sertifikasi --}}
-                <div class="form-group">
-                    <label class="form-label">Dokumen Bukti Sertifikasi (Sertifikat / Piagam / Berkas)</label>
-                    <input type="file" name="documentation" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.webp">
-                    <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">
-                        Format yang didukung: <strong>PDF, PNG, JPG, JPEG, WEBP</strong> (Maksimal 10 MB).
-                    </span>
+                {{-- Tanggal Diperoleh & Masa Berlaku --}}
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Tanggal Diperoleh</label>
+                            <input type="date" id="add-cert-obtained" name="obtained_date" class="form-control" style="cursor:pointer;" onclick="this.showPicker && this.showPicker()">
+                            <div id="add-cert-obtained-preview" style="font-size:11.5px; color:#2563eb; font-weight:600; margin-top:3px; display:none;">
+                                📅 Terpilih: <span id="add-cert-obtained-preview-text"></span>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Masa Berlaku Hingga</label>
+                            <input type="date" id="add-cert-valid" name="valid_until" class="form-control" style="cursor:pointer;" onclick="this.showPicker && this.showPicker()">
+                            <div id="add-cert-valid-preview" style="font-size:11.5px; color:#2563eb; font-weight:600; margin-top:3px; display:none;">
+                                📅 Terpilih: <span id="add-cert-valid-preview-text"></span>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Status Checkboxes (Seumur Hidup & Sertifikat Aktif) --}}
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:8px; padding:6px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; flex-wrap:wrap;">
+                        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#475569; cursor:pointer;">
+                            <input type="checkbox" id="add-cert-lifetime" name="is_lifetime" value="1">
+                            <span>Seumur Hidup / Tanpa Batas Waktu</span>
+                        </label>
+                        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#1e293b; font-weight:600; cursor:pointer;">
+                            <input type="checkbox" name="is_active" value="1" checked>
+                            <span>Sertifikat masih aktif / berlaku</span>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#1e293b; cursor:pointer;">
-                        <input type="checkbox" name="is_active" value="1" checked>
-                        <span>Sertifikat masih aktif / berlaku</span>
+                {{-- Dokumen Bukti Sertifikasi (WAJIB) --}}
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">
+                        Dokumen Bukti Sertifikasi (Sertifikat / Piagam / Berkas)
+                        <span style="color:#ef4444; font-weight:700;">* (Wajib Diunggah)</span>
                     </label>
+                    <input type="file" id="add-cert-doc-file" name="documentation" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.webp" required>
+                    <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">
+                        Wajib melampirkan berkas bukti sertifikasi: <strong>PDF, PNG, JPG, JPEG, WEBP</strong> (Maksimal 10 MB).
+                    </span>
+                    <div id="add-cert-doc-error" style="display:none; color:#dc2626; font-size:11.5px; font-weight:600; margin-top:4px;">
+                        ⚠️ Berkas dokumen sertifikasi wajib diunggah sebelum menyimpan!
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan Sertifikasi</button>
+                <div class="modal-footer modal-footer-standard modal-footer-end">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                    <button type="submit" class="btn-modal-action btn-modal-submit">Tambah</button>
+                </div>
             </div>
         </form>
     </div>
@@ -582,7 +607,7 @@
 
 {{-- Modal Edit Sertifikasi --}}
 <div id="modal-edit-sertifikasi" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 680px; max-height: 88vh; display: flex; flex-direction: column;">
         <div class="modal-header">
             <div class="modal-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -590,19 +615,22 @@
             </div>
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
-        <form id="form-edit-sertifikasi" action="" method="POST" enctype="multipart/form-data">
+        <form id="form-edit-sertifikasi" action="" method="POST" enctype="multipart/form-data" data-base-action="{{ url('/karyawan/' . $employee->nik . '/certification') }}">
             @csrf
             @method('PUT')
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Pilih Sertifikasi yang Ingin Diedit</label>
-                    <select id="edit-select-sertifikasi" class="form-control">
+            <div class="modal-body" style="max-height:75vh; overflow-y:auto; padding: 16px 20px 10px 20px;">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label class="form-label" style="font-weight: 600;">Pilih Sertifikasi yang Ingin Diedit</label>
+                    <select id="edit-select-sertifikasi" class="form-control" style="background:#f8fafc; font-weight:600; color:#1e293b;">
                         @foreach($employee->certifications as $cert)
                             <option value="{{ $cert->id }}"
                                     data-name="{{ $cert->name }}"
                                     data-issuer="{{ $cert->issuer }}"
                                     data-obtained="{{ $cert->obtained_date }}"
+                                    data-obtained-iso="{{ $cert->obtained_date_iso }}"
                                     data-valid="{{ $cert->valid_until }}"
+                                    data-valid-iso="{{ $cert->valid_until_iso }}"
+                                    data-is-lifetime="{{ strtolower(trim($cert->valid_until ?? '')) === 'seumur hidup' ? '1' : '0' }}"
                                     data-active="{{ $cert->is_active ? '1' : '0' }}"
                                     data-doc="{{ $cert->documentation }}"
                                     data-is-image="{{ $cert->is_image ? '1' : '0' }}"
@@ -613,52 +641,80 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Nama Sertifikasi <span style="color:#ef4444;">*</span></label>
-                    <input type="text" id="edit-cert-name" name="name" class="form-control" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Lembaga Penyelenggara / Penerbit</label>
-                    <input type="text" id="edit-cert-issuer" name="issuer" class="form-control">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Tanggal Diperoleh</label>
-                        <input type="text" id="edit-cert-obtained" name="obtained_date" class="form-control">
+                {{-- Nama Sertifikasi & Lembaga Penyelenggara --}}
+                <div class="form-row" style="margin-bottom: 12px; gap: 12px;">
+                    <div class="form-group" style="flex: 1.2; margin-bottom: 0;">
+                        <label class="form-label">Nama Sertifikasi <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="edit-cert-name" name="name" class="form-control" required>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Masa Berlaku Hingga</label>
-                        <input type="text" id="edit-cert-valid" name="valid_until" class="form-control">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label class="form-label">Lembaga Penyelenggara / Penerbit</label>
+                        <input type="text" id="edit-cert-issuer" name="issuer" class="form-control" placeholder="Contoh: BNSP / PMI / LSS">
+                    </div>
+                </div>
+
+                {{-- Tanggal Diperoleh & Masa Berlaku --}}
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Tanggal Diperoleh</label>
+                            <input type="date" id="edit-cert-obtained" name="obtained_date" class="form-control" style="cursor:pointer;" onclick="this.showPicker && this.showPicker()">
+                            <div id="edit-cert-obtained-preview" style="font-size:11.5px; color:#2563eb; font-weight:600; margin-top:3px; display:none;">
+                                📅 Terpilih: <span id="edit-cert-obtained-preview-text"></span>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Masa Berlaku Hingga</label>
+                            <input type="date" id="edit-cert-valid" name="valid_until" class="form-control" style="cursor:pointer;" onclick="this.showPicker && this.showPicker()">
+                            <div id="edit-cert-valid-preview" style="font-size:11.5px; color:#2563eb; font-weight:600; margin-top:3px; display:none;">
+                                📅 Terpilih: <span id="edit-cert-valid-preview-text"></span>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Status Checkboxes (Seumur Hidup & Sertifikat Aktif) berjajar rapih --}}
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:8px; padding:6px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; flex-wrap:wrap;">
+                        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#475569; cursor:pointer;">
+                            <input type="checkbox" id="edit-cert-lifetime" name="is_lifetime" value="1">
+                            <span>Seumur Hidup / Tanpa Batas Waktu</span>
+                        </label>
+                        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#1e293b; font-weight:600; cursor:pointer;">
+                            <input type="checkbox" id="edit-cert-active" name="is_active" value="1">
+                            <span>Sertifikat masih aktif / berlaku</span>
+                        </label>
                     </div>
                 </div>
 
                 {{-- Dokumentasi Bukti Sertifikasi --}}
-                <div class="form-group">
-                    <label class="form-label">Dokumen Bukti Sertifikasi (Sertifikat / Piagam / Berkas)</label>
-                    <div id="edit-cert-doc-current" style="margin-bottom:8px; font-size:12px; padding:8px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; display:none;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">
+                        Dokumen Bukti Sertifikasi (Sertifikat / Piagam / Berkas)
+                        <span id="edit-cert-doc-required-badge" style="color:#ef4444; font-weight:700; display:none;">* (Wajib Diunggah)</span>
+                    </label>
+                    <div id="edit-cert-doc-current" style="margin-bottom:6px; font-size:12px; padding:6px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; display:none;">
+                    </div>
+                    <div id="edit-cert-doc-warning" style="display:none; margin-bottom:6px; font-size:11.5px; padding:6px 10px; background:#fef2f2; border:1px solid #fecaca; border-radius:6px; color:#b91c1c; font-weight:600;">
+                        ⚠️ Sertifikasi ini saat ini belum memiliki dokumen bukti. Anda wajib mengunggah file dokumen bukti untuk menyimpan!
                     </div>
                     <input type="file" id="edit-cert-doc-file" name="documentation" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.webp">
-                    <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">
-                        Pilih file baru jika ingin mengganti dokumen bukti sertifikasi (PDF, PNG, JPG, JPEG, WEBP - Maks. 10 MB).
-                    </span>
-                    <label id="edit-cert-remove-doc-wrap" style="display:none; align-items:center; gap:6px; margin-top:6px; font-size:12px; color:#dc2626; cursor:pointer;">
-                        <input type="checkbox" name="remove_documentation" value="1" id="edit-cert-remove-doc">
-                        <span>Hapus dokumen sertifikasi saat ini</span>
-                    </label>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                        <span id="edit-cert-doc-help" style="font-size:11px; color:#64748b;">
+                            Pilih file baru jika ingin mengganti dokumen (PDF, PNG, JPG, JPEG, WEBP - Maks. 10 MB).
+                        </span>
+                    </div>
+                    <div id="edit-cert-doc-error" style="display:none; color:#dc2626; font-size:11.5px; font-weight:600; margin-top:4px;">
+                        ⚠️ Dokumen bukti sertifikasi wajib diunggah sebelum menyimpan sertifikasi!
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#1e293b; cursor:pointer;">
-                        <input type="checkbox" id="edit-cert-active" name="is_active" value="1">
-                        <span>Sertifikat masih aktif / berlaku</span>
-                    </label>
+                <div class="modal-footer modal-footer-standard modal-footer-between">
+                    <button type="button" class="btn-modal-action btn-modal-delete" id="btn-delete-sertifikasi-from-edit">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Hapus
+                    </button>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                        <button type="submit" class="btn-modal-action btn-modal-submit">Perbarui</button>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Perbarui Sertifikasi</button>
             </div>
         </form>
     </div>
@@ -674,10 +730,10 @@
             </div>
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
-        <form id="form-hapus-sertifikasi" action="" method="POST">
+        <form id="form-hapus-sertifikasi" action="" method="POST" data-base-action="{{ url('/karyawan/' . $employee->nik . '/certification') }}">
             @csrf
             @method('DELETE')
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 16px 20px 10px 20px;">
                 <div class="form-group">
                     <label class="form-label">Pilih Sertifikasi yang Akan Dihapus</label>
                     <select id="delete-select-sertifikasi" class="form-control">
@@ -691,10 +747,10 @@
                 <div style="font-size:12px; color:#b91c1c; margin-top:8px;">
                     Perhatian: Sertifikasi beserta berkas dokumen yang dihapus tidak dapat dikembalikan dan akan mengurangi total sertifikasi.
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626;">Hapus Permanen</button>
+                <div class="modal-footer modal-footer-standard modal-footer-end">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                    <button type="submit" class="btn-modal-action btn-modal-danger-submit">Hapus Permanen</button>
+                </div>
             </div>
         </form>
     </div>
@@ -2809,8 +2865,17 @@
 {{-- =========================================================================
      MODAL GRUP 4: DEVELOPMENT GAP (TARGET POSISI & GAP KOMPETENSI)
    ========================================================================= --}}
+@php
+    $modalManajerialGaps = $employee->competencyGaps->filter(function($g) {
+        return empty($g->competency_type) || strtolower($g->competency_type) === 'manajerial';
+    })->values();
 
-{{-- 4.1 Modal Tambah Development Gap --}}
+    $modalTechnicalGaps = $employee->competencyGaps->filter(function($g) {
+        return strtolower($g->competency_type) === 'technical';
+    })->values();
+@endphp
+
+{{-- 4.1 Modal Tambah Development Gap (Pilihan A, B, C) --}}
 <div id="modal-tambah-gap" class="modal-backdrop">
     <div class="modal-card">
         <div class="modal-header">
@@ -2828,26 +2893,46 @@
                     Pilih Bagian yang Ingin Ditambah / Diatur:
                 </label>
                 <select id="select-tambah-gap-section" class="form-control section-switcher" data-container="container-tambah-gap">
-                    <option value="gap-detail">Detail Baris Gap Kompetensi Baru (B. Manajerial / C. Technical)</option>
-                    <option value="gap-target">A. Posisi Target & Metode Asesmen Gap</option>
+                    <option value="tambah-gap-a">A. Posisi Target & Metode Asesmen Gap</option>
+                    <option value="tambah-gap-b" selected>B. Detail Gap Kompetensi Manajerial</option>
+                    <option value="tambah-gap-c">C. Detail Gap Kompetensi Technical</option>
                 </select>
             </div>
 
-            {{-- Form Gap Detail --}}
-            <form id="form-tambah-gap-detail" class="dynamic-subform" data-section="gap-detail" action="{{ route('karyawan.competency-gap.store', ['nik' => $employee->nik]) }}" method="POST">
+            {{-- Form A: Posisi Target & Metode Asesmen Gap --}}
+            <form id="form-tambah-gap-a" class="dynamic-subform" data-section="tambah-gap-a" style="display:none;" action="{{ route('karyawan.development-gap.target.update', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
-                <div class="form-row">
-                    <div class="form-group" style="flex:2;">
-                        <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="competency" class="form-control" placeholder="Contoh: Digital Transformation / PLC Automation" required>
-                    </div>
-                    <div class="form-group" style="flex:1;">
-                        <label class="form-label">Kategori Kompetensi <span style="color:#ef4444;">*</span></label>
-                        <select name="competency_type" id="tambah-gap-type" class="form-control" required>
-                            <option value="Manajerial">B. Manajerial</option>
-                            <option value="Technical">C. Technical</option>
-                        </select>
-                    </div>
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">A. Formulir Posisi Target & Metode Asesmen Gap</div>
+                <div class="form-group">
+                    <label class="form-label">Posisi Target <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="target_position_gap" class="form-control" value="{{ $employee->target_position_gap ?: 'Engineering Manager (JC5 / GS-1)' }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Departemen / Fungsi Target <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="target_department_gap" class="form-control" value="{{ $employee->target_department_gap ?: 'Manufacturing Engineering' }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Metode Asesmen Gap <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="gap_method" class="form-control" value="{{ $employee->gap_method ?: 'Perbandingan : Posisi Saat Ini vs Posisi Target' }}" required>
+                </div>
+                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
+                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Target Gap</button>
+                </div>
+            </form>
+
+            {{-- Form B: Gap Kompetensi Manajerial --}}
+            <form id="form-tambah-gap-b" class="dynamic-subform" data-section="tambah-gap-b" action="{{ route('karyawan.competency-gap.store', ['nik' => $employee->nik]) }}" method="POST">
+                @csrf
+                <input type="hidden" name="competency_type" value="Manajerial">
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px; display:flex; align-items:center; justify-content:space-between;">
+                    <span>B. Tambah Gap Kompetensi Manajerial</span>
+                    <span class="badge-blue" style="font-size:11px; padding:2px 8px;">Manajerial</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nama Kompetensi Manajerial <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="competency" class="form-control" placeholder="Contoh: Strategic Orientation / Business Acumen" required>
                 </div>
 
                 <div class="form-row">
@@ -2871,49 +2956,81 @@
 
                 <div class="form-group">
                     <label class="form-label">Deskripsi Level Saat Ini</label>
-                    <input type="text" name="current_desc" class="form-control" placeholder="Deskripsi pemenuhan level saat ini">
+                    <input type="text" name="current_desc" class="form-control" placeholder="Deskripsi pemenuhan level manajerial saat ini">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Deskripsi Target Level</label>
-                    <input type="text" name="standard_desc" class="form-control" placeholder="Deskripsi tuntutan target level posisi target">
+                    <input type="text" name="standard_desc" class="form-control" placeholder="Deskripsi tuntutan target level manajerial posisi target">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Peningkatan yang Diharapkan <span style="color:#ef4444;">*</span></label>
-                    <textarea name="expected_improvement" class="form-control" rows="2" placeholder="Uraikan output peningkatan yang diharapkan dari karyawan..." required></textarea>
+                    <textarea name="expected_improvement" class="form-control" rows="2" placeholder="Uraikan output peningkatan manajerial yang diharapkan dari karyawan..." required></textarea>
                 </div>
                 <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
                     <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Gap Kompetensi</button>
+                    <button type="submit" class="btn btn-primary">Simpan Gap Manajerial</button>
                 </div>
             </form>
 
-            {{-- Form Gap Target --}}
-            <form id="form-tambah-gap-target" class="dynamic-subform" data-section="gap-target" style="display:none;" action="{{ route('karyawan.development-gap.target.update', ['nik' => $employee->nik]) }}" method="POST">
+            {{-- Form C: Gap Kompetensi Technical --}}
+            <form id="form-tambah-gap-c" class="dynamic-subform" data-section="tambah-gap-c" style="display:none;" action="{{ route('karyawan.competency-gap.store', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
-                <div class="form-group">
-                    <label class="form-label">Posisi Target <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="target_position_gap" class="form-control" value="{{ $employee->target_position_gap ?: 'Engineering Manager (JC5 / G5-1)' }}" required>
+                <input type="hidden" name="competency_type" value="Technical">
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px; display:flex; align-items:center; justify-content:space-between;">
+                    <span>C. Tambah Gap Kompetensi Technical</span>
+                    <span class="badge-green" style="font-size:11px; padding:2px 8px;">Technical</span>
                 </div>
+
                 <div class="form-group">
-                    <label class="form-label">Departemen / Fungsi Target <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="target_department_gap" class="form-control" value="{{ $employee->target_department_gap ?: 'Manufacturing Engineering' }}" required>
+                    <label class="form-label">Nama Kompetensi Technical <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="competency" class="form-control" placeholder="Contoh: PLC Automation / Smart Manufacturing" required>
                 </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Level Saat Ini (1 - 5) <span style="color:#ef4444;">*</span></label>
+                        <select name="current_level" class="form-control" required>
+                            @for($l = 1; $l <= 5; $l++)
+                                <option value="{{ $l }}" {{ $l == 3 ? 'selected' : '' }}>Level {{ $l }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Target Level (1 - 5) <span style="color:#ef4444;">*</span></label>
+                        <select name="standard_level" class="form-control" required>
+                            @for($s = 1; $s <= 5; $s++)
+                                <option value="{{ $s }}" {{ $s == 5 ? 'selected' : '' }}>Level {{ $s }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label class="form-label">Metode Asesmen Gap <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="gap_method" class="form-control" value="{{ $employee->gap_method ?: 'Perbandingan Kompetensi: Posisi Saat Ini vs Posisi Target (Engineering Manager)' }}" required>
+                    <label class="form-label">Deskripsi Level Saat Ini</label>
+                    <input type="text" name="current_desc" class="form-control" placeholder="Deskripsi pemenuhan level teknis saat ini">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Deskripsi Target Level</label>
+                    <input type="text" name="standard_desc" class="form-control" placeholder="Deskripsi tuntutan target level teknis posisi target">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Peningkatan yang Diharapkan <span style="color:#ef4444;">*</span></label>
+                    <textarea name="expected_improvement" class="form-control" rows="2" placeholder="Uraikan output peningkatan teknis yang diharapkan dari karyawan..." required></textarea>
                 </div>
                 <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
                     <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Target Gap</button>
+                    <button type="submit" class="btn btn-primary">Simpan Gap Technical</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-{{-- 4.2 Modal Edit Development Gap (Pilih Target Gap atau Baris Kompetensi) --}}
+{{-- 4.2 Modal Edit Development Gap (Pilihan A, B, C dengan Tombol Hapus di Kiri Bawah) --}}
 <div id="modal-edit-gap" class="modal-backdrop">
     <div class="modal-card modal-lg">
         <div class="modal-header">
@@ -2925,24 +3042,31 @@
         </div>
 
         <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+            {{-- Hidden form for inline deletion --}}
+            <form id="form-inline-hapus-gap" action="" method="POST" style="display:none;">
+                @csrf
+                @method('DELETE')
+            </form>
+
             <div class="section-selector-box">
                 <label>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                     Pilih Bagian yang Ingin Diedit:
                 </label>
                 <select id="select-edit-gap-section" class="form-control section-switcher" data-container="container-edit-gap">
-                    <option value="edit-gap-target">Informasi Posisi Target & Metode Gap</option>
-                    <option value="edit-gap-detail">Detail Baris Gap Kompetensi (B. Manajerial / C. Technical)</option>
+                    <option value="edit-gap-a">A. Posisi Target & Metode Asesmen Gap</option>
+                    <option value="edit-gap-b" selected>B. Detail Gap Kompetensi Manajerial</option>
+                    <option value="edit-gap-c">C. Detail Gap Kompetensi Technical</option>
                 </select>
             </div>
 
-            {{-- Form Target Gap --}}
-            <form id="form-edit-gap-target" class="dynamic-subform" data-section="edit-gap-target" action="{{ route('karyawan.development-gap.target.update', ['nik' => $employee->nik]) }}" method="POST">
+            {{-- Form A: Target Gap --}}
+            <form id="form-edit-gap-a" class="dynamic-subform" data-section="edit-gap-a" style="display:none;" action="{{ route('karyawan.development-gap.target.update', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
-                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir Posisi Target & Metode Asesmen Gap</div>
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">A. Formulir Posisi Target & Metode Asesmen Gap</div>
                 <div class="form-group">
                     <label class="form-label">Posisi Target <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="target_position_gap" class="form-control" value="{{ $employee->target_position_gap ?: 'Engineering Manager (JC5 / G5-1)' }}" required>
+                    <input type="text" name="target_position_gap" class="form-control" value="{{ $employee->target_position_gap ?: 'Engineering Manager (JC5 / GS-1)' }}" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Departemen / Fungsi Target <span style="color:#ef4444;">*</span></label>
@@ -2950,7 +3074,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Metode Asesmen Gap <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="gap_method" class="form-control" value="{{ $employee->gap_method ?: 'Perbandingan Kompetensi: Posisi Saat Ini vs Posisi Target (Engineering Manager)' }}" required>
+                    <input type="text" name="gap_method" class="form-control" value="{{ $employee->gap_method ?: 'Perbandingan : Posisi Saat Ini vs Posisi Target' }}" required>
                 </div>
                 <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
                     <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
@@ -2958,47 +3082,45 @@
                 </div>
             </form>
 
-            {{-- Form Edit Gap Kompetensi --}}
-            <form id="form-edit-gap-detail" class="dynamic-subform" data-section="edit-gap-detail" style="display:none;" action="" method="POST">
+            {{-- Form B: Edit Gap Manajerial (dengan tombol hapus di kiri bawah) --}}
+            <form id="form-edit-gap-b" class="dynamic-subform" data-section="edit-gap-b" action="" method="POST">
                 @csrf
                 @method('PUT')
-                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir Edit Baris Gap Kompetensi</div>
+                <input type="hidden" name="competency_type" value="Manajerial">
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px; display:flex; align-items:center; justify-content:space-between;">
+                    <span>B. Formulir Edit Gap Kompetensi Manajerial</span>
+                    <span class="badge-blue" style="font-size:11px; padding:2px 8px;">Manajerial</span>
+                </div>
+
                 <div class="form-group">
-                    <label class="form-label">Pilih Kompetensi yang Ingin Diedit:</label>
-                    <select id="select-edit-gap-item" class="form-control">
-                        @foreach($employee->competencyGaps as $gap)
+                    <label class="form-label">Pilih Kompetensi Manajerial yang Ingin Diedit:</label>
+                    <select id="select-edit-gap-b-item" class="form-control">
+                        @forelse($modalManajerialGaps as $gap)
                             <option value="{{ $gap->id }}"
                                     data-comp="{{ $gap->competency }}"
-                                    data-type="{{ $gap->competency_type ?: 'Manajerial' }}"
+                                    data-type="Manajerial"
                                     data-curr="{{ $gap->current_level }}"
                                     data-currdesc="{{ $gap->current_desc }}"
                                     data-std="{{ $gap->standard_level }}"
                                     data-stddesc="{{ $gap->standard_desc }}"
                                     data-improvement="{{ $gap->expected_improvement }}">
-                                [{{ $gap->competency_type ?: 'Manajerial' }}] {{ $gap->competency }} (Gap: {{ $gap->gap }})
+                                {{ $loop->iteration }}. {{ $gap->competency }} (Level: {{ $gap->current_level }} &rarr; Target: {{ $gap->standard_level }} | Gap: {{ $gap->gap }})
                             </option>
-                        @endforeach
+                        @empty
+                            <option value="">Belum ada data gap kompetensi manajerial</option>
+                        @endforelse
                     </select>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group" style="flex:2;">
-                        <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-gap-comp" name="competency" class="form-control" required>
-                    </div>
-                    <div class="form-group" style="flex:1;">
-                        <label class="form-label">Kategori Kompetensi <span style="color:#ef4444;">*</span></label>
-                        <select id="edit-gap-type" name="competency_type" class="form-control" required>
-                            <option value="Manajerial">B. Manajerial</option>
-                            <option value="Technical">C. Technical</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Nama Kompetensi Manajerial <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="edit-gap-b-comp" name="competency" class="form-control" required>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Level Saat Ini (1 - 5) <span style="color:#ef4444;">*</span></label>
-                        <select id="edit-gap-curr" name="current_level" class="form-control" required>
+                        <select id="edit-gap-b-curr" name="current_level" class="form-control" required>
                             @for($l = 1; $l <= 5; $l++)
                                 <option value="{{ $l }}">Level {{ $l }}</option>
                             @endfor
@@ -3006,7 +3128,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Target Level (1 - 5) <span style="color:#ef4444;">*</span></label>
-                        <select id="edit-gap-std" name="standard_level" class="form-control" required>
+                        <select id="edit-gap-b-std" name="standard_level" class="form-control" required>
                             @for($s = 1; $s <= 5; $s++)
                                 <option value="{{ $s }}">Level {{ $s }}</option>
                             @endfor
@@ -3016,86 +3138,115 @@
 
                 <div class="form-group">
                     <label class="form-label">Deskripsi Level Saat Ini</label>
-                    <input type="text" id="edit-gap-currdesc" name="current_desc" class="form-control">
+                    <input type="text" id="edit-gap-b-currdesc" name="current_desc" class="form-control">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Deskripsi Target Level</label>
-                    <input type="text" id="edit-gap-stddesc" name="standard_desc" class="form-control">
+                    <input type="text" id="edit-gap-b-stddesc" name="standard_desc" class="form-control">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Peningkatan yang Diharapkan <span style="color:#ef4444;">*</span></label>
-                    <textarea id="edit-gap-improvement" name="expected_improvement" class="form-control" rows="2" required></textarea>
+                    <textarea id="edit-gap-b-improvement" name="expected_improvement" class="form-control" rows="2" required></textarea>
                 </div>
 
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Perbarui Gap Kompetensi</button>
+                {{-- Footer Form B: Tombol Hapus di KIRI BAWAH, Batal & Simpan di KANAN --}}
+                <div class="modal-footer" style="padding:14px 0 0; margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <button type="button" class="btn btn-outline" id="btn-hapus-gap-b" style="color:#dc2626; border-color:#fca5a5; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Hapus Gap Ini
+                        </button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                        <button type="submit" class="btn btn-primary">Perbarui Gap Manajerial</button>
+                    </div>
                 </div>
             </form>
-        </div>
-    </div>
-</div>
 
-{{-- 4.3 Modal Hapus Development Gap --}}
-<div id="modal-hapus-gap" class="modal-backdrop">
-    <div class="modal-card" style="max-width:500px;">
-        <div class="modal-header" style="background:#b91c1c;">
-            <div class="modal-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                Hapus Data Development Gap
-            </div>
-            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
-        </div>
-
-        <div class="modal-body">
-            <div class="section-selector-box">
-                <label>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                    Pilih Bagian Gap yang Ingin Dihapus / Direset:
-                </label>
-                <select id="select-hapus-gap-section" class="form-control section-switcher" data-container="container-hapus-gap">
-                    <option value="del-gap-detail">Detail Baris Gap Kompetensi (B. Manajerial / C. Technical)</option>
-                    <option value="del-gap-target">A. Posisi Target & Metode Gap (Reset Nilai)</option>
-                </select>
-            </div>
-
-            {{-- Form Hapus Gap Baris --}}
-            <form id="form-hapus-gap" class="dynamic-subform" data-section="del-gap-detail" action="" method="POST">
+            {{-- Form C: Edit Gap Technical (dengan tombol hapus di kiri bawah) --}}
+            <form id="form-edit-gap-c" class="dynamic-subform" data-section="edit-gap-c" style="display:none;" action="" method="POST">
                 @csrf
-                @method('DELETE')
+                @method('PUT')
+                <input type="hidden" name="competency_type" value="Technical">
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px; display:flex; align-items:center; justify-content:space-between;">
+                    <span>C. Formulir Edit Gap Kompetensi Technical</span>
+                    <span class="badge-green" style="font-size:11px; padding:2px 8px;">Technical</span>
+                </div>
+
                 <div class="form-group">
-                    <label class="form-label">Pilih Gap Kompetensi yang Akan Dihapus:</label>
-                    <select id="select-del-gap-item" class="form-control">
-                        @foreach($employee->competencyGaps as $gap)
-                            <option value="{{ $gap->id }}">
-                                [{{ $gap->competency_type ?: 'Manajerial' }}] {{ $gap->competency }} (Gap: {{ $gap->gap }})
+                    <label class="form-label">Pilih Kompetensi Technical yang Ingin Diedit:</label>
+                    <select id="select-edit-gap-c-item" class="form-control">
+                        @forelse($modalTechnicalGaps as $gap)
+                            <option value="{{ $gap->id }}"
+                                    data-comp="{{ $gap->competency }}"
+                                    data-type="Technical"
+                                    data-curr="{{ $gap->current_level }}"
+                                    data-currdesc="{{ $gap->current_desc }}"
+                                    data-std="{{ $gap->standard_level }}"
+                                    data-stddesc="{{ $gap->standard_desc }}"
+                                    data-improvement="{{ $gap->expected_improvement }}">
+                                {{ $loop->iteration }}. {{ $gap->competency }} (Level: {{ $gap->current_level }} &rarr; Target: {{ $gap->standard_level }} | Gap: {{ $gap->gap }})
                             </option>
-                        @endforeach
+                        @empty
+                            <option value="">Belum ada data gap kompetensi technical</option>
+                        @endforelse
                     </select>
                 </div>
-                <div style="font-size:12px; color:#b91c1c; margin-top:10px;">
-                    Perhatian: Data gap kompetensi yang dihapus tidak dapat dipulihkan.
-                </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626;">Hapus Gap Ini</button>
-                </div>
-            </form>
 
-            {{-- Form Reset Target Gap --}}
-            <form id="form-reset-gap-target" class="dynamic-subform" data-section="del-gap-target" style="display:none;" action="{{ route('karyawan.development-gap.target.update', ['nik' => $employee->nik]) }}" method="POST">
-                @csrf
-                <input type="hidden" name="target_position_gap" value="-">
-                <input type="hidden" name="target_department_gap" value="-">
-                <input type="hidden" name="gap_method" value="-">
-                <div style="font-size:12.5px; color:#334155; line-height:1.6;">
-                    Apakah Anda yakin ingin mereset informasi <strong>Posisi Target & Metode Gap</strong> menjadi default/kosong?
+                <div class="form-group">
+                    <label class="form-label">Nama Kompetensi Technical <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="edit-gap-c-comp" name="competency" class="form-control" required>
                 </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626;">Reset Target Gap</button>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Level Saat Ini (1 - 5) <span style="color:#ef4444;">*</span></label>
+                        <select id="edit-gap-c-curr" name="current_level" class="form-control" required>
+                            @for($l = 1; $l <= 5; $l++)
+                                <option value="{{ $l }}">Level {{ $l }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Target Level (1 - 5) <span style="color:#ef4444;">*</span></label>
+                        <select id="edit-gap-c-std" name="standard_level" class="form-control" required>
+                            @for($s = 1; $s <= 5; $s++)
+                                <option value="{{ $s }}">Level {{ $s }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Deskripsi Level Saat Ini</label>
+                    <input type="text" id="edit-gap-c-currdesc" name="current_desc" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Deskripsi Target Level</label>
+                    <input type="text" id="edit-gap-c-stddesc" name="standard_desc" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Peningkatan yang Diharapkan <span style="color:#ef4444;">*</span></label>
+                    <textarea id="edit-gap-c-improvement" name="expected_improvement" class="form-control" rows="2" required></textarea>
+                </div>
+
+                {{-- Footer Form C: Tombol Hapus di KIRI BAWAH, Batal & Simpan di KANAN --}}
+                <div class="modal-footer" style="padding:14px 0 0; margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <button type="button" class="btn btn-outline" id="btn-hapus-gap-c" style="color:#dc2626; border-color:#fca5a5; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Hapus Gap Ini
+                        </button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
+                        <button type="submit" class="btn btn-primary">Perbarui Gap Technical</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -3107,8 +3258,32 @@
    ========================================================================= --}}
 
 {{-- 5.1 Modal Tambah IDP Action Plan & Ringkasan --}}
+@php
+    $allIdpActionPlans = $employee->idpActionPlans ?? collect();
+    $idpManajerialPlans = $allIdpActionPlans->filter(function($p) {
+        return strtolower($p->competency_type ?? 'manajerial') !== 'technical';
+    });
+    $idpTechnicalPlans = $allIdpActionPlans->filter(function($p) {
+        return strtolower($p->competency_type ?? '') === 'technical';
+    });
+    $idpManajerialCompetencies = $idpManajerialPlans->pluck('competency')->unique();
+    $idpTechnicalCompetencies = $idpTechnicalPlans->pluck('competency')->unique();
+    $idpPicOptions = [
+        'Marketing',
+        'Mentor',
+        'Atasan Langsung',
+        'HRD',
+        'SME (Subject Matter Expert)',
+        'PMO',
+        'Director / Division Head',
+        'Internal Trainer',
+        'External Trainer / Vendor',
+        'Quality / Engineering Specialist',
+        'Cross-Functional Team',
+    ];
+@endphp
 <div id="modal-tambah-idp" class="modal-backdrop">
-    <div class="modal-card modal-lg">
+    <div class="modal-card" style="max-width: 680px;">
         <div class="modal-header">
             <div class="modal-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -3117,94 +3292,253 @@
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
 
-        <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+        <div class="modal-body" style="max-height:75vh; overflow-y:auto; padding: 16px 20px 10px 20px;">
             <div class="section-selector-box">
                 <label>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                     Pilih Bagian IDP yang Ingin Ditambah / Diatur:
                 </label>
                 <select id="select-tambah-idp-section" class="form-control section-switcher" data-container="container-tambah-idp">
-                    <option value="idp-action">B/C. Detail Baris Rencana Aksi (Action Plan)</option>
-                    <option value="idp-summary">A. Ringkasan Kesiapan & Incumbent</option>
+                    <option value="tambah-idp-summary">A. Ringkasan Kesiapan & Incumbent</option>
+                    <option value="tambah-idp-b">B. Rencana Pengembangan Manajerial</option>
+                    <option value="tambah-idp-c">C. Rencana Pengembangan Technical</option>
                 </select>
             </div>
 
-            {{-- Form IDP Action Plan --}}
-            <form id="form-tambah-idp-action" class="dynamic-subform" data-section="idp-action" action="{{ route('karyawan.idp-action-plan.store', ['nik' => $employee->nik]) }}" method="POST">
+            {{-- Form Tambah IDP Bagian B: Manajerial --}}
+            <form id="form-tambah-idp-b" class="dynamic-subform" data-section="tambah-idp-b" action="{{ route('karyawan.idp-action-plan.store', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
-                <div class="form-group">
-                    <label class="form-label">Kategori Rencana Pengembangan <span style="color:#ef4444;">*</span></label>
-                    <select name="competency_type" id="tambah-idp-competency-type" class="form-control" required>
-                        <option value="Manajerial">B. Rencana Pengembangan Manajerial</option>
-                        <option value="Technical">C. Rencana Pengembangan Technical</option>
-                    </select>
-                </div>
+                <input type="hidden" name="competency_type" value="Manajerial">
+                <datalist id="datalist-tambah-idp-b-competencies">
+                    @foreach($idpManajerialCompetencies as $cName)
+                        <option value="{{ $cName }}"></option>
+                    @endforeach
+                </datalist>
 
                 <div class="form-group">
-                    <label class="form-label">Kompetensi yang Dikembangkan <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="competency" class="form-control" placeholder="Contoh: Vision & Business Sense" required>
+                    <label class="form-label">Kompetensi Manajerial yang Dikembangkan <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="competency" id="tambah-idp-b-competency" class="form-control" placeholder="Pilih dari daftar atau ketik baru..." list="datalist-tambah-idp-b-competencies" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Tujuan Spesifik (Target)</label>
-                    <textarea name="specific_goal" class="form-control" rows="2" placeholder="Tujuan terukur yang ingin dicapai..."></textarea>
+                    <textarea name="specific_goal" id="tambah-idp-b-goal" class="form-control" rows="2" placeholder="Tujuan terukur yang ingin dicapai pada kompetensi ini..."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Metode Pengembangan <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="development_methods" class="form-control" placeholder="Contoh: Training, On the Job, Coaching, Exposure" required>
+                    <select name="development_methods" id="tambah-idp-b-method" class="form-control" required>
+                        <option value="">-- Pilih Metode Pengembangan --</option>
+                        <option value="Training">Training</option>
+                        <option value="On the Job">On the Job</option>
+                        <option value="Coaching">Coaching</option>
+                        <option value="Mentoring">Mentoring</option>
+                        <option value="Exposure">Exposure</option>
+                        <option value="Project / Assignment">Project / Assignment</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="E-Learning / Self Study">E-Learning / Self Study</option>
+                        <option value="Benchmarking">Benchmarking</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>PIC / Pendukung <span style="color:#ef4444;">*</span></span>
+                        <span style="font-size:11px; font-weight:400; color:#64748b;">(Dapat memilih lebih dari satu)</span>
+                    </label>
+                    <div class="pic-checkbox-group" id="tambah-idp-b-pic-group" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:8px 12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px 14px; max-height:160px; overflow-y:auto;">
+                        @foreach($idpPicOptions as $picOpt)
+                            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#334155; cursor:pointer; font-weight:500; margin:0; user-select:none;">
+                                <input type="checkbox" name="pic_supporter[]" value="{{ $picOpt }}" class="idp-pic-checkbox" style="width:15px; height:15px; accent-color:#0284c7; cursor:pointer;">
+                                <span>{{ $picOpt }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <div class="pic-validation-feedback" style="display:none; color:#ef4444; font-size:11.5px; margin-top:4px; font-weight:500;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        Silakan pilih minimal satu PIC / Pendukung.
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Aktivitas / Program <span style="color:#ef4444;">*</span></label>
-                    <textarea name="activity_program" class="form-control" rows="2" placeholder="Contoh: • Strategic Initiative Project&#10;• Mentoring Executive" required></textarea>
+                    <input type="text" name="activity_program" id="tambah-idp-b-activity" class="form-control" placeholder="Contoh: Strategic Thinking Workshop" required>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">PIC / Pendukung <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="pic_supporter" class="form-control" placeholder="Contoh: Division Head, HR Mentor" required>
+                        <label class="form-label">Tanggal Mulai <span style="color:#ef4444;">*</span></label>
+                        <input type="date" name="start_date" id="tambah-idp-b-start" class="form-control" onclick="this.showPicker && this.showPicker()" required>
                     </div>
                     <div class="form-group">
+                        <label class="form-label">Tanggal Selesai <span style="color:#ef4444;">*</span></label>
+                        <input type="date" name="end_date" id="tambah-idp-b-end" class="form-control" onclick="this.showPicker && this.showPicker()" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Indikator Keberhasilan <span style="color:#ef4444;">*</span></label>
+                    <select name="success_indicator" id="tambah-idp-b-indicator" class="form-control" required>
+                        <option value="">-- Pilih Indikator Keberhasilan --</option>
+                        <option value="Peningkatan skor kepuasan customer (CSAT >= 85%).">Peningkatan skor kepuasan customer (CSAT >= 85%).</option>
+                        <option value="Feedback 360° meningkat pada aspek komunikasi dan kolaborasi.">Feedback 360° meningkat pada aspek komunikasi dan kolaborasi.</option>
+                        <option value="Menyusun proposal inisiatif strategis dan disetujui atasan.">Menyusun proposal inisiatif strategis dan disetujui atasan.</option>
+                        <option value="Keputusan berbasis data yang memberikan dampak terukur.">Keputusan berbasis data yang memberikan dampak terukur.</option>
+                        <option value="Proyek selesai sesuai rencana waktu, biaya, dan standar kualitas.">Proyek selesai sesuai rencana waktu, biaya, dan standar kualitas.</option>
+                        <option value="Engagement tim meningkat dan target tercapai.">Engagement tim meningkat dan target tercapai.</option>
+                        <option value="Feedback lintas fungsi positif dan kolaborasi efektif.">Feedback lintas fungsi positif dan kolaborasi efektif.</option>
+                        <option value="Inisiatif baru diimplementasikan dan memberikan hasil nyata.">Inisiatif baru diimplementasikan dan memberikan hasil nyata.</option>
+                        <option value="Kelulusan sertifikasi Lean Six Sigma dengan skor >= 85.">Kelulusan sertifikasi Lean Six Sigma dengan skor >= 85.</option>
+                        <option value="Peningkatan efisiensi lini produksi sebesar 15%.">Peningkatan efisiensi lini produksi sebesar 15%.</option>
+                        <option value="Penyusunan dokumen Control Plan & FMEA terstandar.">Penyusunan dokumen Control Plan & FMEA terstandar.</option>
+                        <option value="Penurunan scrap rate manufaktur hingga di bawah 1.5%.">Penurunan scrap rate manufaktur hingga di bawah 1.5%.</option>
+                        <option value="Implementasi sistem pemantauan sensor otomatis pada 2 mesin kritis.">Implementasi sistem pemantauan sensor otomatis pada 2 mesin kritis.</option>
+                        <option value="Penyusunan roadmap otomasi manufaktur jangka panjang.">Penyusunan roadmap otomasi manufaktur jangka panjang.</option>
+                        <option value="custom">-- Tulis Indikator Kustom / Lainnya --</option>
+                    </select>
+                    <input type="text" name="success_indicator_custom" id="tambah-idp-b-indicator-custom" class="form-control" style="display:none; margin-top:8px;" placeholder="Ketik indikator keberhasilan spesifik...">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
                         <label class="form-label">Status <span style="color:#ef4444;">*</span></label>
-                        <select name="status" class="form-control" required>
+                        <select name="status" id="tambah-idp-b-status" class="form-control" required>
                             <option value="On Progress">On Progress</option>
                             <option value="Planning">Planning</option>
                             <option value="Selesai">Selesai</option>
                             <option value="Dibatalkan">Dibatalkan</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">Progres (%) <span style="color:#ef4444;">*</span></label>
+                        <input type="number" name="progress_percent" id="tambah-idp-b-progress" class="form-control" min="0" max="100" placeholder="0 - 100" value="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer modal-footer-standard modal-footer-end">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                    <button type="submit" class="btn-modal-action btn-modal-submit">Tambah</button>
+                </div>
+            </form>
+
+            {{-- Form Tambah IDP Bagian C: Technical --}}
+            <form id="form-tambah-idp-c" class="dynamic-subform" data-section="tambah-idp-c" style="display:none;" action="{{ route('karyawan.idp-action-plan.store', ['nik' => $employee->nik]) }}" method="POST">
+                @csrf
+                <input type="hidden" name="competency_type" value="Technical">
+                <datalist id="datalist-tambah-idp-c-competencies">
+                    @foreach($idpTechnicalCompetencies as $cName)
+                        <option value="{{ $cName }}"></option>
+                    @endforeach
+                </datalist>
+
+                <div class="form-group">
+                    <label class="form-label">Kompetensi Technical yang Dikembangkan <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="competency" id="tambah-idp-c-competency" class="form-control" placeholder="Pilih dari daftar atau ketik baru..." list="datalist-tambah-idp-c-competencies" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tujuan Spesifik (Target)</label>
+                    <textarea name="specific_goal" id="tambah-idp-c-goal" class="form-control" rows="2" placeholder="Tujuan teknikal yang ingin dicapai pada kompetensi ini..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Metode Pengembangan <span style="color:#ef4444;">*</span></label>
+                    <select name="development_methods" id="tambah-idp-c-method" class="form-control" required>
+                        <option value="">-- Pilih Metode Pengembangan --</option>
+                        <option value="Training">Training</option>
+                        <option value="On the Job">On the Job</option>
+                        <option value="Coaching">Coaching</option>
+                        <option value="Mentoring">Mentoring</option>
+                        <option value="Exposure">Exposure</option>
+                        <option value="Project / Assignment">Project / Assignment</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="E-Learning / Self Study">E-Learning / Self Study</option>
+                        <option value="Benchmarking">Benchmarking</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>PIC / Pendukung <span style="color:#ef4444;">*</span></span>
+                        <span style="font-size:11px; font-weight:400; color:#64748b;">(Dapat memilih lebih dari satu)</span>
+                    </label>
+                    <div class="pic-checkbox-group" id="tambah-idp-c-pic-group" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:8px 12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px 14px; max-height:160px; overflow-y:auto;">
+                        @foreach($idpPicOptions as $picOpt)
+                            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#334155; cursor:pointer; font-weight:500; margin:0; user-select:none;">
+                                <input type="checkbox" name="pic_supporter[]" value="{{ $picOpt }}" class="idp-pic-checkbox" style="width:15px; height:15px; accent-color:#0284c7; cursor:pointer;">
+                                <span>{{ $picOpt }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <div class="pic-validation-feedback" style="display:none; color:#ef4444; font-size:11.5px; margin-top:4px; font-weight:500;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        Silakan pilih minimal satu PIC / Pendukung.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Aktivitas / Program <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="activity_program" id="tambah-idp-c-activity" class="form-control" placeholder="Contoh: Advanced PLC Programming Course" required>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Tanggal Mulai <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="start_date" class="form-control" placeholder="Contoh: Jun 2026" required>
+                        <input type="date" name="start_date" id="tambah-idp-c-start" class="form-control" onclick="this.showPicker && this.showPicker()" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Tanggal Selesai <span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="end_date" class="form-control" placeholder="Contoh: Des 2026" required>
+                        <input type="date" name="end_date" id="tambah-idp-c-end" class="form-control" onclick="this.showPicker && this.showPicker()" required>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Indikator Keberhasilan <span style="color:#ef4444;">*</span></label>
+                    <select name="success_indicator" id="tambah-idp-c-indicator" class="form-control" required>
+                        <option value="">-- Pilih Indikator Keberhasilan --</option>
+                        <option value="Peningkatan skor kepuasan customer (CSAT >= 85%).">Peningkatan skor kepuasan customer (CSAT >= 85%).</option>
+                        <option value="Feedback 360° meningkat pada aspek komunikasi dan kolaborasi.">Feedback 360° meningkat pada aspek komunikasi dan kolaborasi.</option>
+                        <option value="Menyusun proposal inisiatif strategis dan disetujui atasan.">Menyusun proposal inisiatif strategis dan disetujui atasan.</option>
+                        <option value="Keputusan berbasis data yang memberikan dampak terukur.">Keputusan berbasis data yang memberikan dampak terukur.</option>
+                        <option value="Proyek selesai sesuai rencana waktu, biaya, dan standar kualitas.">Proyek selesai sesuai rencana waktu, biaya, dan standar kualitas.</option>
+                        <option value="Engagement tim meningkat dan target tercapai.">Engagement tim meningkat dan target tercapai.</option>
+                        <option value="Feedback lintas fungsi positif dan kolaborasi efektif.">Feedback lintas fungsi positif dan kolaborasi efektif.</option>
+                        <option value="Inisiatif baru diimplementasikan dan memberikan hasil nyata.">Inisiatif baru diimplementasikan dan memberikan hasil nyata.</option>
+                        <option value="Kelulusan sertifikasi Lean Six Sigma dengan skor >= 85.">Kelulusan sertifikasi Lean Six Sigma dengan skor >= 85.</option>
+                        <option value="Peningkatan efisiensi lini produksi sebesar 15%.">Peningkatan efisiensi lini produksi sebesar 15%.</option>
+                        <option value="Penyusunan dokumen Control Plan & FMEA terstandar.">Penyusunan dokumen Control Plan & FMEA terstandar.</option>
+                        <option value="Penurunan scrap rate manufaktur hingga di bawah 1.5%.">Penurunan scrap rate manufaktur hingga di bawah 1.5%.</option>
+                        <option value="Implementasi sistem pemantauan sensor otomatis pada 2 mesin kritis.">Implementasi sistem pemantauan sensor otomatis pada 2 mesin kritis.</option>
+                        <option value="Penyusunan roadmap otomasi manufaktur jangka panjang.">Penyusunan roadmap otomasi manufaktur jangka panjang.</option>
+                        <option value="custom">-- Tulis Indikator Kustom / Lainnya --</option>
+                    </select>
+                    <input type="text" name="success_indicator_custom" id="tambah-idp-c-indicator-custom" class="form-control" style="display:none; margin-top:8px;" placeholder="Ketik indikator keberhasilan spesifik...">
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Indikator Keberhasilan</label>
-                        <input type="text" name="success_indicator" class="form-control" placeholder="Contoh: Disetujuinya inisiatif strategis oleh atasan">
+                        <label class="form-label">Status <span style="color:#ef4444;">*</span></label>
+                        <select name="status" id="tambah-idp-c-status" class="form-control" required>
+                            <option value="On Progress">On Progress</option>
+                            <option value="Planning">Planning</option>
+                            <option value="Selesai">Selesai</option>
+                            <option value="Dibatalkan">Dibatalkan</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Progres (%) <span style="color:#ef4444;">*</span></label>
-                        <input type="number" name="progress_percent" class="form-control" min="0" max="100" value="0" required>
+                        <input type="number" name="progress_percent" id="tambah-idp-c-progress" class="form-control" min="0" max="100" placeholder="0 - 100" value="0" required>
                     </div>
                 </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Rencana IDP</button>
+                <div class="modal-footer modal-footer-standard modal-footer-end">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                    <button type="submit" class="btn-modal-action btn-modal-submit">Tambah</button>
                 </div>
             </form>
 
             {{-- Form IDP Summary --}}
-            <form id="form-tambah-idp-summary" class="dynamic-subform" data-section="idp-summary" style="display:none;" action="{{ route('karyawan.idp.summary.update', ['nik' => $employee->nik]) }}" method="POST">
+            <form id="form-tambah-idp-summary" class="dynamic-subform" data-section="tambah-idp-summary" style="display:none;" action="{{ route('karyawan.idp.summary.update', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
                 <div class="form-row">
                     <div class="form-group">
@@ -3224,18 +3558,18 @@
                     <label class="form-label">Tujuan Pengembangan Utama</label>
                     <textarea name="idp_primary_goal" class="form-control" rows="3" placeholder="Mempersiapkan karyawan untuk mencapai level kompetensi target...">{{ $employee->idp_primary_goal ?: 'Mempersiapkan ' . $employee->name . ' untuk mencapai kompetensi pada level yang diharapkan untuk posisi Engineering Manager, sehingga siap menggantikan posisi Section Head saat incumbent pensiun.' }}</textarea>
                 </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Ringkasan IDP</button>
+                <div class="modal-footer modal-footer-standard modal-footer-end">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                    <button type="submit" class="btn-modal-action btn-modal-submit">Tambah</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-{{-- 5.2 Modal Edit IDP (Pilih Ringkasan Kesiapan atau Baris Action Plan) --}}
+{{-- 5.2 Modal Edit IDP (Bagian B Manajerial, Bagian C Technical, Bagian A Ringkasan) --}}
 <div id="modal-edit-idp" class="modal-backdrop">
-    <div class="modal-card modal-lg">
+    <div class="modal-card" style="max-width: 680px;">
         <div class="modal-header">
             <div class="modal-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -3244,7 +3578,7 @@
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
 
-        <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+        <div class="modal-body" style="max-height:75vh; overflow-y:auto; padding: 16px 20px 10px 20px;">
             <div class="section-selector-box">
                 <label>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
@@ -3252,14 +3586,15 @@
                 </label>
                 <select id="select-edit-idp-section" class="form-control section-switcher" data-container="container-edit-idp">
                     <option value="edit-idp-summary">A. Ringkasan Kesiapan & Fokus Pengembangan</option>
-                    <option value="edit-idp-action">B/C. Detail Baris Rencana Aksi (Action Plan)</option>
+                    <option value="edit-idp-b">B. Rencana Pengembangan Manajerial</option>
+                    <option value="edit-idp-c">C. Rencana Pengembangan Technical</option>
                 </select>
             </div>
 
-            {{-- Form Edit Ringkasan IDP --}}
+            {{-- Form Edit Ringkasan IDP (Bagian A) --}}
             <form id="form-edit-idp-summary" class="dynamic-subform" data-section="edit-idp-summary" action="{{ route('karyawan.idp.summary.update', ['nik' => $employee->nik]) }}" method="POST">
                 @csrf
-                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir Ringkasan Kesiapan & Incumbent</div>
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir Ringkasan Kesiapan & Incumbent (Bagian A)</div>
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Persentase Tingkat Kesiapan <span style="color:#ef4444;">*</span></label>
@@ -3278,24 +3613,31 @@
                     <label class="form-label">Tujuan Pengembangan Utama</label>
                     <textarea name="idp_primary_goal" class="form-control" rows="3" placeholder="Mempersiapkan karyawan untuk mencapai level kompetensi posisi target...">{{ $employee->idp_primary_goal ?: 'Mempersiapkan ' . $employee->name . ' untuk mencapai kompetensi pada level yang diharapkan untuk posisi Engineering Manager, sehingga siap menggantikan posisi Section Head saat incumbent pensiun.' }}</textarea>
                 </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Perbarui Ringkasan IDP</button>
+                <div class="modal-footer modal-footer-standard modal-footer-between">
+                    <button type="button" id="btn-delete-from-edit-idp-summary" class="btn-modal-action btn-modal-delete">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Hapus
+                    </button>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                        <button type="submit" class="btn-modal-action btn-modal-submit">Perbarui</button>
+                    </div>
                 </div>
             </form>
 
-            {{-- Form Edit Action Plan IDP --}}
-            <form id="form-edit-idp-action" class="dynamic-subform" data-section="edit-idp-action" style="display:none;" action="" method="POST">
+            {{-- Form Edit Bagian B: Rencana Aksi Manajerial --}}
+            <form id="form-edit-idp-b" class="dynamic-subform" data-section="edit-idp-b" style="display:none;" action="" method="POST">
                 @csrf
                 @method('PUT')
-                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir Edit Baris Rencana Aksi IDP</div>
+                <input type="hidden" name="competency_type" value="Manajerial">
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir Edit Rencana Aksi Manajerial (Bagian B)</div>
                 <div class="form-group">
-                    <label class="form-label">Pilih Rencana Aksi yang Ingin Diedit:</label>
-                    <select id="select-edit-idp-item" class="form-control">
-                        @foreach($employee->idpActionPlans as $plan)
+                    <label class="form-label">Pilih Rencana Aksi Manajerial yang Ingin Diedit:</label>
+                    <select id="select-edit-idp-b-item" class="form-control">
+                        @forelse($idpManajerialPlans as $plan)
                             <option value="{{ $plan->id }}"
                                     data-comp="{{ $plan->competency }}"
-                                    data-type="{{ $plan->competency_type ?? 'Manajerial' }}"
+                                    data-type="Manajerial"
                                     data-goal="{{ $plan->specific_goal }}"
                                     data-methods="{{ $plan->development_methods }}"
                                     data-program="{{ $plan->activity_program }}"
@@ -3305,90 +3647,274 @@
                                     data-indicator="{{ $plan->success_indicator }}"
                                     data-status="{{ $plan->status }}"
                                     data-progress="{{ $plan->progress_percent }}">
-                                #{{ $plan->order_no }} - {{ $plan->competency }} [{{ $plan->competency_type ?? 'Manajerial' }}] ({{ $plan->status }} - {{ $plan->progress_percent }}%)
+                                {{ $plan->competency }} &bull; {{ $plan->development_methods }}: {{ Str::limit($plan->activity_program, 28) }} ({{ $plan->status }} - {{ $plan->progress_percent }}%)
                             </option>
-                        @endforeach
+                        @empty
+                            <option value="">Belum ada data rencana aksi manajerial</option>
+                        @endforelse
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Kategori Rencana Pengembangan <span style="color:#ef4444;">*</span></label>
-                    <select id="edit-idp-competency-type" name="competency_type" class="form-control" required>
-                        <option value="Manajerial">B. Rencana Pengembangan Manajerial</option>
-                        <option value="Technical">C. Rencana Pengembangan Technical</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Kompetensi yang Dikembangkan <span style="color:#ef4444;">*</span></label>
-                    <input type="text" id="edit-idp-comp" name="competency" class="form-control" required>
+                    <label class="form-label">Kompetensi Manajerial yang Dikembangkan <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="edit-idp-b-comp" name="competency" class="form-control" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Tujuan Spesifik</label>
-                    <textarea id="edit-idp-goal" name="specific_goal" class="form-control" rows="2"></textarea>
+                    <textarea id="edit-idp-b-goal" name="specific_goal" class="form-control" rows="2"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Metode Pengembangan <span style="color:#ef4444;">*</span></label>
-                    <input type="text" id="edit-idp-methods" name="development_methods" class="form-control" required>
+                    <select id="edit-idp-b-methods" name="development_methods" class="form-control" required>
+                        <option value="Training">Training</option>
+                        <option value="On the Job">On the Job</option>
+                        <option value="Coaching">Coaching</option>
+                        <option value="Mentoring">Mentoring</option>
+                        <option value="Exposure">Exposure</option>
+                        <option value="Project / Assignment">Project / Assignment</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="E-Learning / Self Study">E-Learning / Self Study</option>
+                        <option value="Benchmarking">Benchmarking</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>PIC / Pendukung <span style="color:#ef4444;">*</span></span>
+                        <span style="font-size:11px; font-weight:400; color:#64748b;">(Dapat memilih lebih dari satu)</span>
+                    </label>
+                    <div class="pic-checkbox-group" id="edit-idp-b-pic-group" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:8px 12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px 14px; max-height:160px; overflow-y:auto;">
+                        @foreach($idpPicOptions as $picOpt)
+                            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#334155; cursor:pointer; font-weight:500; margin:0; user-select:none;">
+                                <input type="checkbox" name="pic_supporter[]" value="{{ $picOpt }}" class="idp-pic-checkbox" style="width:15px; height:15px; accent-color:#0284c7; cursor:pointer;">
+                                <span>{{ $picOpt }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <div class="pic-validation-feedback" style="display:none; color:#ef4444; font-size:11.5px; margin-top:4px; font-weight:500;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        Silakan pilih minimal satu PIC / Pendukung.
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Aktivitas / Program <span style="color:#ef4444;">*</span></label>
-                    <textarea id="edit-idp-program" name="activity_program" class="form-control" rows="2" required></textarea>
+                    <input type="text" id="edit-idp-b-program" name="activity_program" class="form-control" required>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">PIC / Pendukung <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-idp-pic" name="pic_supporter" class="form-control" required>
+                        <label class="form-label">Tanggal Mulai <span style="color:#ef4444;">*</span></label>
+                        <input type="date" id="edit-idp-b-start" name="start_date" class="form-control" onclick="this.showPicker && this.showPicker()" required>
                     </div>
                     <div class="form-group">
+                        <label class="form-label">Tanggal Selesai <span style="color:#ef4444;">*</span></label>
+                        <input type="date" id="edit-idp-b-end" name="end_date" class="form-control" onclick="this.showPicker && this.showPicker()" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Indikator Keberhasilan <span style="color:#ef4444;">*</span></label>
+                    <select id="edit-idp-b-indicator" name="success_indicator" class="form-control">
+                        <option value="Peningkatan skor kepuasan customer (CSAT >= 85%).">Peningkatan skor kepuasan customer (CSAT >= 85%).</option>
+                        <option value="Feedback 360° meningkat pada aspek komunikasi dan kolaborasi.">Feedback 360° meningkat pada aspek komunikasi dan kolaborasi.</option>
+                        <option value="Menyusun proposal inisiatif strategis dan disetujui atasan.">Menyusun proposal inisiatif strategis dan disetujui atasan.</option>
+                        <option value="Keputusan berbasis data yang memberikan dampak terukur.">Keputusan berbasis data yang memberikan dampak terukur.</option>
+                        <option value="Proyek selesai sesuai rencana waktu, biaya, dan standar kualitas.">Proyek selesai sesuai rencana waktu, biaya, dan standar kualitas.</option>
+                        <option value="Engagement tim meningkat dan target tercapai.">Engagement tim meningkat dan target tercapai.</option>
+                        <option value="Feedback lintas fungsi positif dan kolaborasi efektif.">Feedback lintas fungsi positif dan kolaborasi efektif.</option>
+                        <option value="Inisiatif baru diimplementasikan dan memberikan hasil nyata.">Inisiatif baru diimplementasikan dan memberikan hasil nyata.</option>
+                        <option value="Kelulusan sertifikasi Lean Six Sigma dengan skor >= 85.">Kelulusan sertifikasi Lean Six Sigma dengan skor >= 85.</option>
+                        <option value="Peningkatan efisiensi lini produksi sebesar 15%.">Peningkatan efisiensi lini produksi sebesar 15%.</option>
+                        <option value="Penyusunan dokumen Control Plan & FMEA terstandar.">Penyusunan dokumen Control Plan & FMEA terstandar.</option>
+                        <option value="Penurunan scrap rate manufaktur hingga di bawah 1.5%.">Penurunan scrap rate manufaktur hingga di bawah 1.5%.</option>
+                        <option value="Implementasi sistem pemantauan sensor otomatis pada 2 mesin kritis.">Implementasi sistem pemantauan sensor otomatis pada 2 mesin kritis.</option>
+                        <option value="Penyusunan roadmap otomasi manufaktur jangka panjang.">Penyusunan roadmap otomasi manufaktur jangka panjang.</option>
+                        <option value="custom">-- Tulis Indikator Kustom / Lainnya --</option>
+                    </select>
+                    <input type="text" name="success_indicator_custom" id="edit-idp-b-indicator-custom" class="form-control" style="display:none; margin-top:8px;" placeholder="Ketik indikator keberhasilan spesifik...">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
                         <label class="form-label">Status <span style="color:#ef4444;">*</span></label>
-                        <select id="edit-idp-status" name="status" class="form-control" required>
+                        <select id="edit-idp-b-status" name="status" class="form-control" required>
                             <option value="On Progress">On Progress</option>
                             <option value="Planning">Planning</option>
                             <option value="Selesai">Selesai</option>
                             <option value="Dibatalkan">Dibatalkan</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">Progres (%) <span style="color:#ef4444;">*</span></label>
+                        <input type="number" id="edit-idp-b-progress" name="progress_percent" class="form-control" min="0" max="100" placeholder="0 - 100" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer modal-footer-standard modal-footer-between">
+                    <button type="button" id="btn-delete-from-edit-idp-b" class="btn-modal-action btn-modal-delete">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Hapus
+                    </button>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                        <button type="submit" class="btn-modal-action btn-modal-submit">Perbarui</button>
+                    </div>
+                </div>
+            </form>
+
+            {{-- Form Edit Bagian C: Rencana Aksi Technical --}}
+            <form id="form-edit-idp-c" class="dynamic-subform" data-section="edit-idp-c" style="display:none;" action="" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="competency_type" value="Technical">
+                <div style="font-weight:700; color:#0b2545; margin-bottom:12px; font-size:12.5px;">Formulir Edit Rencana Aksi Technical (Bagian C)</div>
+                <div class="form-group">
+                    <label class="form-label">Pilih Rencana Aksi Technical yang Ingin Diedit:</label>
+                    <select id="select-edit-idp-c-item" class="form-control">
+                        @forelse($idpTechnicalPlans as $plan)
+                            <option value="{{ $plan->id }}"
+                                    data-comp="{{ $plan->competency }}"
+                                    data-type="Technical"
+                                    data-goal="{{ $plan->specific_goal }}"
+                                    data-methods="{{ $plan->development_methods }}"
+                                    data-program="{{ $plan->activity_program }}"
+                                    data-pic="{{ $plan->pic_supporter }}"
+                                    data-start="{{ $plan->start_date }}"
+                                    data-end="{{ $plan->end_date }}"
+                                    data-indicator="{{ $plan->success_indicator }}"
+                                    data-status="{{ $plan->status }}"
+                                    data-progress="{{ $plan->progress_percent }}">
+                                {{ $plan->competency }} &bull; {{ $plan->development_methods }}: {{ Str::limit($plan->activity_program, 28) }} ({{ $plan->status }} - {{ $plan->progress_percent }}%)
+                            </option>
+                        @empty
+                            <option value="">Belum ada data rencana aksi technical</option>
+                        @endforelse
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Kompetensi Technical yang Dikembangkan <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="edit-idp-c-comp" name="competency" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tujuan Spesifik</label>
+                    <textarea id="edit-idp-c-goal" name="specific_goal" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Metode Pengembangan <span style="color:#ef4444;">*</span></label>
+                    <select id="edit-idp-c-methods" name="development_methods" class="form-control" required>
+                        <option value="Training">Training</option>
+                        <option value="On the Job">On the Job</option>
+                        <option value="Coaching">Coaching</option>
+                        <option value="Mentoring">Mentoring</option>
+                        <option value="Exposure">Exposure</option>
+                        <option value="Project / Assignment">Project / Assignment</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="E-Learning / Self Study">E-Learning / Self Study</option>
+                        <option value="Benchmarking">Benchmarking</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>PIC / Pendukung <span style="color:#ef4444;">*</span></span>
+                        <span style="font-size:11px; font-weight:400; color:#64748b;">(Dapat memilih lebih dari satu)</span>
+                    </label>
+                    <div class="pic-checkbox-group" id="edit-idp-c-pic-group" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:8px 12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px 14px; max-height:160px; overflow-y:auto;">
+                        @foreach($idpPicOptions as $picOpt)
+                            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#334155; cursor:pointer; font-weight:500; margin:0; user-select:none;">
+                                <input type="checkbox" name="pic_supporter[]" value="{{ $picOpt }}" class="idp-pic-checkbox" style="width:15px; height:15px; accent-color:#0284c7; cursor:pointer;">
+                                <span>{{ $picOpt }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <div class="pic-validation-feedback" style="display:none; color:#ef4444; font-size:11.5px; margin-top:4px; font-weight:500;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        Silakan pilih minimal satu PIC / Pendukung.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Aktivitas / Program <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="edit-idp-c-program" name="activity_program" class="form-control" required>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Tanggal Mulai <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-idp-start" name="start_date" class="form-control" required>
+                        <input type="date" id="edit-idp-c-start" name="start_date" class="form-control" onclick="this.showPicker && this.showPicker()" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Tanggal Selesai <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="edit-idp-end" name="end_date" class="form-control" required>
+                        <input type="date" id="edit-idp-c-end" name="end_date" class="form-control" onclick="this.showPicker && this.showPicker()" required>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Indikator Keberhasilan <span style="color:#ef4444;">*</span></label>
+                    <select id="edit-idp-c-indicator" name="success_indicator" class="form-control">
+                        <option value="Peningkatan skor kepuasan customer (CSAT >= 85%).">Peningkatan skor kepuasan customer (CSAT >= 85%).</option>
+                        <option value="Feedback 360° meningkat pada aspek komunikasi dan kolaborasi.">Feedback 360° meningkat pada aspek komunikasi dan kolaborasi.</option>
+                        <option value="Menyusun proposal inisiatif strategis dan disetujui atasan.">Menyusun proposal inisiatif strategis dan disetujui atasan.</option>
+                        <option value="Keputusan berbasis data yang memberikan dampak terukur.">Keputusan berbasis data yang memberikan dampak terukur.</option>
+                        <option value="Proyek selesai sesuai rencana waktu, biaya, dan standar kualitas.">Proyek selesai sesuai rencana waktu, biaya, dan standar kualitas.</option>
+                        <option value="Engagement tim meningkat dan target tercapai.">Engagement tim meningkat dan target tercapai.</option>
+                        <option value="Feedback lintas fungsi positif dan kolaborasi efektif.">Feedback lintas fungsi positif dan kolaborasi efektif.</option>
+                        <option value="Inisiatif baru diimplementasikan dan memberikan hasil nyata.">Inisiatif baru diimplementasikan dan memberikan hasil nyata.</option>
+                        <option value="Kelulusan sertifikasi Lean Six Sigma dengan skor >= 85.">Kelulusan sertifikasi Lean Six Sigma dengan skor >= 85.</option>
+                        <option value="Peningkatan efisiensi lini produksi sebesar 15%.">Peningkatan efisiensi lini produksi sebesar 15%.</option>
+                        <option value="Penyusunan dokumen Control Plan & FMEA terstandar.">Penyusunan dokumen Control Plan & FMEA terstandar.</option>
+                        <option value="Penurunan scrap rate manufaktur hingga di bawah 1.5%.">Penurunan scrap rate manufaktur hingga di bawah 1.5%.</option>
+                        <option value="Implementasi sistem pemantauan sensor otomatis pada 2 mesin kritis.">Implementasi sistem pemantauan sensor otomatis pada 2 mesin kritis.</option>
+                        <option value="Penyusunan roadmap otomasi manufaktur jangka panjang.">Penyusunan roadmap otomasi manufaktur jangka panjang.</option>
+                        <option value="custom">-- Tulis Indikator Kustom / Lainnya --</option>
+                    </select>
+                    <input type="text" name="success_indicator_custom" id="edit-idp-c-indicator-custom" class="form-control" style="display:none; margin-top:8px;" placeholder="Ketik indikator keberhasilan spesifik...">
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Indikator Keberhasilan</label>
-                        <input type="text" id="edit-idp-indicator" name="success_indicator" class="form-control">
+                        <label class="form-label">Status <span style="color:#ef4444;">*</span></label>
+                        <select id="edit-idp-c-status" name="status" class="form-control" required>
+                            <option value="On Progress">On Progress</option>
+                            <option value="Planning">Planning</option>
+                            <option value="Selesai">Selesai</option>
+                            <option value="Dibatalkan">Dibatalkan</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Progres (%) <span style="color:#ef4444;">*</span></label>
-                        <input type="number" id="edit-idp-progress" name="progress_percent" class="form-control" min="0" max="100" required>
+                        <input type="number" id="edit-idp-c-progress" name="progress_percent" class="form-control" min="0" max="100" placeholder="0 - 100" required>
                     </div>
                 </div>
 
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Perbarui Rencana Aksi IDP</button>
+                <div class="modal-footer modal-footer-standard modal-footer-between">
+                    <button type="button" id="btn-delete-from-edit-idp-c" class="btn-modal-action btn-modal-delete">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Hapus
+                    </button>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                        <button type="submit" class="btn-modal-action btn-modal-submit">Perbarui</button>
+                    </div>
                 </div>
             </form>
+
+            {{-- End Form Edit Bagian C --}}
         </div>
     </div>
 </div>
 
 {{-- 5.3 Modal Hapus IDP Action Plan & Summary --}}
 <div id="modal-hapus-idp" class="modal-backdrop">
-    <div class="modal-card" style="max-width:500px;">
+    <div class="modal-card" style="max-width:540px;">
         <div class="modal-header" style="background:#b91c1c;">
             <div class="modal-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -3397,38 +3923,66 @@
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body" style="padding: 16px 20px 10px 20px;">
             <div class="section-selector-box">
                 <label>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                     Pilih Bagian IDP yang Ingin Dihapus / Direset:
                 </label>
                 <select id="select-hapus-idp-section" class="form-control section-switcher" data-container="container-hapus-idp">
-                    <option value="del-idp-action">B/C. Detail Baris Rencana Aksi (Hapus Baris)</option>
                     <option value="del-idp-summary">A. Ringkasan Kesiapan & Incumbent (Reset Nilai)</option>
+                    <option value="del-idp-b">B. Rencana Pengembangan Manajerial</option>
+                    <option value="del-idp-c">C. Rencana Pengembangan Technical</option>
                 </select>
             </div>
 
-            {{-- Form Hapus IDP Baris --}}
-            <form id="form-hapus-idp" class="dynamic-subform" data-section="del-idp-action" action="" method="POST">
+            {{-- Form Hapus IDP Bagian B: Manajerial --}}
+            <form id="form-hapus-idp-b" class="dynamic-subform" data-section="del-idp-b" action="" method="POST">
                 @csrf
                 @method('DELETE')
                 <div class="form-group">
-                    <label class="form-label">Pilih Rencana Aksi yang Akan Dihapus:</label>
-                    <select id="select-del-idp-item" class="form-control">
-                        @foreach($employee->idpActionPlans as $plan)
+                    <label class="form-label">Pilih Rencana Aksi Manajerial yang Akan Dihapus:</label>
+                    <select id="select-del-idp-b-item" class="form-control">
+                        @forelse($idpManajerialPlans as $plan)
                             <option value="{{ $plan->id }}">
-                                #{{ $plan->order_no }} - {{ $plan->competency }} [{{ $plan->competency_type ?? 'Manajerial' }}] ({{ $plan->status }})
+                                {{ $plan->competency }} &bull; {{ $plan->development_methods }}: {{ Str::limit($plan->activity_program, 28) }} ({{ $plan->status }})
                             </option>
-                        @endforeach
+                        @empty
+                            <option value="">Belum ada data rencana aksi manajerial</option>
+                        @endforelse
                     </select>
                 </div>
                 <div style="font-size:12px; color:#b91c1c; margin-top:10px;">
-                    Perhatian: Data rencana aksi yang dihapus tidak dapat dipulihkan.
+                    Perhatian: Data rencana aksi manajerial yang dihapus tidak dapat dipulihkan.
                 </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626;">Hapus Rencana Ini</button>
+                <div class="modal-footer modal-footer-standard modal-footer-end">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                    <button type="submit" class="btn-modal-action btn-modal-danger-submit">Hapus Rencana Manajerial Ini</button>
+                </div>
+            </form>
+
+            {{-- Form Hapus IDP Bagian C: Technical --}}
+            <form id="form-hapus-idp-c" class="dynamic-subform" data-section="del-idp-c" style="display:none;" action="" method="POST">
+                @csrf
+                @method('DELETE')
+                <div class="form-group">
+                    <label class="form-label">Pilih Rencana Aksi Technical yang Akan Dihapus:</label>
+                    <select id="select-del-idp-c-item" class="form-control">
+                        @forelse($idpTechnicalPlans as $plan)
+                            <option value="{{ $plan->id }}">
+                                {{ $plan->competency }} &bull; {{ $plan->development_methods }}: {{ Str::limit($plan->activity_program, 28) }} ({{ $plan->status }})
+                            </option>
+                        @empty
+                            <option value="">Belum ada data rencana aksi technical</option>
+                        @endforelse
+                    </select>
+                </div>
+                <div style="font-size:12px; color:#b91c1c; margin-top:10px;">
+                    Perhatian: Data rencana aksi technical yang dihapus tidak dapat dipulihkan.
+                </div>
+                <div class="modal-footer modal-footer-standard modal-footer-end">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                    <button type="submit" class="btn-modal-action btn-modal-danger-submit">Hapus Rencana Technical Ini</button>
                 </div>
             </form>
 
@@ -3442,271 +3996,767 @@
                 <div style="font-size:12.5px; color:#334155; line-height:1.6;">
                     Apakah Anda yakin ingin mereset data <strong>Ringkasan Kesiapan & Fokus IDP</strong> menjadi default/kosong?
                 </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626;">Reset Ringkasan IDP</button>
+                <div class="modal-footer modal-footer-standard modal-footer-end">
+                    <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                    <button type="submit" class="btn-modal-action btn-modal-danger-submit">Reset Ringkasan IDP</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-{{-- 6.1 Modal Tambah Review Hasil Pengembangan --}}
+{{-- 6.1 Modal Tambah Hasil Pengembangan (Mendukung Bagian B, C, D, E) --}}
 <div id="modal-tambah-review" class="modal-backdrop">
-    <div class="modal-card" style="max-width:560px;">
+    <div class="modal-card" style="max-width:680px;">
         <div class="modal-header">
             <div class="modal-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Tambah Review Hasil Pengembangan
+                Tambah Data Pengembangan
             </div>
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
 
-        <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
-            <form id="form-tambah-review" action="{{ route('karyawan.development-review.store', ['nik' => $employee->nik]) }}" method="POST">
-                @csrf
-                <div class="form-group">
-                    <label class="form-label">Kategori Kompetensi <span style="color:#ef4444;">*</span></label>
-                    <select name="competency_type" id="tambah-review-competency-type" class="form-control" required>
-                        <option value="Manajerial">B. Review per Kompetensi Manajerial</option>
-                        <option value="Technical">C. Review per Kompetensi Technical</option>
-                    </select>
-                </div>
+        <div class="modal-body" style="max-height:75vh; overflow-y:auto; padding: 16px 20px 10px 20px;">
+            <div class="form-group" style="margin-bottom:18px; background:#f8fafc; padding:12px 14px; border-radius:6px; border:1px solid #e2e8f0;">
+                <label class="form-label" style="font-weight:700; color:#0b2545; margin-bottom:6px;">Pilih Bagian yang Ingin Ditambahkan:</label>
+                <select id="select-tambah-review-section" class="form-control section-switcher" onchange="switchTambahReviewSection(this.value)" style="font-weight:600; font-size:12.5px;">
+                    <option value="B">B. Review per Kompetensi Manajerial</option>
+                    <option value="C">C. Review per Kompetensi Technical</option>
+                    <option value="D">D. Feedback Atasan Langsung</option>
+                    <option value="E">E. Rekomendasi Tindak Lanjut</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="competency" class="form-control" placeholder="Contoh: Problem Analysis, Leadership, Cloud Architecture" required>
-                </div>
+            {{-- Form Container B: Tambah Kompetensi Manajerial --}}
+            <div id="tambah-review-container-b">
+                <form action="{{ route('karyawan.development-review.store', ['nik' => $employee->nik]) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="competency_type" value="Manajerial">
 
-                <div class="form-group">
-                    <label class="form-label">Periode Review</label>
-                    <input type="text" name="period" class="form-control" value="Juni 2026 – Mei 2027" placeholder="Contoh: Juni 2026 – Mei 2027">
-                </div>
-
-                <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Level Sebelumnya <span style="color:#ef4444;">*</span></label>
-                        <input type="number" name="previous_level" class="form-control" min="0" max="10" value="2" required>
+                        <label class="form-label">Nama Kompetensi Manajerial <span style="color:#ef4444;">*</span></label>
+                        <input type="text" name="competency" class="form-control" placeholder="Contoh: Problem Analysis, Leadership, Communication" required>
                     </div>
+
                     <div class="form-group">
-                        <label class="form-label">Level Saat Ini <span style="color:#ef4444;">*</span></label>
-                        <input type="number" name="current_level" class="form-control" min="0" max="10" value="3" required>
+                        <label class="form-label">Periode Review</label>
+                        <input type="text" name="period" class="form-control" value="Juni 2026 – Mei 2027" placeholder="Contoh: Juni 2026 – Mei 2027">
                     </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Level Sebelumnya <span style="color:#ef4444;">*</span></label>
+                            <input type="number" name="previous_level" class="form-control" min="0" max="10" value="3" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Level Saat Ini <span style="color:#ef4444;">*</span></label>
+                            <input type="number" name="current_level" class="form-control" min="0" max="10" value="4" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Level Target <span style="color:#ef4444;">*</span></label>
+                            <input type="number" name="target_level" class="form-control" min="0" max="10" value="5" required>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label class="form-label">Level Target <span style="color:#ef4444;">*</span></label>
-                        <input type="number" name="target_level" class="form-control" min="0" max="10" value="4" required>
+                        <label class="form-label">Status Perkembangan</label>
+                        <select name="status" class="form-control">
+                            <option value="">Otomatis (Sesuai Peningkatan)</option>
+                            <option value="Meningkat">Meningkat</option>
+                            <option value="Stabil">Stabil</option>
+                            <option value="Belum Meningkat">Belum Meningkat</option>
+                        </select>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">Status Perkembangan</label>
-                    <select name="status" class="form-control">
-                        <option value="">Otomatis (Sesuai Peningkatan)</option>
-                        <option value="Meningkat">Meningkat</option>
-                        <option value="Stabil">Stabil</option>
-                        <option value="Belum Meningkat">Belum Meningkat</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Catatan Reviewer</label>
+                        <textarea name="reviewer_notes" class="form-control" rows="3" placeholder="Catatan evaluasi perkembangan kompetensi manajerial ini..."></textarea>
+                    </div>
 
-                <div class="form-group">
-                    <label class="form-label">Catatan Reviewer</label>
-                    <textarea name="reviewer_notes" class="form-control" rows="3" placeholder="Catatan evaluasi perkembangan kompetensi ini..."></textarea>
-                </div>
+                    <div class="modal-footer modal-footer-standard modal-footer-end">
+                        <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                        <button type="submit" class="btn-modal-action btn-modal-submit">Tambah</button>
+                    </div>
+                </form>
+            </div>
 
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Review</button>
-                </div>
-            </form>
+            {{-- Form Container C: Tambah Kompetensi Technical --}}
+            <div id="tambah-review-container-c" style="display:none;">
+                <form action="{{ route('karyawan.development-review.store', ['nik' => $employee->nik]) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="competency_type" value="Technical">
+
+                    <div class="form-group">
+                        <label class="form-label">Nama Kompetensi Technical <span style="color:#ef4444;">*</span></label>
+                        <input type="text" name="competency" class="form-control" placeholder="Contoh: Cloud Architecture, Database Tuning, DevOps CI/CD" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Periode Review</label>
+                        <input type="text" name="period" class="form-control" value="Juni 2026 – Mei 2027" placeholder="Contoh: Juni 2026 – Mei 2027">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Level Sebelumnya <span style="color:#ef4444;">*</span></label>
+                            <input type="number" name="previous_level" class="form-control" min="0" max="10" value="3" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Level Saat Ini <span style="color:#ef4444;">*</span></label>
+                            <input type="number" name="current_level" class="form-control" min="0" max="10" value="4" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Level Target <span style="color:#ef4444;">*</span></label>
+                            <input type="number" name="target_level" class="form-control" min="0" max="10" value="5" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Status Perkembangan</label>
+                        <select name="status" class="form-control">
+                            <option value="">Otomatis (Sesuai Peningkatan)</option>
+                            <option value="Meningkat">Meningkat</option>
+                            <option value="Stabil">Stabil</option>
+                            <option value="Belum Meningkat">Belum Meningkat</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Catatan Reviewer</label>
+                        <textarea name="reviewer_notes" class="form-control" rows="3" placeholder="Catatan evaluasi perkembangan kompetensi technical ini..."></textarea>
+                    </div>
+
+                    <div class="modal-footer modal-footer-standard modal-footer-end">
+                        <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                        <button type="submit" class="btn-modal-action btn-modal-submit">Tambah</button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Form Container D: Tambah Feedback Atasan Langsung (Mendukung Multi-Komentar) --}}
+            <div id="tambah-review-container-d" style="display:none;">
+                <form action="{{ route('karyawan.development-review.feedback.update', ['nik' => $employee->nik]) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="feedback_action" value="add_new">
+                    <div style="font-size:12px; font-weight:700; color:#0b2545; text-transform:uppercase; margin-bottom:10px; padding-bottom:4px; border-bottom:1px solid #e2e8f0;">
+                        D. Feedback Atasan Langsung (Tambah Komentar / Evaluasi Baru)
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Catatan Umpan Balik (Feedback Baru) <span style="color:#ef4444;">*</span></label>
+                        <textarea name="review_feedback_text" class="form-control" rows="4" placeholder="Tulis catatan evaluasi atau apresiasi atasan yang baru..." required></textarea>
+                        <span style="font-size:11px; color:#64748b; margin-top:3px; display:block;">Komentar baru ini akan ditambahkan ke daftar komentar feedback pada kartu Bagian D.</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nama Reviewer / Atasan <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="review_reviewer_name" class="form-control" placeholder="Contoh: Rina Suryani" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Jabatan Reviewer <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="review_reviewer_title" class="form-control" placeholder="Contoh: VP Engineering / HR Director" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Pengisian Feedback <span style="color:#ef4444;">*</span></label>
+                        <input type="date" name="review_date" class="form-control" value="{{ date('Y-m-d') }}" style="cursor:pointer;" onclick="if(this.showPicker){try{this.showPicker();}catch(e){}}" required>
+                        <span style="font-size:11px; color:#64748b; margin-top:3px; display:block;">Pilih tanggal dari kalender pengisian feedback.</span>
+                    </div>
+
+                    <div class="modal-footer modal-footer-standard modal-footer-end">
+                        <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                        <button type="submit" class="btn-modal-action btn-modal-submit">Tambah</button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Form Container E: Tambah Rekomendasi Tindak Lanjut --}}
+            <div id="tambah-review-container-e" style="display:none;">
+                <form action="{{ route('karyawan.development-review.feedback.update', ['nik' => $employee->nik]) }}" method="POST">
+                    @csrf
+                    <div style="font-size:12px; font-weight:700; color:#0b2545; text-transform:uppercase; margin-bottom:10px; padding-bottom:4px; border-bottom:1px solid #e2e8f0;">
+                        E. Rekomendasi Tindak Lanjut
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Poin Rekomendasi Tindak Lanjut Baru <span style="color:#ef4444;">*</span></label>
+                        <textarea name="new_recommendation_item" class="form-control" rows="3" placeholder="Tuliskan poin rekomendasi tindak lanjut yang ingin ditambahkan..." required></textarea>
+                        <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">Poin baru akan otomatis ditambahkan ke daftar rekomendasi tindak lanjut bercentang hijau.</span>
+                    </div>
+
+                    <div class="modal-footer modal-footer-standard modal-footer-end">
+                        <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                        <button type="submit" class="btn-modal-action btn-modal-submit">Tambah</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
-{{-- 6.2 Modal Edit Review Hasil Pengembangan --}}
+{{-- 6.2 Modal Edit Hasil Pengembangan (Mendukung Bagian B, C, D, E & Hapus di Kiri Bawah) --}}
 <div id="modal-edit-review" class="modal-backdrop">
-    <div class="modal-card" style="max-width:560px;">
+    <div class="modal-card" style="max-width:680px;">
         <div class="modal-header">
             <div class="modal-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                Edit Review Hasil Pengembangan
+                Edit Data Pengembangan
             </div>
             <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
         </div>
 
-        <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
-            <form id="form-edit-review" action="" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="form-group">
-                    <label class="form-label">Pilih Kompetensi yang Ingin Diedit:</label>
-                    <select id="select-edit-review-item" class="form-control">
-                        @foreach($employee->developmentReviews as $rev)
-                            <option value="{{ $rev->id }}"
-                                    data-comp="{{ $rev->competency }}"
-                                    data-type="{{ $rev->competency_type ?? 'Manajerial' }}"
-                                    data-period="{{ $rev->period }}"
-                                    data-prev="{{ $rev->previous_level }}"
-                                    data-curr="{{ $rev->current_level }}"
-                                    data-target="{{ $rev->target_level }}"
-                                    data-status="{{ $rev->status }}"
-                                    data-notes="{{ $rev->reviewer_notes }}">
-                                #{{ $rev->order_no }} - {{ $rev->competency }} [{{ $rev->competency_type ?? 'Manajerial' }}] (Level {{ $rev->previous_level }} &rarr; {{ $rev->current_level }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Kategori Kompetensi <span style="color:#ef4444;">*</span></label>
-                    <select id="edit-review-competency-type" name="competency_type" class="form-control" required>
-                        <option value="Manajerial">B. Review per Kompetensi Manajerial</option>
-                        <option value="Technical">C. Review per Kompetensi Technical</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
-                    <input type="text" id="edit-review-comp" name="competency" class="form-control" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Periode Review</label>
-                    <input type="text" id="edit-review-period" name="period" class="form-control">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Level Sebelumnya <span style="color:#ef4444;">*</span></label>
-                        <input type="number" id="edit-review-prev" name="previous_level" class="form-control" min="0" max="10" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Level Saat Ini <span style="color:#ef4444;">*</span></label>
-                        <input type="number" id="edit-review-curr" name="current_level" class="form-control" min="0" max="10" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Level Target <span style="color:#ef4444;">*</span></label>
-                        <input type="number" id="edit-review-target" name="target_level" class="form-control" min="0" max="10" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Status Perkembangan</label>
-                    <select id="edit-review-status" name="status" class="form-control">
-                        <option value="">Otomatis (Sesuai Peningkatan)</option>
-                        <option value="Meningkat">Meningkat</option>
-                        <option value="Stabil">Stabil</option>
-                        <option value="Belum Meningkat">Belum Meningkat</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Catatan Reviewer</label>
-                    <textarea id="edit-review-notes" name="reviewer_notes" class="form-control" rows="3"></textarea>
-                </div>
-
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Perbarui Review</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{{-- 6.3 Modal Hapus Review Hasil Pengembangan --}}
-<div id="modal-hapus-review" class="modal-backdrop">
-    <div class="modal-card" style="max-width:500px;">
-        <div class="modal-header" style="background:#b91c1c;">
-            <div class="modal-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                Hapus Review Hasil Pengembangan
+        <div class="modal-body" style="max-height:75vh; overflow-y:auto; padding: 16px 20px 10px 20px;">
+            <div class="form-group" style="margin-bottom:18px; background:#f8fafc; padding:12px 14px; border-radius:6px; border:1px solid #e2e8f0;">
+                <label class="form-label" style="font-weight:700; color:#0b2545; margin-bottom:6px;">Pilih Bagian yang Ingin Diedit:</label>
+                <select id="select-edit-review-section" class="form-control section-switcher" onchange="switchEditReviewSection(this.value)" style="font-weight:600; font-size:12.5px;">
+                    <option value="B">B. Review per Kompetensi Manajerial</option>
+                    <option value="C">C. Review per Kompetensi Technical</option>
+                    <option value="D">D. Feedback Atasan Langsung</option>
+                    <option value="E">E. Rekomendasi Tindak Lanjut</option>
+                </select>
             </div>
-            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
-        </div>
 
-        <div class="modal-body">
-            <form id="form-hapus-review" action="" method="POST">
-                @csrf
-                @method('DELETE')
-                <div class="form-group">
-                    <label class="form-label">Pilih Review yang Akan Dihapus:</label>
-                    <select id="select-del-review-item" class="form-control">
-                        @foreach($employee->developmentReviews as $rev)
-                            <option value="{{ $rev->id }}">
-                                #{{ $rev->order_no }} - {{ $rev->competency }} [{{ $rev->competency_type ?? 'Manajerial' }}] ({{ $rev->status }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div style="font-size:12px; color:#b91c1c; margin-top:10px;">
-                    Perhatian: Data review kompetensi yang dihapus tidak dapat dipulihkan.
-                </div>
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-danger-outline" style="background:#dc2626; color:#ffffff; border-color:#dc2626;">Hapus Review Ini</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+            @php
+                $manajerialReviewsList = $employee->developmentReviews->filter(function($r) {
+                    return strtolower($r->competency_type ?? 'manajerial') !== 'technical';
+                });
+                $technicalReviewsList = $employee->developmentReviews->filter(function($r) {
+                    return strtolower($r->competency_type ?? '') === 'technical';
+                });
 
-{{-- 6.4 Modal Edit Feedback & Rekomendasi Review --}}
-<div id="modal-edit-feedback-review" class="modal-backdrop">
-    <div class="modal-card" style="max-width:600px;">
-        <div class="modal-header">
-            <div class="modal-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                Edit Feedback Atasan & Rekomendasi Tindak Lanjut
+                // Parse feedback list
+                $modalFeedbackList = [];
+                $decodedModalFeedback = json_decode($employee->review_feedback_text ?? '', true);
+                if (is_array($decodedModalFeedback) && !empty($decodedModalFeedback) && isset($decodedModalFeedback[0]['text'])) {
+                    $modalFeedbackList = $decodedModalFeedback;
+                } elseif (!empty($employee->review_feedback_text)) {
+                    $modalFeedbackList = [
+                        [
+                            'text' => $employee->review_feedback_text,
+                            'reviewer_name' => $employee->review_reviewer_name ?: 'Andi Wijaya',
+                            'reviewer_title' => $employee->review_reviewer_title ?: 'Engineering Division Head',
+                            'date' => $employee->review_date ?: '20 Mei 2027',
+                        ]
+                    ];
+                } else {
+                    $modalFeedbackList = [
+                        [
+                            'text' => 'Budi Santosoo menunjukkan perkembangan yang baik selama periode ini. Terlihat peningkatan dalam kepemimpinan, komunikasi, dan kemampuan eksekusi. Fokus selanjutnya adalah memperkuat kemampuan analisis strategis dan pengambilan keputusan berbasis data untuk siap menempati posisi Engineering Manager saat penugasan berikutnya.',
+                            'reviewer_name' => 'Andi Wijaya',
+                            'reviewer_title' => 'Engineering Division Head',
+                            'date' => '20 Mei 2027',
+                        ]
+                    ];
+                }
+
+                $modalRecommendationItems = array_values(array_filter(array_map('trim', explode("\n", $employee->review_recommendations ?: ''))));
+                if (empty($modalRecommendationItems)) {
+                    $modalRecommendationItems = [
+                        'Lanjutkan program pengembangan sesuai IDP dengan fokus pada Analysis & Judgement.',
+                        'Berikan kesempatan memimpin proyek strategis yang berdampak lintas departemen.',
+                        'Coaching/mentoring dengan Engineering Manager untuk mempercepat kesiapan.',
+                        'Review berikutnya dilakukan pada Mei 2028.'
+                    ];
+                }
+
+                if (!function_exists('toIsoDateReview')) {
+                    function toIsoDateReview($dateStr) {
+                        if (empty($dateStr)) return date('Y-m-d');
+                        $dateStr = trim($dateStr);
+                        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStr)) return $dateStr;
+                        $months = [
+                            'januari' => '01', 'jan' => '01', 'februari' => '02', 'feb' => '02',
+                            'maret' => '03', 'mar' => '03', 'april' => '04', 'apr' => '04',
+                            'mei' => '05', 'may' => '05', 'juni' => '06', 'jun' => '06',
+                            'juli' => '07', 'jul' => '07', 'agustus' => '08', 'agu' => '08', 'aug' => '08',
+                            'september' => '09', 'sep' => '09', 'oktober' => '10', 'okt' => '10', 'oct' => '10',
+                            'november' => '11', 'nov' => '11', 'desember' => '12', 'des' => '12', 'dec' => '12'
+                        ];
+                        if (preg_match('/^(\d{1,2})\s+([a-zA-Z]+)\s+(\d{4})$/', $dateStr, $matches)) {
+                            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+                            $monthKey = strtolower($matches[2]);
+                            $month = $months[$monthKey] ?? '05';
+                            $year = $matches[3];
+                            return "$year-$month-$day";
+                        }
+                        $ts = strtotime($dateStr);
+                        return $ts ? date('Y-m-d', $ts) : date('Y-m-d');
+                    }
+                }
+            @endphp
+
+            {{-- Form Container B: Edit Kompetensi Manajerial --}}
+            <div id="edit-review-container-b">
+                @if($manajerialReviewsList->isNotEmpty())
+                    <form id="form-edit-review-b" action="" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="competency_type" value="Manajerial">
+
+                        <div class="form-group">
+                            <label class="form-label">Pilih Kompetensi Manajerial yang Ingin Diedit:</label>
+                            <select id="select-edit-review-item-b" class="form-control">
+                                @foreach($manajerialReviewsList as $rev)
+                                    <option value="{{ $rev->id }}"
+                                            data-comp="{{ $rev->competency }}"
+                                            data-type="Manajerial"
+                                            data-period="{{ $rev->period }}"
+                                            data-prev="{{ $rev->previous_level }}"
+                                            data-curr="{{ $rev->current_level }}"
+                                            data-target="{{ $rev->target_level }}"
+                                            data-status="{{ $rev->status }}"
+                                            data-notes="{{ $rev->reviewer_notes }}">
+                                        #{{ $loop->iteration }} - {{ $rev->competency }} (Level {{ $rev->previous_level }} &rarr; {{ $rev->current_level }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
+                            <input type="text" id="edit-review-b-comp" name="competency" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Periode Review</label>
+                            <input type="text" id="edit-review-b-period" name="period" class="form-control">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Level Sebelumnya <span style="color:#ef4444;">*</span></label>
+                                <input type="number" id="edit-review-b-prev" name="previous_level" class="form-control" min="0" max="10" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Level Saat Ini <span style="color:#ef4444;">*</span></label>
+                                <input type="number" id="edit-review-b-curr" name="current_level" class="form-control" min="0" max="10" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Level Target <span style="color:#ef4444;">*</span></label>
+                                <input type="number" id="edit-review-b-target" name="target_level" class="form-control" min="0" max="10" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Status Perkembangan</label>
+                            <select id="edit-review-b-status" name="status" class="form-control">
+                                <option value="">Otomatis (Sesuai Peningkatan)</option>
+                                <option value="Meningkat">Meningkat</option>
+                                <option value="Stabil">Stabil</option>
+                                <option value="Belum Meningkat">Belum Meningkat</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Catatan Reviewer</label>
+                            <textarea id="edit-review-b-notes" name="reviewer_notes" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="modal-footer modal-footer-standard modal-footer-between">
+                            <button type="button" class="btn-modal-action btn-modal-delete" id="btn-delete-review-b-from-edit">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Hapus
+                            </button>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                                <button type="submit" class="btn-modal-action btn-modal-submit">Perbarui</button>
+                            </div>
+                        </div>
+                    </form>
+                @else
+                    <div style="text-align:center; padding:24px; color:#64748b; font-size:12px;">
+                        Belum ada review kompetensi manajerial. Silakan pilih bagian <strong>B</strong> di menu Tambah untuk menambahkan.
+                    </div>
+                @endif
             </div>
-            <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
-        </div>
 
-        <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
-            <form id="form-edit-feedback-review" action="{{ route('karyawan.development-review.feedback.update', ['nik' => $employee->nik]) }}" method="POST">
-                @csrf
-                <div style="font-size:12px; font-weight:700; color:#0b2545; text-transform:uppercase; margin-bottom:8px; border-bottom:1px solid #e2e8f0; padding-bottom:4px;">
-                    D. Feedback Atasan Langsung
-                </div>
+            {{-- Form Container C: Edit Kompetensi Technical --}}
+            <div id="edit-review-container-c" style="display:none;">
+                @if($technicalReviewsList->isNotEmpty())
+                    <form id="form-edit-review-c" action="" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="competency_type" value="Technical">
 
-                <div class="form-group">
-                    <label class="form-label">Catatan Umpan Balik (Feedback) <span style="color:#ef4444;">*</span></label>
-                    <textarea name="review_feedback_text" class="form-control" rows="4" placeholder="Tulis catatan evaluasi dan apresiasi atasan terhadap capaian karyawan...">{{ $employee->review_feedback_text ?: 'Budi Santosoo menunjukkan perkembangan yang baik selama periode ini. Terlihat peningkatan dalam kepemimpinan, komunikasi, dan kemampuan eksekusi. Fokus selanjutnya adalah memperkuat kemampuan analisis strategis dan pengambilan keputusan berbasis data untuk siap menempati posisi Engineering Manager saat penugasan berikutnya.' }}</textarea>
-                </div>
+                        <div class="form-group">
+                            <label class="form-label">Pilih Kompetensi Technical yang Ingin Diedit:</label>
+                            <select id="select-edit-review-item-c" class="form-control">
+                                @foreach($technicalReviewsList as $rev)
+                                    <option value="{{ $rev->id }}"
+                                            data-comp="{{ $rev->competency }}"
+                                            data-type="Technical"
+                                            data-period="{{ $rev->period }}"
+                                            data-prev="{{ $rev->previous_level }}"
+                                            data-curr="{{ $rev->current_level }}"
+                                            data-target="{{ $rev->target_level }}"
+                                            data-status="{{ $rev->status }}"
+                                            data-notes="{{ $rev->reviewer_notes }}">
+                                        #{{ $loop->iteration }} - {{ $rev->competency }} (Level {{ $rev->previous_level }} &rarr; {{ $rev->current_level }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Nama Reviewer / Atasan</label>
-                        <input type="text" name="review_reviewer_name" class="form-control" value="{{ $employee->review_reviewer_name ?: 'Andi Wijaya' }}">
+                        <div class="form-group">
+                            <label class="form-label">Nama Kompetensi <span style="color:#ef4444;">*</span></label>
+                            <input type="text" id="edit-review-c-comp" name="competency" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Periode Review</label>
+                            <input type="text" id="edit-review-c-period" name="period" class="form-control">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Level Sebelumnya <span style="color:#ef4444;">*</span></label>
+                                <input type="number" id="edit-review-c-prev" name="previous_level" class="form-control" min="0" max="10" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Level Saat Ini <span style="color:#ef4444;">*</span></label>
+                                <input type="number" id="edit-review-c-curr" name="current_level" class="form-control" min="0" max="10" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Level Target <span style="color:#ef4444;">*</span></label>
+                                <input type="number" id="edit-review-c-target" name="target_level" class="form-control" min="0" max="10" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Status Perkembangan</label>
+                            <select id="edit-review-c-status" name="status" class="form-control">
+                                <option value="">Otomatis (Sesuai Peningkatan)</option>
+                                <option value="Meningkat">Meningkat</option>
+                                <option value="Stabil">Stabil</option>
+                                <option value="Belum Meningkat">Belum Meningkat</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Catatan Reviewer</label>
+                            <textarea id="edit-review-c-notes" name="reviewer_notes" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="modal-footer modal-footer-standard modal-footer-between">
+                            <button type="button" class="btn-modal-action btn-modal-delete" id="btn-delete-review-c-from-edit">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Hapus
+                            </button>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                                <button type="submit" class="btn-modal-action btn-modal-submit">Perbarui</button>
+                            </div>
+                        </div>
+                    </form>
+                @else
+                    <div style="text-align:center; padding:24px; color:#64748b; font-size:12px;">
+                        Belum ada review kompetensi technical. Silakan pilih bagian <strong>C</strong> di menu Tambah untuk menambahkan.
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Jabatan Reviewer</label>
-                        <input type="text" name="review_reviewer_title" class="form-control" value="{{ $employee->review_reviewer_title ?: 'Engineering Division Head' }}">
+                @endif
+            </div>
+
+            {{-- Form Container D: Edit Feedback Atasan Langsung --}}
+            <div id="edit-review-container-d" style="display:none;">
+                <form id="form-edit-review-d" action="{{ route('karyawan.development-review.feedback.update', ['nik' => $employee->nik]) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="feedback_action" id="edit-feedback-action" value="update_item">
+                    <input type="hidden" name="feedback_index" id="edit-feedback-index" value="0">
+
+                    <div style="font-size:12px; font-weight:700; color:#0b2545; text-transform:uppercase; margin-bottom:10px; padding-bottom:4px; border-bottom:1px solid #e2e8f0;">
+                        D. Feedback Atasan Langsung
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">Tanggal Review</label>
-                    <input type="text" name="review_date" class="form-control" value="{{ $employee->review_date ?: '20 Mei 2027' }}" placeholder="Contoh: 20 Mei 2027">
-                </div>
+                    @if(count($modalFeedbackList) > 1)
+                        <div class="form-group" style="background:#f8fafc; padding:10px 12px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:12px;">
+                            <label class="form-label" style="font-size:11.5px; font-weight:700; color:#475569; margin-bottom:4px;">Pilih Komentar Feedback yang Ingin Diedit / Dihapus:</label>
+                            <select id="select-edit-feedback-item" class="form-control" style="font-size:12px; font-weight:600;">
+                                @foreach($modalFeedbackList as $idx => $fb)
+                                    <option value="{{ $idx }}"
+                                            data-text="{{ $fb['text'] }}"
+                                            data-reviewer="{{ $fb['reviewer_name'] }}"
+                                            data-title="{{ $fb['reviewer_title'] }}"
+                                            data-date="{{ toIsoDateReview($fb['date'] ?? '') }}">
+                                        Komentar #{{ $loop->iteration }} - {{ $fb['reviewer_name'] }} ({{ $fb['date'] }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @else
+                        <div style="font-size:11.5px; color:#64748b; margin-bottom:10px;">
+                            Mengedit komentar feedback dari: <strong id="edit-feedback-active-label">{{ $modalFeedbackList[0]['reviewer_name'] ?? 'Andi Wijaya' }}</strong>
+                        </div>
+                    @endif
 
-                <div style="font-size:12px; font-weight:700; color:#0b2545; text-transform:uppercase; margin:16px 0 8px; border-bottom:1px solid #e2e8f0; padding-bottom:4px;">
-                    E. Rekomendasi Tindak Lanjut
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Catatan Umpan Balik (Feedback) <span style="color:#ef4444;">*</span></label>
+                        <textarea id="edit-feedback-text" name="review_feedback_text" class="form-control" rows="4" placeholder="Tulis catatan evaluasi dan apresiasi atasan terhadap capaian karyawan..." required>{{ $modalFeedbackList[0]['text'] ?? '' }}</textarea>
+                    </div>
 
-                <div class="form-group">
-                    <label class="form-label">Daftar Rekomendasi Tindak Lanjut</label>
-                    <textarea name="review_recommendations" class="form-control" rows="5" placeholder="Tulis setiap rekomendasi pada baris baru (tiap baris otomatis menjadi poin bercentang hijau)...">{{ $employee->review_recommendations ?: "Lanjutkan program pengembangan sesuai IDP dengan fokus pada Analysis & Judgement.\nBerikan kesempatan memimpin proyek strategis yang berdampak lintas departemen.\nCoaching/mentoring dengan Engineering Manager untuk mempercepat kesiapan.\nReview berikutnya dilakukan pada Mei 2028." }}</textarea>
-                    <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">Tips: Tekan Enter untuk menambah poin rekomendasi baru.</span>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nama Reviewer / Atasan</label>
+                            <input type="text" id="edit-feedback-reviewer" name="review_reviewer_name" class="form-control" value="{{ $modalFeedbackList[0]['reviewer_name'] ?? 'Andi Wijaya' }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Jabatan Reviewer</label>
+                            <input type="text" id="edit-feedback-title" name="review_reviewer_title" class="form-control" value="{{ $modalFeedbackList[0]['reviewer_title'] ?? 'Engineering Division Head' }}">
+                        </div>
+                    </div>
 
-                <div class="modal-footer" style="padding:12px 0 0; margin-top:16px;">
-                    <button type="button" class="btn btn-outline" data-modal-close>Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Feedback & Rekomendasi</button>
-                </div>
-            </form>
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Pengisian Feedback <span style="color:#ef4444;">*</span></label>
+                        <input type="date" id="edit-feedback-date" name="review_date" class="form-control" value="{{ toIsoDateReview($modalFeedbackList[0]['date'] ?? '') }}" style="cursor:pointer;" onclick="if(this.showPicker){try{this.showPicker();}catch(e){}}" required>
+                        <span style="font-size:11px; color:#64748b; margin-top:3px; display:block;">Pilih tanggal dari kalender pengisian feedback.</span>
+                    </div>
+
+                    <div class="modal-footer modal-footer-standard modal-footer-between">
+                        <button type="button" class="btn-modal-action btn-modal-delete" id="btn-delete-feedback-from-edit">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Hapus
+                        </button>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                            <button type="submit" class="btn-modal-action btn-modal-submit">Perbarui</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Form Container E: Edit Rekomendasi Tindak Lanjut --}}
+            <div id="edit-review-container-e" style="display:none;">
+                <form id="form-edit-review-e" action="{{ route('karyawan.development-review.feedback.update', ['nik' => $employee->nik]) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="recommendation_action" id="edit-rec-action" value="update_all">
+                    <input type="hidden" name="delete_recommendation_index" id="delete-rec-index" value="">
+
+                    <div style="font-size:12px; font-weight:700; color:#0b2545; text-transform:uppercase; margin-bottom:10px; padding-bottom:4px; border-bottom:1px solid #e2e8f0;">
+                        E. Rekomendasi Tindak Lanjut
+                    </div>
+
+                    @if(!empty($modalRecommendationItems))
+                        <div class="form-group" style="background:#f8fafc; padding:10px 12px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:12px;">
+                            <label class="form-label" style="font-size:11.5px; font-weight:700; color:#475569; margin-bottom:4px;">Pilih Poin yang Ingin Dihapus Spesifik (Opsional):</label>
+                            <select id="select-delete-rec-item" class="form-control" style="font-size:12px; font-weight:600;">
+                                <option value="">-- Hapus Semua / Pilih Poin Spesifik di Bawah --</option>
+                                @foreach($modalRecommendationItems as $idx => $recItem)
+                                    <option value="{{ $idx }}" data-text="{{ $recItem }}">
+                                        Poin #{{ $loop->iteration }}: {{ Str::limit($recItem, 65) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+
+                    <div class="form-group">
+                        <label class="form-label">Daftar Rekomendasi Tindak Lanjut <span style="color:#ef4444;">*</span></label>
+                        <textarea id="edit-recommendations-textarea" name="review_recommendations" class="form-control" rows="6" placeholder="Tulis setiap rekomendasi pada baris baru (tiap baris otomatis menjadi poin bercentang hijau)..." required>{{ $employee->review_recommendations ?: implode("\n", $modalRecommendationItems) }}</textarea>
+                        <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">Tips: Tekan Enter untuk menambah baris poin rekomendasi baru.</span>
+                    </div>
+
+                    <div class="modal-footer modal-footer-standard modal-footer-between">
+                        <button type="button" class="btn-modal-action btn-modal-delete" id="btn-delete-recommendation-from-edit">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Hapus
+                        </button>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button type="button" class="btn-modal-action btn-modal-cancel" data-modal-close>Batal</button>
+                            <button type="submit" class="btn-modal-action btn-modal-submit">Perbarui</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+{{-- Hidden Form Delete Review Langsung dari Modal Edit --}}
+<form id="form-delete-review-direct" action="" method="POST" style="display:none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+<script>
+    window.switchTambahReviewSection = function(section) {
+        ['b', 'c', 'd', 'e'].forEach(function(s) {
+            const el = document.getElementById('tambah-review-container-' + s);
+            if (el) el.style.display = (s === section.toLowerCase()) ? 'block' : 'none';
+        });
+    };
+
+    window.switchEditReviewSection = function(section) {
+        ['b', 'c', 'd', 'e'].forEach(function(s) {
+            const el = document.getElementById('edit-review-container-' + s);
+            if (el) el.style.display = (s === section.toLowerCase()) ? 'block' : 'none';
+        });
+        if (section.toLowerCase() === 'b' && typeof window.updateEditReviewB === 'function') window.updateEditReviewB();
+        if (section.toLowerCase() === 'c' && typeof window.updateEditReviewC === 'function') window.updateEditReviewC();
+        if (section.toLowerCase() === 'd' && typeof window.updateEditReviewD === 'function') window.updateEditReviewD();
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const nik = '{{ $employee->nik }}';
+
+        // Pre-fill Edit Bagian B (Manajerial)
+        const selectB = document.getElementById('select-edit-review-item-b');
+        const formB = document.getElementById('form-edit-review-b');
+        const btnDeleteB = document.getElementById('btn-delete-review-b-from-edit');
+
+        if (selectB && formB) {
+            const updateB = function() {
+                const opt = selectB.selectedOptions[0];
+                if (!opt) return;
+                formB.action = `/karyawan/${nik}/development-review/${opt.value}`;
+                const compIn = document.getElementById('edit-review-b-comp');
+                const periodIn = document.getElementById('edit-review-b-period');
+                const prevIn = document.getElementById('edit-review-b-prev');
+                const currIn = document.getElementById('edit-review-b-curr');
+                const targetIn = document.getElementById('edit-review-b-target');
+                const statusIn = document.getElementById('edit-review-b-status');
+                const notesIn = document.getElementById('edit-review-b-notes');
+
+                if (compIn) compIn.value = opt.getAttribute('data-comp') || '';
+                if (periodIn) periodIn.value = opt.getAttribute('data-period') || '';
+                if (prevIn) prevIn.value = opt.getAttribute('data-prev') || '0';
+                if (currIn) currIn.value = opt.getAttribute('data-curr') || '0';
+                if (targetIn) targetIn.value = opt.getAttribute('data-target') || '0';
+                if (statusIn) statusIn.value = opt.getAttribute('data-status') || '';
+                if (notesIn) notesIn.value = opt.getAttribute('data-notes') || '';
+            };
+            window.updateEditReviewB = updateB;
+            selectB.addEventListener('change', updateB);
+            updateB();
+        }
+
+        if (btnDeleteB && selectB) {
+            btnDeleteB.addEventListener('click', function() {
+                const opt = selectB.selectedOptions[0];
+                if (!opt) return;
+                const compName = opt.getAttribute('data-comp') || opt.textContent.trim();
+                if (confirm(`Apakah Anda yakin ingin menghapus review kompetensi manajerial "${compName}"?`)) {
+                    const formDel = document.getElementById('form-delete-review-direct');
+                    if (formDel) {
+                        formDel.action = `/karyawan/${nik}/development-review/${opt.value}`;
+                        formDel.submit();
+                    }
+                }
+            });
+        }
+
+        // Pre-fill Edit Bagian C (Technical)
+        const selectC = document.getElementById('select-edit-review-item-c');
+        const formC = document.getElementById('form-edit-review-c');
+        const btnDeleteC = document.getElementById('btn-delete-review-c-from-edit');
+
+        if (selectC && formC) {
+            const updateC = function() {
+                const opt = selectC.selectedOptions[0];
+                if (!opt) return;
+                formC.action = `/karyawan/${nik}/development-review/${opt.value}`;
+                const compIn = document.getElementById('edit-review-c-comp');
+                const periodIn = document.getElementById('edit-review-c-period');
+                const prevIn = document.getElementById('edit-review-c-prev');
+                const currIn = document.getElementById('edit-review-c-curr');
+                const targetIn = document.getElementById('edit-review-c-target');
+                const statusIn = document.getElementById('edit-review-c-status');
+                const notesIn = document.getElementById('edit-review-c-notes');
+
+                if (compIn) compIn.value = opt.getAttribute('data-comp') || '';
+                if (periodIn) periodIn.value = opt.getAttribute('data-period') || '';
+                if (prevIn) prevIn.value = opt.getAttribute('data-prev') || '0';
+                if (currIn) currIn.value = opt.getAttribute('data-curr') || '0';
+                if (targetIn) targetIn.value = opt.getAttribute('data-target') || '0';
+                if (statusIn) statusIn.value = opt.getAttribute('data-status') || '';
+                if (notesIn) notesIn.value = opt.getAttribute('data-notes') || '';
+            };
+            window.updateEditReviewC = updateC;
+            selectC.addEventListener('change', updateC);
+            updateC();
+        }
+
+        if (btnDeleteC && selectC) {
+            btnDeleteC.addEventListener('click', function() {
+                const opt = selectC.selectedOptions[0];
+                if (!opt) return;
+                const compName = opt.getAttribute('data-comp') || opt.textContent.trim();
+                if (confirm(`Apakah Anda yakin ingin menghapus review kompetensi technical "${compName}"?`)) {
+                    const formDel = document.getElementById('form-delete-review-direct');
+                    if (formDel) {
+                        formDel.action = `/karyawan/${nik}/development-review/${opt.value}`;
+                        formDel.submit();
+                    }
+                }
+            });
+        }
+
+        // Edit Bagian D (Feedback): Switch antar komentar & tombol Hapus
+        const selectFeedbackD = document.getElementById('select-edit-feedback-item');
+        const formD = document.getElementById('form-edit-review-d');
+        const btnDeleteD = document.getElementById('btn-delete-feedback-from-edit');
+
+        if (selectFeedbackD) {
+            const updateD = function() {
+                const opt = selectFeedbackD.selectedOptions[0];
+                if (!opt) return;
+                const textIn = document.getElementById('edit-feedback-text');
+                const reviewerIn = document.getElementById('edit-feedback-reviewer');
+                const titleIn = document.getElementById('edit-feedback-title');
+                const dateIn = document.getElementById('edit-feedback-date');
+                const indexIn = document.getElementById('edit-feedback-index');
+
+                if (textIn) textIn.value = opt.getAttribute('data-text') || '';
+                if (reviewerIn) reviewerIn.value = opt.getAttribute('data-reviewer') || '';
+                if (titleIn) titleIn.value = opt.getAttribute('data-title') || '';
+                if (dateIn) dateIn.value = opt.getAttribute('data-date') || '';
+                if (indexIn) indexIn.value = opt.value;
+            };
+            window.updateEditReviewD = updateD;
+            selectFeedbackD.addEventListener('change', updateD);
+            updateD();
+        }
+
+        if (btnDeleteD && formD) {
+            btnDeleteD.addEventListener('click', function() {
+                const reviewerName = document.getElementById('edit-feedback-reviewer') ? document.getElementById('edit-feedback-reviewer').value : 'atasan';
+                if (confirm(`Apakah Anda yakin ingin menghapus komentar feedback dari "${reviewerName}"?`)) {
+                    const actionIn = document.getElementById('edit-feedback-action');
+                    if (actionIn) actionIn.value = 'delete_item';
+                    formD.submit();
+                }
+            });
+        }
+
+        // Edit Bagian E (Rekomendasi): Tombol Hapus spesifik atau seluruh rekomendasi
+        const btnDeleteE = document.getElementById('btn-delete-recommendation-from-edit');
+        const formE = document.getElementById('form-edit-review-e');
+        const selectDeleteRecE = document.getElementById('select-delete-rec-item');
+
+        if (btnDeleteE && formE) {
+            btnDeleteE.addEventListener('click', function() {
+                const actionIn = document.getElementById('edit-rec-action');
+                const deleteIdxIn = document.getElementById('delete-rec-index');
+                const selectedVal = selectDeleteRecE ? selectDeleteRecE.value : '';
+
+                if (selectedVal !== '') {
+                    const opt = selectDeleteRecE.selectedOptions[0];
+                    const pointTitle = opt ? opt.textContent.trim() : `Poin #${parseInt(selectedVal) + 1}`;
+                    if (confirm(`Apakah Anda yakin ingin menghapus ${pointTitle}?`)) {
+                        if (actionIn) actionIn.value = 'delete_item';
+                        if (deleteIdxIn) deleteIdxIn.value = selectedVal;
+                        formE.submit();
+                    }
+                } else {
+                    if (confirm('Apakah Anda yakin ingin menghapus / mengosongkan seluruh rekomendasi tindak lanjut?')) {
+                        if (actionIn) actionIn.value = 'delete_item';
+                        if (deleteIdxIn) deleteIdxIn.value = '';
+                        formE.submit();
+                    }
+                }
+            });
+        }
+    });
+</script>
 
 {{-- 9. Modal Riwayat Perubahan Umum --}}
 <div id="modal-riwayat-perubahan" class="modal-backdrop">
@@ -3767,7 +4817,7 @@
                 {{-- Current Avatar Preview --}}
                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:20px; gap:8px;">
                     <div style="position:relative;">
-                        <img id="avatar-preview-display" src="{{ $employee->avatar ?: '/images/avatar-budi.png' }}" alt="{{ $employee->name }}" style="width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid #2563eb; box-shadow:0 4px 10px rgba(0,0,0,0.15);">
+                        <img id="avatar-preview-display" src="{{ asset($employee->avatar ?: 'images/avatar-budi.png') }}" alt="{{ $employee->name }}" style="width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid #2563eb; box-shadow:0 4px 10px rgba(0,0,0,0.15);">
                     </div>
                     <span style="font-size:12px; font-weight:600; color:#334155;">{{ $employee->name }} (NIK: {{ $employee->nik }})</span>
                 </div>
@@ -3804,7 +4854,7 @@
                             onclick="selectPresetAvatar('{{ $p['path'] }}', this)"
                             style="border:2px solid #e2e8f0; border-radius:8px; padding:8px 4px; text-align:center; cursor:pointer; transition:all 0.2s;"
                         >
-                            <img src="{{ $p['path'] }}" alt="{{ $p['label'] }}" style="width:46px; height:46px; border-radius:50%; object-fit:cover; margin:0 auto 4px; display:block;">
+                            <img src="{{ asset($p['path']) }}" alt="{{ $p['label'] }}" style="width:46px; height:46px; border-radius:50%; object-fit:cover; margin:0 auto 4px; display:block;">
                             <div style="font-size:11px; font-weight:600; color:#334155;">{{ $p['label'] }}</div>
                         </div>
                     @endforeach

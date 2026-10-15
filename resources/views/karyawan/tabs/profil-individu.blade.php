@@ -19,10 +19,16 @@
             width: 100%;
             margin-bottom: 16px;
         }
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
+            .profil-row-3 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px;
+            }
+        }
+        @media (max-width: 900px) {
             .profil-row-3,
             .profil-row-2 {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
                 gap: 14px;
             }
         }
@@ -89,7 +95,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000000" class="bi bi-graph-up-arrow" viewBox="0 0 16 16" style="flex-shrink:0;">
                             <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.707l-4.146 4.147a.5.5 0 0 1-.708 0L7 6.707l-5.146 5.147a.5.5 0 0 1-.708-.708l5.5-5.5a.5.5 0 0 1 .708 0L9.5 7.793 13.293 4H10.5a.5.5 0 0 1-.5-.5"/>
                         </svg>
-                        <span class="card-title" style="font-size:14px; font-weight:800; letter-spacing:0.3px;">C1. PERFORMANCE 3 TAHUN TERAKHIR</span>
+                        <span class="card-title" style="font-size:14px; font-weight:800; letter-spacing:0.3px;">PERFORMANCE 3 TAHUN TERAKHIR</span>
                     </div>
                 </div>
 
@@ -140,7 +146,7 @@
                             <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/>
                             <path d="M9.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
                         </svg>
-                        <span class="card-title" style="font-size:14px; font-weight:800; letter-spacing:0.3px;">C2. POTENTIAL ASSESSMENT (POTASS)</span>
+                        <span class="card-title" style="font-size:14px; font-weight:800; letter-spacing:0.3px;">POTENTIAL ASSESSMENT (POTASS)</span>
                     </div>
                 </div>
 
@@ -192,7 +198,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000000" class="bi bi-grid-3x3-gap-fill" viewBox="0 0 16 16" style="flex-shrink:0;">
                             <path d="M1 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zM1 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zM1 12a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z"/>
                         </svg>
-                        <span class="card-title" style="font-size:14px; font-weight:800; letter-spacing:0.3px;">C3. HAV 16 BOX & TALENT POOL</span>
+                        <span class="card-title" style="font-size:14px; font-weight:800; letter-spacing:0.3px;">HAV 16 BOX & TALENT POOL</span>
                     </div>
                 </div>
 
@@ -282,7 +288,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000000" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16" style="flex-shrink:0;">
                             <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
                         </svg>
-                        <span class="card-title" style="font-size:14px; font-weight:800; letter-spacing:0.3px;">C5. FLYING RISK ASSESSMENT</span>
+                        <span class="card-title" style="font-size:14px; font-weight:800; letter-spacing:0.3px;">FLYING RISK ASSESSMENT</span>
                     </div>
                 </div>
 
@@ -583,167 +589,457 @@
 
     </div>
 
+    @php
+        // IDP Action Plans (Bagian B & C)
+        $allIdpPlans = $employee->idpActionPlans ?: collect();
+        $profilManajerialIdp = $allIdpPlans->filter(function($p) {
+            return strtolower($p->competency_type ?? 'manajerial') !== 'technical';
+        });
+        $profilTechnicalIdp = $allIdpPlans->filter(function($p) {
+            return strtolower($p->competency_type ?? '') === 'technical';
+        });
+
+        $manajerialGrouped = $profilManajerialIdp->groupBy(function($item) {
+            return trim($item->competency);
+        });
+        $technicalGrouped = $profilTechnicalIdp->groupBy(function($item) {
+            return trim($item->competency);
+        });
+
+        $totalIdpPlans = $allIdpPlans->count();
+
+        // Reviews (Bagian B & C)
+        $profilReviews = $employee->developmentReviews ?: collect();
+        $totalReviews = $profilReviews->count();
+        $profilManajerialReviews = $profilReviews->filter(function($r) {
+            return strtolower($r->competency_type ?? 'manajerial') !== 'technical';
+        });
+        $profilTechnicalReviews = $profilReviews->filter(function($r) {
+            return strtolower($r->competency_type ?? '') === 'technical';
+        });
+    @endphp
+
     {{-- =========================================================================
-         BARIS 4: Individual Development Plan (IDP)
+         BARIS 4: Individual Development Plan (IDP) - Bagian B & C
          ========================================================================= --}}
     <div class="dashboard-card" style="margin-bottom:16px; padding:18px 20px;">
-        <div class="card-header-bar" style="margin-bottom:14px; padding-bottom:8px;">
+        <div class="card-header-bar" style="margin-bottom:16px; padding-bottom:8px; border-bottom:1.5px solid #e2e8f0;">
             <div class="card-title-wrap">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
                 <span class="card-title" style="font-size:14.5px; font-weight:800; letter-spacing:0.3px;">INDIVIDUAL DEVELOPMENT PLAN (IDP)</span>
             </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span class="badge-blue" style="font-size:11px; padding:3px 10px; font-weight:700;">{{ $totalIdpPlans }} Total Rencana Aksi</span>
+                <a href="{{ route('karyawan.show', ['nik' => $employee->nik, 'tab' => 'individual-developmentplan']) }}" class="btn-mini btn-mini-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:5px; font-weight:700;">
+                    Buka Tab IDP &rarr;
+                </a>
+            </div>
         </div>
 
-        <div class="profil-table-scroll">
-            <table class="table-custom" style="font-size:11.5px; width:100%; min-width:700px;">
-                <thead>
-                    <tr>
-                        <th style="width:15%;">Kompetensi</th>
-                        <th style="width:25%;">Aktivitas Pengembangan</th>
-                        <th style="width:12%;">Metode</th>
-                        <th style="width:12%;">Pendukung</th>
-                        <th class="text-center" style="width:8%;">Target</th>
-                        <th style="width:20%;">Indikator Keberhasilan</th>
-                        <th class="text-center" style="width:8%;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if($employee->idpActionPlans->count() > 0)
-                        @foreach($employee->idpActionPlans->take(4) as $idp)
-                            <tr>
-                                <td style="font-weight:700;">{{ $idp->competency }}</td>
-                                <td>{{ $idp->activity_program ?: $idp->specific_goal }}</td>
-                                <td>{{ $idp->development_methods }}</td>
-                                <td>{{ $idp->pic_supporter }}</td>
-                                <td class="text-center">{{ $idp->end_date }}</td>
-                                <td>{{ $idp->success_indicator }}</td>
-                                <td class="text-center">
-                                    @if($idp->status === 'Selesai')
-                                        <span class="badge-table-blue">Selesai</span>
-                                    @elseif($idp->status === 'On Progress' || $idp->status === 'Berjalan')
-                                        <span class="badge-table-green">Berjalan</span>
-                                    @else
-                                        <span class="badge-table-gray">{{ $idp->status }}</span>
+        {{-- Bagian A. Rencana Pengembangan Manajerial --}}
+        <div style="margin-bottom: 24px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:13px; font-weight:800; color:#0b2545;">A. Rencana Pengembangan Manajerial <span style="font-weight:500; text-transform:none; color:#64748b;">(IDP Action Plan)</span></span>
+                    <span class="badge-outline-blue" style="font-size:10.5px; padding:1px 8px; font-weight:700;">{{ $manajerialGrouped->count() }} Kompetensi, {{ $profilManajerialIdp->count() }} Rencana</span>
+                </div>
+                <div style="font-size:11px; color:#64748b; font-weight:500;">
+                    Tersinkronisasi otomatis dari halaman IDP
+                </div>
+            </div>
+
+            <div class="profil-table-scroll">
+                <table class="table-custom" style="font-size:11.5px; width:100%; min-width:980px;">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width:4%;">No.</th>
+                            <th style="width:14%;">Kompetensi yang Dikembangkan<br><small style="font-weight:400; color:#64748b;">({{ $manajerialGrouped->count() }} Kompetensi, {{ $profilManajerialIdp->count() }} Rencana)</small></th>
+                            <th style="width:15%;">Tujuan Spesifik (Target)</th>
+                            <th style="width:12%;">Metode Pengembangan</th>
+                            <th style="width:16%;">Aktivitas / Program</th>
+                            <th style="width:11%;">PIC / Pendukung</th>
+                            <th class="text-center" style="width:6.5%;">Mulai</th>
+                            <th class="text-center" style="width:6.5%;">Selesai</th>
+                            <th style="width:14%;">Indikator Keberhasilan</th>
+                            <th class="text-center" style="width:7.5%;">Status</th>
+                            <th class="text-center" style="width:8.5%;">Progres</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php $compIndex = 1; @endphp
+                        @forelse($manajerialGrouped as $compName => $items)
+                            @php
+                                $rowCount = $items->count();
+                                $firstPlan = $items->first();
+                            @endphp
+                            @foreach($items as $idx => $plan)
+                                <tr>
+                                    @if($idx === 0)
+                                        <td rowspan="{{ $rowCount }}" class="text-center" style="vertical-align:middle; font-weight:700; background:#ffffff; border-right:1px solid #e2e8f0;">{{ $compIndex }}</td>
+                                        <td rowspan="{{ $rowCount }}" style="vertical-align:middle; font-weight:700; color:#0f172a; background:#ffffff; border-right:1px solid #e2e8f0;">
+                                            {{ $compName }}
+                                        </td>
+                                        <td rowspan="{{ $rowCount }}" style="vertical-align:middle; font-size:11px; color:#334155; line-height:1.55; background:#ffffff; border-right:1px solid #e2e8f0;">
+                                            {{ $firstPlan->specific_goal }}
+                                        </td>
                                     @endif
+                                    <td style="font-size:11px; vertical-align:middle;">
+                                        @php
+                                            $methodStyle = match(trim($plan->development_methods)) {
+                                                'Training' => 'background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;',
+                                                'On the Job' => 'background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0;',
+                                                'Coaching' => 'background:#faf5ff; color:#7e22ce; border:1px solid #e9d5ff;',
+                                                'Mentoring' => 'background:#fffbeb; color:#b45309; border:1px solid #fde68a;',
+                                                'Exposure' => 'background:#ecfeff; color:#0e7490; border:1px solid #a5f3fc;',
+                                                'Project / Assignment' => 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa;',
+                                                'Workshop' => 'background:#fff1f2; color:#be123c; border:1px solid #fecdd3;',
+                                                'Seminar' => 'background:#fdf2f8; color:#a21caf; border:1px solid #fbcfe8;',
+                                                'E-Learning / Self Study' => 'background:#f8fafc; color:#475569; border:1px solid #e2e8f0;',
+                                                default => 'background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;'
+                                            };
+                                        @endphp
+                                        <span style="display:inline-flex; align-items:center; gap:5px; font-weight:600; padding:3px 8px; border-radius:6px; font-size:11px; {{ $methodStyle }}">
+                                            @if(trim($plan->development_methods) === 'Training')
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+                                            @elseif(trim($plan->development_methods) === 'On the Job')
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                                            @elseif(trim($plan->development_methods) === 'Coaching')
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                            @elseif(trim($plan->development_methods) === 'Mentoring')
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                            @elseif(trim($plan->development_methods) === 'Exposure')
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                                            @else
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                            @endif
+                                            {{ $plan->development_methods }}
+                                        </span>
+                                    </td>
+                                    <td style="font-size:11px; color:#1e293b; font-weight:600; vertical-align:middle; line-height:1.45;">
+                                        {{ $plan->activity_program }}
+                                    </td>
+                                    <td style="font-size:11px; color:#475569; vertical-align:middle;">
+                                        <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                                            @foreach(array_filter(array_map('trim', explode(',', $plan->pic_supporter ?? ''))) as $picItem)
+                                                <span style="display:inline-block; background:#f8fafc; border:1px solid #e2e8f0; padding:2px 8px; border-radius:12px; font-weight:600; color:#334155; font-size:10.5px; white-space:nowrap;">
+                                                    {{ $picItem }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </td>
+                                    <td class="text-center" style="font-size:11px; white-space:nowrap; vertical-align:middle; color:#334155; font-weight:600;">{{ $plan->start_date }}</td>
+                                    <td class="text-center" style="font-size:11px; white-space:nowrap; vertical-align:middle; color:#334155; font-weight:600;">{{ $plan->end_date }}</td>
+                                    <td style="font-size:11px; color:#334155; vertical-align:middle; line-height:1.45;">{{ $plan->success_indicator }}</td>
+                                    <td class="text-center" style="vertical-align:middle;">
+                                        @if(in_array($plan->status, ['Selesai', 'Completed', 'Done']) || (int)$plan->progress_percent >= 100)
+                                            <span class="badge-outline-green">Selesai</span>
+                                        @elseif($plan->status === 'On Progress' || $plan->status === 'Berjalan')
+                                            <span class="badge-outline-blue">On Progress</span>
+                                        @elseif($plan->status === 'Planning')
+                                            <span class="badge-outline-orange">Planning</span>
+                                        @elseif($plan->status === 'Dibatalkan')
+                                            <span class="badge-outline-red">Dibatalkan</span>
+                                        @else
+                                            <span class="badge-outline-gray">{{ $plan->status }}</span>
+                                        @endif
+                                    </td>
+                                    <td style="vertical-align:middle;">
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <div class="progress-bar-wrap" style="flex:1;">
+                                                <div class="progress-bar-fill {{ (int)$plan->progress_percent >= 100 ? 'fill-green' : ((int)$plan->progress_percent >= 60 ? 'fill-blue' : 'fill-orange') }}" style="width: {{ $plan->progress_percent }}%;"></div>
+                                            </div>
+                                            <span style="font-size:11px; font-weight:700; width:28px;">{{ $plan->progress_percent }}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            @php $compIndex++; @endphp
+                        @empty
+                            <tr>
+                                <td colspan="11" class="text-center text-muted" style="padding: 20px; color:#64748b; font-size:11.5px;">
+                                    Belum ada rencana pengembangan manajerial.
                                 </td>
                             </tr>
-                        @endforeach
-                    @else
-                        <tr>
-                            <td style="font-weight:700;">People Development</td>
-                            <td>Mengembangkan 1 Supervisor sebagai calon pengganti</td>
-                            <td>Coaching / OJT</td>
-                            <td>Engineering Manager</td>
-                            <td class="text-center">Mar-27</td>
-                            <td>Supervisor mampu menjalankan tanggung jawab Section Head yang disepakati secara mandiri</td>
-                            <td class="text-center"><span class="badge-table-green">Berjalan</span></td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight:700;">Strategic Thinking</td>
-                            <td>Memimpin proyek peningkatan produktivitas lintas fungsi</td>
-                            <td>Project Assignment</td>
-                            <td>Division Head</td>
-                            <td class="text-center">Jun-27</td>
-                            <td>Target proyek tercapai dan hasil dipresentasikan kepada Management</td>
-                            <td class="text-center"><span class="badge-table-green">Berjalan</span></td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight:700;">Cost Management</td>
-                            <td>Terlibat dalam penyusunan budget FY27 dan monthly cost review</td>
-                            <td>OJT</td>
-                            <td>Engineering / Finance</td>
-                            <td class="text-center">Dec-26</td>
-                            <td>Mampu menyiapkan dan menjelaskan performa biaya departemen secara mandiri</td>
-                            <td class="text-center"><span class="badge-table-blue">Selesai</span></td>
-                        </tr>
-                    @endif
-                </tbody>
-            </table>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div style="font-size:10.5px; color:#64748b; margin-top:8px;">
-            <strong>Metode:</strong> OJT / Project Assignment / Job Rotation / Coaching / Mentoring / Training / Self Learning / Overseas Assignment
+
+        {{-- Bagian B. Rencana Pengembangan Technical --}}
+        <div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:13px; font-weight:800; color:#0b2545;">B. Rencana Pengembangan Technical <span style="font-weight:500; text-transform:none; color:#64748b;">(IDP Action Plan)</span></span>
+                    <span class="badge-outline-blue" style="font-size:10.5px; padding:1px 8px; font-weight:700;">{{ $technicalGrouped->count() }} Kompetensi, {{ $profilTechnicalIdp->count() }} Rencana</span>
+                </div>
+                <div style="font-size:11px; color:#64748b; font-weight:500;">
+                    Tersinkronisasi otomatis dari halaman IDP
+                </div>
+            </div>
+
+            <div class="profil-table-scroll">
+                <table class="table-custom" style="font-size:11.5px; width:100%; min-width:980px;">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width:4%;">No.</th>
+                            <th style="width:14%;">Kompetensi yang Dikembangkan<br><small style="font-weight:400; color:#64748b;">({{ $technicalGrouped->count() }} Kompetensi, {{ $profilTechnicalIdp->count() }} Rencana)</small></th>
+                            <th style="width:15%;">Tujuan Spesifik (Target)</th>
+                            <th style="width:12%;">Metode Pengembangan</th>
+                            <th style="width:16%;">Aktivitas / Program</th>
+                            <th style="width:11%;">PIC / Pendukung</th>
+                            <th class="text-center" style="width:6.5%;">Mulai</th>
+                            <th class="text-center" style="width:6.5%;">Selesai</th>
+                            <th style="width:14%;">Indikator Keberhasilan</th>
+                            <th class="text-center" style="width:7.5%;">Status</th>
+                            <th class="text-center" style="width:8.5%;">Progres</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php $techIndex = 1; @endphp
+                        @forelse($technicalGrouped as $compName => $items)
+                            @php
+                                $rowCount = $items->count();
+                                $firstPlan = $items->first();
+                            @endphp
+                            @foreach($items as $idx => $plan)
+                                <tr>
+                                    @if($idx === 0)
+                                        <td rowspan="{{ $rowCount }}" class="text-center" style="vertical-align:middle; font-weight:700; background:#ffffff; border-right:1px solid #e2e8f0;">{{ $techIndex }}</td>
+                                        <td rowspan="{{ $rowCount }}" style="vertical-align:middle; font-weight:700; color:#0f172a; background:#ffffff; border-right:1px solid #e2e8f0;">
+                                            {{ $compName }}
+                                        </td>
+                                        <td rowspan="{{ $rowCount }}" style="vertical-align:middle; font-size:11px; color:#334155; line-height:1.55; background:#ffffff; border-right:1px solid #e2e8f0;">
+                                            {{ $firstPlan->specific_goal }}
+                                        </td>
+                                    @endif
+                                    <td style="font-size:11px; vertical-align:middle;">
+                                        @php
+                                            $methodStyle = match(trim($plan->development_methods)) {
+                                                'Training' => 'background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;',
+                                                'On the Job' => 'background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0;',
+                                                'Coaching' => 'background:#faf5ff; color:#7e22ce; border:1px solid #e9d5ff;',
+                                                'Mentoring' => 'background:#fffbeb; color:#b45309; border:1px solid #fde68a;',
+                                                'Exposure' => 'background:#ecfeff; color:#0e7490; border:1px solid #a5f3fc;',
+                                                'Project / Assignment' => 'background:#fff7ed; color:#c2410c; border:1px solid #fed7aa;',
+                                                'Workshop' => 'background:#fff1f2; color:#be123c; border:1px solid #fecdd3;',
+                                                'Seminar' => 'background:#fdf2f8; color:#a21caf; border:1px solid #fbcfe8;',
+                                                'E-Learning / Self Study' => 'background:#f8fafc; color:#475569; border:1px solid #e2e8f0;',
+                                                default => 'background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;'
+                                            };
+                                        @endphp
+                                        <span style="display:inline-flex; align-items:center; gap:5px; font-weight:600; padding:3px 8px; border-radius:6px; font-size:11px; {{ $methodStyle }}">
+                                            @if(trim($plan->development_methods) === 'Training')
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+                                            @elseif(trim($plan->development_methods) === 'On the Job')
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                                            @elseif(trim($plan->development_methods) === 'Coaching')
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                            @elseif(trim($plan->development_methods) === 'Mentoring')
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                            @elseif(trim($plan->development_methods) === 'Exposure')
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                                            @else
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                            @endif
+                                            {{ $plan->development_methods }}
+                                        </span>
+                                    </td>
+                                    <td style="font-size:11px; color:#1e293b; font-weight:600; vertical-align:middle; line-height:1.45;">
+                                        {{ $plan->activity_program }}
+                                    </td>
+                                    <td style="font-size:11px; color:#475569; vertical-align:middle;">
+                                        <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                                            @foreach(array_filter(array_map('trim', explode(',', $plan->pic_supporter ?? ''))) as $picItem)
+                                                <span style="display:inline-block; background:#f8fafc; border:1px solid #e2e8f0; padding:2px 8px; border-radius:12px; font-weight:600; color:#334155; font-size:10.5px; white-space:nowrap;">
+                                                    {{ $picItem }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </td>
+                                    <td class="text-center" style="font-size:11px; white-space:nowrap; vertical-align:middle; color:#334155; font-weight:600;">{{ $plan->start_date }}</td>
+                                    <td class="text-center" style="font-size:11px; white-space:nowrap; vertical-align:middle; color:#334155; font-weight:600;">{{ $plan->end_date }}</td>
+                                    <td style="font-size:11px; color:#334155; vertical-align:middle; line-height:1.45;">{{ $plan->success_indicator }}</td>
+                                    <td class="text-center" style="vertical-align:middle;">
+                                        @if(in_array($plan->status, ['Selesai', 'Completed', 'Done']) || (int)$plan->progress_percent >= 100)
+                                            <span class="badge-outline-green">Selesai</span>
+                                        @elseif($plan->status === 'On Progress' || $plan->status === 'Berjalan')
+                                            <span class="badge-outline-blue">On Progress</span>
+                                        @elseif($plan->status === 'Planning')
+                                            <span class="badge-outline-orange">Planning</span>
+                                        @elseif($plan->status === 'Dibatalkan')
+                                            <span class="badge-outline-red">Dibatalkan</span>
+                                        @else
+                                            <span class="badge-outline-gray">{{ $plan->status }}</span>
+                                        @endif
+                                    </td>
+                                    <td style="vertical-align:middle;">
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <div class="progress-bar-wrap" style="flex:1;">
+                                                <div class="progress-bar-fill {{ (int)$plan->progress_percent >= 100 ? 'fill-green' : ((int)$plan->progress_percent >= 60 ? 'fill-blue' : 'fill-orange') }}" style="width: {{ $plan->progress_percent }}%;"></div>
+                                            </div>
+                                            <span style="font-size:11px; font-weight:700; width:28px;">{{ $plan->progress_percent }}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            @php $techIndex++; @endphp
+                        @empty
+                            <tr>
+                                <td colspan="11" class="text-center text-muted" style="padding: 20px; color:#64748b; font-size:11.5px;">
+                                    Belum ada rencana pengembangan technical yang ditambahkan.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="font-size:10.5px; color:#64748b; margin-top:14px; padding-top:8px; border-top:1px dashed #e2e8f0;">
+            <strong>Metode Pengembangan:</strong> OJT / Project Assignment / Job Rotation / Coaching / Mentoring / Training / Self Learning / Overseas Assignment
         </div>
     </div>
 
     {{-- =========================================================================
-         BARIS 5: Review Hasil Pengembangan
+         BARIS 5: Review Hasil Pengembangan - Bagian A & B
          ========================================================================= --}}
     <div class="dashboard-card" style="margin-bottom:16px; padding:18px 20px;">
-        <div class="card-header-bar" style="margin-bottom:14px; padding-bottom:8px;">
+        <div class="card-header-bar" style="margin-bottom:16px; padding-bottom:8px; border-bottom:1.5px solid #e2e8f0;">
             <div class="card-title-wrap">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                 <span class="card-title" style="font-size:14.5px; font-weight:800; letter-spacing:0.3px;">REVIEW HASIL PENGEMBANGAN</span>
             </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span class="badge-blue" style="font-size:11px; padding:3px 10px; font-weight:700;">{{ $totalReviews }} Total Kompetensi Direview</span>
+                <a href="{{ route('karyawan.show', ['nik' => $employee->nik, 'tab' => 'review-pengembangan']) }}" class="btn-mini btn-mini-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:5px; font-weight:700;">
+                    Buka Tab Review &rarr;
+                </a>
+            </div>
         </div>
 
-        <div class="profil-table-scroll">
-            <table class="table-custom" style="font-size:11.5px; width:100%; min-width:700px;">
-                <thead>
-                    <tr>
-                        <th style="width:14%;">Kompetensi</th>
-                        <th style="width:22%;">Aktivitas Pengembangan</th>
-                        <th class="text-center" style="width:10%;">Periode Review</th>
-                        <th class="text-center" style="width:10%;">Pelaksanaan / Status</th>
-                        <th style="width:24%;">Hasil Review / Catatan Reviewer</th>
-                        <th class="text-center" style="width:8%;">Level Akhir</th>
-                        <th style="width:12%;">Pertumbuhan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if($employee->developmentReviews->count() > 0)
-                        @foreach($employee->developmentReviews->take(4) as $rev)
+        {{-- Bagian A. Review per Kompetensi Manajerial --}}
+        <div style="margin-bottom: 24px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:13px; font-weight:800; color:#0b2545;">A. Review per Kompetensi Manajerial <span style="font-weight:500; text-transform:none; color:#64748b;">(Perbandingan Level)</span></span>
+                    <span class="badge-outline-blue" style="font-size:10.5px; padding:1px 8px; font-weight:700;">{{ $profilManajerialReviews->count() }} Kompetensi</span>
+                </div>
+                <div style="font-size:11px; color:#64748b; font-weight:500;">
+                    Tersinkronisasi otomatis dari halaman Review Pengembangan
+                </div>
+            </div>
+
+            <div class="profil-table-scroll">
+                <table class="table-custom" style="font-size:11.5px; width:100%; min-width:820px;">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width:4%;">No.</th>
+                            <th style="width:23%;">Kompetensi Manajerial</th>
+                            <th class="text-center" style="width:11%;">Level Sebelumnya</th>
+                            <th class="text-center" style="width:11%;">Level Saat Ini</th>
+                            <th class="text-center" style="width:11%;">Level Target</th>
+                            <th class="text-center" style="width:10%;">Peningkatan</th>
+                            <th class="text-center" style="width:12%;">Status</th>
+                            <th style="width:18%;">Catatan Reviewer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($profilManajerialReviews as $rev)
                             <tr>
+                                <td class="text-center">{{ $loop->iteration }}</td>
                                 <td style="font-weight:700;">{{ $rev->competency }}</td>
-                                <td>{{ $rev->reviewer_notes }}</td>
-                                <td class="text-center">{{ $rev->period }}</td>
+                                <td class="text-center font-bold">{{ $rev->previous_level }}</td>
+                                <td class="text-center font-bold">{{ $rev->current_level }}</td>
+                                <td class="text-center font-bold">{{ $rev->target_level }}</td>
+                                <td class="text-center font-bold" style="color: {{ $rev->growth > 0 ? '#16a34a' : ($rev->growth < 0 ? '#ea580c' : '#475569') }};">
+                                    {{ $rev->growth > 0 ? '+' . $rev->growth : ($rev->growth < 0 ? $rev->growth : '0') }}
+                                </td>
                                 <td class="text-center">
                                     @if($rev->status === 'Meningkat')
-                                        <span class="text-success text-bold">Meningkat</span>
+                                        <span class="badge-table-green">Meningkat</span>
+                                    @elseif($rev->status === 'Stabil')
+                                        <span class="badge-table-blue">Stabil</span>
                                     @else
-                                        <span class="text-bold">{{ $rev->status }}</span>
+                                        <span class="badge-table-orange">Belum Meningkat</span>
                                     @endif
                                 </td>
-                                <td>{{ $rev->reviewer_notes }}</td>
-                                <td class="text-center text-bold">{{ $rev->current_level }}</td>
-                                <td class="text-center">
-                                    <span class="badge-table-green">+{{ $rev->growth }} Level</span>
+                                <td style="font-size:11.5px; color:#334155;">{{ $rev->reviewer_notes }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center text-muted" style="padding: 18px; color:#64748b; font-size:11.5px;">
+                                    Belum ada review kompetensi manajerial yang ditambahkan.
                                 </td>
                             </tr>
-                        @endforeach
-                    @else
-                        <tr>
-                            <td style="font-weight:700;">Cost Management</td>
-                            <td>Terlibat dalam budgeting & monthly cost review</td>
-                            <td class="text-center">Jan-27</td>
-                            <td class="text-center text-success text-bold">Terlaksana</td>
-                            <td>Sudah mampu menyiapkan monthly cost review dan menjelaskan major variance secara mandiri</td>
-                            <td class="text-center text-bold">3</td>
-                            <td><span style="color:#475569; font-weight:600;">Tidak Perlu Tindak Lanjut</span></td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight:700;">People Development</td>
-                            <td>Mengembangkan 1 Supervisor</td>
-                            <td class="text-center">Apr-27</td>
-                            <td class="text-center text-success text-bold">Terlaksana</td>
-                            <td>Supervisor sudah mampu menangani operasional harian secara mandiri, tetapi masih membutuhkan support untuk isu manpower</td>
-                            <td class="text-center text-bold">3</td>
-                            <td><span style="color:#d97706; font-weight:700;">Lanjutkan</span></td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight:700;">Strategic Thinking</td>
-                            <td>Memimpin proyek peningkatan produktivitas lintas fungsi</td>
-                            <td class="text-center">Jul-27</td>
-                            <td class="text-center text-danger text-bold">Tidak Terlaksana</td>
-                            <td>Proyek ditunda karena perubahan prioritas produksi</td>
-                            <td class="text-center text-muted">Belum Dinilai</td>
-                            <td><span style="color:#0056b3; font-weight:700;">Jadwalkan Ulang</span></td>
-                        </tr>
-                    @endif
-                </tbody>
-            </table>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div style="font-size:10.5px; color:#64748b; margin-top:8px;">
-            <strong>Pelaksanaan:</strong> Terlaksana / Tidak Terlaksana | <strong>Tindak Lanjut:</strong> Tidak Perlu Tindak Lanjut / Lanjutkan / Jadwalkan Ulang
+
+        {{-- Bagian B. Review per Kompetensi Technical --}}
+        <div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:13px; font-weight:800; color:#0b2545;">B. Review per Kompetensi Technical <span style="font-weight:500; text-transform:none; color:#64748b;">(Perbandingan Level)</span></span>
+                    <span class="badge-outline-blue" style="font-size:10.5px; padding:1px 8px; font-weight:700;">{{ $profilTechnicalReviews->count() }} Kompetensi</span>
+                </div>
+                <div style="font-size:11px; color:#64748b; font-weight:500;">
+                    Tersinkronisasi otomatis dari halaman Review Pengembangan
+                </div>
+            </div>
+
+            <div class="profil-table-scroll">
+                <table class="table-custom" style="font-size:11.5px; width:100%; min-width:820px;">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width:4%;">No.</th>
+                            <th style="width:23%;">Kompetensi Technical</th>
+                            <th class="text-center" style="width:11%;">Level Sebelumnya</th>
+                            <th class="text-center" style="width:11%;">Level Saat Ini</th>
+                            <th class="text-center" style="width:11%;">Level Target</th>
+                            <th class="text-center" style="width:10%;">Peningkatan</th>
+                            <th class="text-center" style="width:12%;">Status</th>
+                            <th style="width:18%;">Catatan Reviewer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($profilTechnicalReviews as $rev)
+                            <tr>
+                                <td class="text-center">{{ $loop->iteration }}</td>
+                                <td style="font-weight:700;">{{ $rev->competency }}</td>
+                                <td class="text-center font-bold">{{ $rev->previous_level }}</td>
+                                <td class="text-center font-bold">{{ $rev->current_level }}</td>
+                                <td class="text-center font-bold">{{ $rev->target_level }}</td>
+                                <td class="text-center font-bold" style="color: {{ $rev->growth > 0 ? '#16a34a' : ($rev->growth < 0 ? '#ea580c' : '#475569') }};">
+                                    {{ $rev->growth > 0 ? '+' . $rev->growth : ($rev->growth < 0 ? $rev->growth : '0') }}
+                                </td>
+                                <td class="text-center">
+                                    @if($rev->status === 'Meningkat')
+                                        <span class="badge-table-green">Meningkat</span>
+                                    @elseif($rev->status === 'Stabil')
+                                        <span class="badge-table-blue">Stabil</span>
+                                    @else
+                                        <span class="badge-table-orange">Belum Meningkat</span>
+                                    @endif
+                                </td>
+                                <td style="font-size:11.5px; color:#334155;">{{ $rev->reviewer_notes }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center text-muted" style="padding: 18px; color:#64748b; font-size:11.5px;">
+                                    Belum ada review kompetensi technical yang ditambahkan.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="font-size:10.5px; color:#64748b; margin-top:14px; padding-top:8px; border-top:1px dashed #e2e8f0;">
+            <strong>Status Evaluasi:</strong> Meningkat (Level Saat Ini > Level Sebelumnya) / Stabil (Level Sama) / Belum Meningkat
         </div>
     </div>
 

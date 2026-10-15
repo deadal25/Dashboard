@@ -14,7 +14,7 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         if (Auth::check()) {
-            return redirect()->route('beranda');
+            return redirect()->route('dashboard');
         }
 
         return view('auth.login');
@@ -33,7 +33,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             $user = Auth::user();
-            return redirect()->intended(route('beranda'))
+            return redirect()->intended(route('dashboard'))
                 ->with('success', "Selamat datang, {$user->name}! Anda login sebagai {$user->role_name}.");
         }
 
@@ -53,7 +53,7 @@ class AuthController extends Controller
         if ($user) {
             Auth::login($user);
             request()->session()->regenerate();
-            return redirect()->route('beranda')
+            return redirect()->route('dashboard')
                 ->with('success', "Beralih peran berhasil. Anda sekarang aktif sebagai {$user->role_name}.");
         }
 

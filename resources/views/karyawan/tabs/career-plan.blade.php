@@ -1,16 +1,16 @@
 {{-- Tab 4: Individual Career Plan (ICP) --}}
 <div class="tab-pane-content">
-    {{-- Header Navigation Tabs & Actions --}}
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:2px solid #e2e8f0; padding-bottom:0;">
-        <div style="display:flex; gap:24px;">
-            <div data-subtab="d1" style="padding-bottom:12px; font-weight:700; font-size:13px; color:#0b2545; border-bottom:3px solid #0056b3; margin-bottom:-2px; cursor:pointer;">
+    {{-- Header Navigation Tabs & Actions (Matching Mockup Card Bar) --}}
+    <div class="tab-header-flex-bar">
+        <div class="subtab-nav-group" style="display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+            <div data-subtab="d1" style="padding:4px 0 6px 0; font-weight:700; font-size:13px; color:#0056b3; border-bottom:3px solid #0056b3; cursor:pointer;">
                 D1. ARAH KARIR
             </div>
-            <div data-subtab="d2" style="padding-bottom:12px; font-weight:600; font-size:13px; color:#64748b; cursor:pointer;">
+            <div data-subtab="d2" style="padding:4px 0 6px 0; font-weight:600; font-size:13px; color:#64748b; cursor:pointer;">
                 D2. RENCANA JOB CLASS & GRADE
             </div>
         </div>
-        <div class="card-actions" style="margin-bottom:8px;">
+        <div class="card-actions">
             <button type="button" class="btn btn-primary" data-modal-target="modal-tambah-icp">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Tambah
@@ -18,10 +18,6 @@
             <button type="button" class="btn btn-outline" data-modal-target="modal-edit-icp">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 Edit
-            </button>
-            <button type="button" class="btn btn-outline" data-modal-target="modal-hapus-icp" style="color:#b91c1c; border-color:#fca5a5;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                Hapus
             </button>
             <button type="button" class="btn btn-outline" data-modal-target="modal-riwayat-perubahan">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
@@ -31,7 +27,7 @@
     </div>
 
     {{-- D1: Top Row --}}
-    <div data-subtab-content="d1" style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; margin-bottom: 20px;">
+    <div data-subtab-content="d1" class="career-d1-grid">
         {{-- Informasi Arah Karir --}}
         <div class="dashboard-card" style="margin-bottom:0;">
             <div class="card-header-bar" style="margin-bottom:12px; padding-bottom:8px;">
@@ -45,7 +41,8 @@
                     </button>
                 </div>
             </div>
-            <table class="table-custom" style="font-size:11.5px;">
+            <div class="table-responsive">
+                <table class="table-custom" style="font-size:11.5px; min-width:320px;">
                 <tbody>
                     <tr>
                         <td style="font-weight:600; width:45%;">Area yang Diminati Karyawan</td>
@@ -73,6 +70,7 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
 
         {{-- Keterangan Jalur Karir --}}
@@ -134,7 +132,8 @@
                 </button>
             </div>
         </div>
-        <table class="table-custom">
+        <div class="table-responsive">
+            <table class="table-custom" style="min-width:760px;">
             <thead>
                 <tr>
                     <th class="text-center" style="width:4%;">No.</th>
@@ -174,6 +173,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
         <div style="font-size:10.5px; color:#64748b; margin-top:10px;">
             <strong>Catatan:</strong> Usia dihitung otomatis berdasarkan tanggal lahir yang tersimpan pada data profil.
         </div>

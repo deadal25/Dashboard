@@ -1,8 +1,7 @@
 {{-- Tab 5: Status Suksesi --}}
 <div class="tab-pane-content">
     {{-- Header Action Bar --}}
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 style="font-size:15px; font-weight:800; color:#0b2545; text-transform:uppercase;">Status Suksesi</h2>
+    <div class="tab-header-actions-bar">
         <div class="card-actions">
             <button type="button" class="btn btn-primary" data-modal-target="modal-tambah-suksesi">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -45,7 +44,8 @@
                 </button>
             </div>
         </div>
-        <table class="table-custom">
+        <div class="table-responsive">
+            <table class="table-custom" style="min-width:720px;">
             <thead>
                 <tr>
                     <th class="text-center" style="width:4%;">No.</th>
@@ -77,6 +77,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
         <div style="font-size:11.5px; color:#64748b; margin-top:10px;">
             Total {{ $employee->successionPositions->count() }} data
         </div>
@@ -100,7 +101,8 @@
                 </button>
             </div>
         </div>
-        <table class="table-custom">
+        <div class="table-responsive">
+            <table class="table-custom" style="min-width:760px;">
             <thead>
                 <tr>
                     <th class="text-center" style="width:4%;">No.</th>
@@ -138,13 +140,14 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
         <div style="font-size:11.5px; color:#64748b; margin-top:10px;">
             Total {{ $employee->successionCandidates->count() }} data
         </div>
     </div>
 
     {{-- Bottom Two Cards: Keterangan & Catatan --}}
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px;">
+    <div class="suksesi-info-grid">
         {{-- Keterangan Kesiapan --}}
         <div class="info-card-box">
             <h6 style="font-size:12px; font-weight:700; margin-bottom:10px;">Keterangan Kesiapan:</h6>

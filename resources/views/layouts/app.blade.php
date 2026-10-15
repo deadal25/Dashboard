@@ -4,9 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'MAP-IN: Talent & Career Management' }}</title>
-    <link rel="stylesheet" href="/css/map-in.css">
+    <link rel="stylesheet" href="{{ asset('css/map-in.css') }}?v={{ filemtime(public_path('css/map-in.css')) }}">
+    <!-- Anti-FOUC for Sidebar State: Executes synchronously before paint to keep collapsed sidebar instant -->
+    <script>
+        (function() {
+            try {
+                var c = localStorage.getItem('mapin_sidebar_collapsed');
+                if (c === 'true' || (window.innerWidth <= 850 && c !== 'false')) {
+                    document.documentElement.classList.add('sidebar-is-collapsed');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <!-- Bootstrap Icons support -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Global Print Color Preservation: Ensures backgrounds, badges, and charts print in full color across all pages -->
+    <style>
+        @media print {
+            *, *::before, *::after {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            html, body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="app-wrapper">
@@ -14,6 +40,9 @@
         @include('components.topbar')
 
         <div class="main-container">
+            {{-- Mobile Sidebar Backdrop Overlay --}}
+            <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
             {{-- Sidebar with NIK search and navigation --}}
             @include('components.sidebar')
 
@@ -23,6 +52,20 @@
                     <div class="alert-box alert-error">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                         <span>{{ session('error') }}</span>
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="alert-box alert-error" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                        <div style="display:flex; align-items:center; gap:8px; font-weight:700;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            <span>Terjadi kesalahan pengisian formulir:</span>
+                        </div>
+                        <ul style="margin:4px 0 0 26px; padding:0; font-size:12px;">
+                            @foreach($errors->all() as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 @endif
 
@@ -54,7 +97,7 @@
         @include('components.avatar-cropper-modal')
     </div>
 
-    <script src="/js/map-in.js"></script>
+    <script src="{{ asset('js/map-in.js') }}"></script>
 
     @stack('scripts')
 </body>

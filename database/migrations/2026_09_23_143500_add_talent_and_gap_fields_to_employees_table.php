@@ -36,7 +36,7 @@ return new class extends Migration
             // Development Gap Target & Method
             $table->string('target_position_gap')->nullable()->default('Engineering Manager (JC5 / G5-1)');
             $table->string('target_department_gap')->nullable()->default('Manufacturing Engineering');
-            $table->string('gap_method')->nullable()->default('Perbandingan Kompetensi: Posisi Saat Ini vs Posisi Target (Engineering Manager)');
+            $table->string('gap_method')->nullable()->default('Perbandingan : Posisi Saat Ini vs Posisi Target');
 
             // IDP Summary Fields
             $table->string('idp_readiness_desc')->nullable()->default('Siap dalam 1–3 Tahun');

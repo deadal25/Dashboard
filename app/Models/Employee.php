@@ -214,7 +214,10 @@ class Employee extends Model
         if ($upper === 'HIGH' || $upper === 'HIGH RISK') {
             return 'High Risk';
         }
-        if ($upper === 'MEDIUM' || $upper === 'MODERATE' || $upper === 'MODERATE RISK') {
+        if ($upper === 'MEDIUM') {
+            return 'MEDIUM';
+        }
+        if ($upper === 'MODERATE' || $upper === 'MODERATE RISK' || $upper === 'MEDIUM RISK') {
             return 'Moderate Risk';
         }
         return $val ?: 'Low Risk';
@@ -223,8 +226,8 @@ class Employee extends Model
     public function getFlyingRiskBadgeClassAttribute(): string
     {
         return match ($this->flying_risk_formatted) {
-            'High Risk' => 'badge-red',
-            'Moderate Risk' => 'badge-orange',
+            'High Risk', 'HIGH RISK' => 'badge-red',
+            'Moderate Risk', 'MEDIUM', 'Medium Risk' => 'badge-orange',
             default => 'badge-green',
         };
     }

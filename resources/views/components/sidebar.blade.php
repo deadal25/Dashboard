@@ -1,10 +1,12 @@
 @php
     $hasSelectedEmployee = isset($employee) && !empty($employee);
     $currentNik = $hasSelectedEmployee ? $employee->nik : null;
-    $isBeranda = request()->routeIs('beranda');
+    $isDashboard = request()->routeIs('dashboard') || request()->routeIs('beranda');
     $isDataKaryawan = request()->routeIs('data-karyawan') || request()->routeIs('karyawan.index');
-    // Tab hanya aktif jika berada di dalam halaman profil karyawan (bukan di beranda ataupun data karyawan)
-    $activeTab = ($isBeranda || $isDataKaryawan) ? null : ($tab ?? null);
+    // Tab hanya aktif jika berada di dalam halaman profil karyawan (bukan di dashboard ataupun data karyawan)
+    $activeTab = ($isDashboard || $isDataKaryawan) ? null : ($tab ?? null);
+    if ($activeTab === 'career-plan') $activeTab = 'individual-careerplan';
+    if ($activeTab === 'idp') $activeTab = 'individual-developmentplan';
 
     $talentTabs = [
         [
@@ -23,7 +25,7 @@
             'icon' => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>',
         ],
         [
-            'slug' => 'career-plan',
+            'slug' => 'individual-careerplan',
             'title' => 'Individual career plan',
             'icon' => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="5" r="2"></circle><circle cx="17" cy="19" r="2"></circle><path d="M7 7a5 5 0 0 1 5 5 5 5 0 0 0 5 5"></path></svg>',
         ],
@@ -38,7 +40,7 @@
             'icon' => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>',
         ],
         [
-            'slug' => 'idp',
+            'slug' => 'individual-developmentplan',
             'title' => 'Individual development plan',
             'icon' => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>',
         ],
@@ -64,9 +66,25 @@
         }
         $initials = strtoupper($initials);
     }
+    $isSidebarCollapsedCookie = request()->cookie('mapin_sidebar_collapsed') === 'true';
 @endphp
 
-<aside class="sidebar" id="app-sidebar">
+<aside class="sidebar {{ $isSidebarCollapsedCookie ? 'collapsed' : '' }}" id="app-sidebar">
+    {{-- Instant Anti-FOUC inline script before DOM paint --}}
+    <script>
+        (function() {
+            try {
+                var c = localStorage.getItem('mapin_sidebar_collapsed');
+                var s = document.getElementById('app-sidebar');
+                if (c === 'true' || (window.innerWidth <= 850 && c !== 'false')) {
+                    if (s && !s.classList.contains('collapsed')) s.classList.add('collapsed');
+                } else if (c === 'false') {
+                    if (s && s.classList.contains('collapsed')) s.classList.remove('collapsed');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
     {{-- Sidebar Toggle Button (Panah ke samping kiri / kanan) --}}
     <button type="button" id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="Ciutkan Sidebar (Geser ke Kiri)" aria-label="Toggle Sidebar">
         <svg id="sidebar-toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -78,20 +96,22 @@
     <div id="sidebar-resizer" class="sidebar-resizer" title="Tarik / geser untuk mengubah lebar sidebar"></div>
 
     <div class="sidebar-main-content">
-        {{-- Navigation Menu Utama (Beranda & Data karyawan) --}}
+        {{-- Navigation Menu Utama (Dashboard & Data karyawan) --}}
         <nav class="sidebar-top-nav">
-            {{-- 1. Beranda --}}
-            <a href="{{ route('beranda') }}" 
-               class="sidebar-nav-item {{ $isBeranda ? 'active' : '' }}"
-               title="Beranda"
-               data-title="Beranda">
+            {{-- 1. Dashboard --}}
+            <a href="{{ route('dashboard') }}" 
+               class="sidebar-nav-item {{ $isDashboard ? 'active' : '' }}"
+               title="Dashboard"
+               data-title="Dashboard">
                 <span class="sidebar-nav-icon">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
                     </svg>
                 </span>
-                <span>Beranda</span>
+                <span class="sidebar-nav-text">Dashboard</span>
             </a>
 
             {{-- 2. Data karyawan --}}
@@ -107,7 +127,7 @@
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
                 </span>
-                <span>Data karyawan</span>
+                <span class="sidebar-nav-text">Data karyawan</span>
             </a>
         </nav>
 
@@ -130,8 +150,8 @@
                             autocomplete="off"
                             required
                         >
-                        <button type="submit" class="sidebar-search-btn" title="Cari karyawan">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <button type="submit" class="sidebar-search-btn" title="Cari karyawan" data-title="Cari karyawan">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
@@ -182,7 +202,7 @@
                 {{-- Selected Employee Card --}}
                 <div class="sidebar-selected-emp-card">
                     <div class="sidebar-selected-emp-left">
-                        <div class="sidebar-emp-avatar-initials" title="{{ $employee->name }}">
+                        <div class="sidebar-emp-avatar-initials" title="{{ $employee->name }}" data-title="{{ $employee->name }}">
                             {{ $initials }}
                         </div>
                         <div class="sidebar-emp-info">
@@ -220,6 +240,22 @@
                 </nav>
             </div>
         @endif
+    </div>
+
+    {{-- Sidebar Footer: Tombol Kembali Ke Dashboard --}}
+    <div class="sidebar-footer">
+        <a href="{{ route('dashboard') }}" 
+           class="sidebar-btn-back-dashboard {{ $isDashboard ? 'active' : '' }}" 
+           title="Kembali Ke Dashboard" 
+           data-title="Kembali Ke Dashboard">
+            <span class="sidebar-btn-back-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5"></path>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </span>
+            <span class="sidebar-btn-back-text">Kembali Ke Dashboard</span>
+        </a>
     </div>
 </aside>
 
